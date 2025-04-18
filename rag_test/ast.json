@@ -1,0 +1,559 @@
+{
+  "functions": {
+      "_baseURI": {
+          "visibility": "internal",
+          "state_mutability": "read",
+          "modifiers": [],
+          "parameters": [],
+          "calls": []
+      },
+      "setBaseURI": {
+          "visibility": "external",
+          "state_mutability": "write",
+          "modifiers": [
+              "onlyOwner"
+          ],
+          "parameters": [
+              {
+                  "name": "_newBaseURI",
+                  "type": "string calldata"
+              }
+          ],
+          "calls": []
+      },
+      "_mint": {
+          "visibility": "internal",
+          "state_mutability": "write",
+          "modifiers": [],
+          "parameters": [
+              {
+                  "name": "to",
+                  "type": "address"
+              },
+              {
+                  "name": "tokenId",
+                  "type": "uint256"
+              }
+          ],
+          "calls": [
+              "assetsLength"
+          ]
+      },
+      "_bridgeMint": {
+          "visibility": "public",
+          "state_mutability": "write",
+          "modifiers": [],
+          "parameters": [
+              {
+                  "name": "to",
+                  "type": "address"
+              },
+              {
+                  "name": "tokenId",
+                  "type": "uint256"
+              }
+          ],
+          "calls": [
+              "assetsLength",
+              "_mint"
+          ]
+      },
+      "_burn": {
+          "visibility": "internal",
+          "state_mutability": "write",
+          "modifiers": [],
+          "parameters": [
+              {
+                  "name": "tokenId",
+                  "type": "uint256"
+              }
+          ],
+          "calls": [
+              "assetsLength",
+              "ownerOf",
+              "balanceOf"
+          ]
+      },
+      "_transfer": {
+          "visibility": "internal",
+          "state_mutability": "write",
+          "modifiers": [],
+          "parameters": [
+              {
+                  "name": "from",
+                  "type": "address"
+              },
+              {
+                  "name": "to",
+                  "type": "address"
+              },
+              {
+                  "name": "tokenId",
+                  "type": "uint256"
+              }
+          ],
+          "calls": [
+              "assetsLength",
+              "ownerOf",
+              "balanceOf"
+          ]
+      },
+      "mintMany": {
+          "visibility": "external",
+          "state_mutability": "write",
+          "modifiers": [
+              "onlyOwner"
+          ],
+          "parameters": [
+              {
+                  "name": "_amount",
+                  "type": "uint"
+              }
+          ],
+          "calls": [
+              "_mint",
+              "_msgSender"
+          ]
+      },
+      "mint": {
+          "visibility": "external",
+          "state_mutability": "write",
+          "modifiers": [
+              "onlyOwner"
+          ],
+          "parameters": [],
+          "calls": [
+              "_mint",
+              "_msgSender"
+          ]
+      },
+      "setTrustedAddress": {
+          "visibility": "external",
+          "state_mutability": "write",
+          "modifiers": [
+              "onlyOwner"
+          ],
+          "parameters": [
+              {
+                  "name": "_chainId",
+                  "type": "uint16"
+              },
+              {
+                  "name": "_contract",
+                  "type": "address"
+              },
+              {
+                  "name": "_bool",
+                  "type": "bool"
+              }
+          ],
+          "calls": []
+      },
+      "crossChain": {
+          "visibility": "public",
+          "state_mutability": "write",
+          "modifiers": [],
+          "parameters": [
+              {
+                  "name": "_dstChainId",
+                  "type": "uint16"
+              },
+              {
+                  "name": "_destination",
+                  "type": "bytes memory"
+              },
+              {
+                  "name": "_to",
+                  "type": "address"
+              },
+              {
+                  "name": "tokenId",
+                  "type": "uint256[] memory"
+              }
+          ],
+          "calls": [
+              "_msgSender",
+              "ownerOf",
+              "_burn"
+          ]
+      },
+      "lzReceive": {
+          "visibility": "external",
+          "state_mutability": "write",
+          "modifiers": [],
+          "parameters": [
+              {
+                  "name": "_srcChainId",
+                  "type": "uint16"
+              },
+              {
+                  "name": "_srcAddress",
+                  "type": "bytes memory"
+              },
+              {
+                  "name": "_nonce",
+                  "type": "uint64"
+              },
+              {
+                  "name": "_payload",
+                  "type": "bytes memory"
+              }
+          ],
+          "calls": [
+              "_msgSender",
+              "excessivelySafeCall",
+              "nonblockingLzReceive"
+          ]
+      },
+      "nonblockingLzReceive": {
+          "visibility": "public",
+          "state_mutability": "write",
+          "modifiers": [],
+          "parameters": [
+              {
+                  "name": "_srcChainId",
+                  "type": "uint16"
+              },
+              {
+                  "name": "_srcAddress",
+                  "type": "bytes calldata"
+              },
+              {
+                  "name": "_nonce",
+                  "type": "uint64"
+              },
+              {
+                  "name": "_payload",
+                  "type": "bytes calldata"
+              }
+          ],
+          "calls": [
+              "_nonblockingLzReceive"
+          ]
+      },
+      "_nonblockingLzReceive": {
+          "visibility": "internal",
+          "state_mutability": "write",
+          "modifiers": [],
+          "parameters": [
+              {
+                  "name": "_srcChainId",
+                  "type": "uint16"
+              },
+              {
+                  "name": "_srcAddress",
+                  "type": "bytes memory"
+              },
+              {
+                  "name": "_nonce",
+                  "type": "uint64"
+              },
+              {
+                  "name": "_payload",
+                  "type": "bytes memory"
+              }
+          ],
+          "calls": [
+              "_bridgeMint"
+          ]
+      },
+      "retryMessage": {
+          "visibility": "public",
+          "state_mutability": "write",
+          "modifiers": [],
+          "parameters": [
+              {
+                  "name": "_srcChainId",
+                  "type": "uint16"
+              },
+              {
+                  "name": "_srcAddress",
+                  "type": "bytes calldata"
+              },
+              {
+                  "name": "_nonce",
+                  "type": "uint64"
+              },
+              {
+                  "name": "_payload",
+                  "type": "bytes calldata"
+              }
+          ],
+          "calls": [
+              "_nonblockingLzReceive"
+          ]
+      },
+      "estimateFees": {
+          "visibility": "external",
+          "state_mutability": "read",
+          "modifiers": [],
+          "parameters": [
+              {
+                  "name": "_dstChainId",
+                  "type": "uint16"
+              },
+              {
+                  "name": "_userApplication",
+                  "type": "address"
+              },
+              {
+                  "name": "_payload",
+                  "type": "bytes calldata"
+              },
+              {
+                  "name": "_payInZRO",
+                  "type": "bool"
+              },
+              {
+                  "name": "_adapterParams",
+                  "type": "bytes calldata"
+              }
+          ],
+          "calls": []
+      },
+      "setGas": {
+          "visibility": "external",
+          "state_mutability": "write",
+          "modifiers": [
+              "onlyOwner"
+          ],
+          "parameters": [
+              {
+                  "name": "_gas",
+                  "type": "uint"
+              }
+          ],
+          "calls": []
+      },
+      "setEndpoint": {
+          "visibility": "external",
+          "state_mutability": "write",
+          "modifiers": [
+              "onlyOwner"
+          ],
+          "parameters": [
+              {
+                  "name": "_endpoint",
+                  "type": "ILayerZeroEndpoint"
+              }
+          ],
+          "calls": []
+      },
+      "safeTransferMany": {
+          "visibility": "external",
+          "state_mutability": "write",
+          "modifiers": [],
+          "parameters": [
+              {
+                  "name": "_to",
+                  "type": "address"
+              },
+              {
+                  "name": "_ids",
+                  "type": "uint[] calldata"
+              }
+          ],
+          "calls": [
+              "_transfer",
+              "_msgSender"
+          ]
+      },
+      "safeTransferFromMany": {
+          "visibility": "external",
+          "state_mutability": "write",
+          "modifiers": [],
+          "parameters": [
+              {
+                  "name": "_from",
+                  "type": "address"
+              },
+              {
+                  "name": "_to",
+                  "type": "address"
+              },
+              {
+                  "name": "_ids",
+                  "type": "uint[] calldata"
+              }
+          ],
+          "calls": [
+              "safeTransferFrom"
+          ]
+      },
+      "approveMany": {
+          "visibility": "external",
+          "state_mutability": "write",
+          "modifiers": [],
+          "parameters": [
+              {
+                  "name": "_to",
+                  "type": "address"
+              },
+              {
+                  "name": "_ids",
+                  "type": "uint[] calldata"
+              }
+          ],
+          "calls": [
+              "approve"
+          ]
+      },
+      "claim": {
+          "visibility": "external",
+          "state_mutability": "write",
+          "modifiers": [],
+          "parameters": [
+              {
+                  "name": "_tigAsset",
+                  "type": "address"
+              }
+          ],
+          "calls": [
+              "_msgSender",
+              "pending"
+          ]
+      },
+      "distribute": {
+          "visibility": "external",
+          "state_mutability": "write",
+          "modifiers": [],
+          "parameters": [
+              {
+                  "name": "_tigAsset",
+                  "type": "address"
+              },
+              {
+                  "name": "_amount",
+                  "type": "uint"
+              }
+          ],
+          "calls": [
+              "assetsLength",
+              "totalSupply",
+              "_msgSender"
+          ]
+      },
+      "pending": {
+          "visibility": "public",
+          "state_mutability": "read",
+          "modifiers": [],
+          "parameters": [
+              {
+                  "name": "user",
+                  "type": "address"
+              },
+              {
+                  "name": "_tigAsset",
+                  "type": "address"
+              }
+          ],
+          "calls": [
+              "balanceOf"
+          ]
+      },
+      "addAsset": {
+          "visibility": "external",
+          "state_mutability": "write",
+          "modifiers": [
+              "onlyOwner"
+          ],
+          "parameters": [
+              {
+                  "name": "_asset",
+                  "type": "address"
+              }
+          ],
+          "calls": []
+      },
+      "setAllowedAsset": {
+          "visibility": "external",
+          "state_mutability": "write",
+          "modifiers": [
+              "onlyOwner"
+          ],
+          "parameters": [
+              {
+                  "name": "_asset",
+                  "type": "address"
+              },
+              {
+                  "name": "_bool",
+                  "type": "bool"
+              }
+          ],
+          "calls": []
+      },
+      "setMaxBridge": {
+          "visibility": "external",
+          "state_mutability": "write",
+          "modifiers": [
+              "onlyOwner"
+          ],
+          "parameters": [
+              {
+                  "name": "_max",
+                  "type": "uint256"
+              }
+          ],
+          "calls": []
+      },
+      "assetsLength": {
+          "visibility": "public",
+          "state_mutability": "read",
+          "modifiers": [],
+          "parameters": [],
+          "calls": []
+      },
+      "allowedAsset": {
+          "visibility": "external",
+          "state_mutability": "read",
+          "modifiers": [],
+          "parameters": [
+              {
+                  "name": "_asset",
+                  "type": "address"
+              }
+          ],
+          "calls": []
+      },
+      "balanceIds": {
+          "visibility": "external",
+          "state_mutability": "read",
+          "modifiers": [],
+          "parameters": [
+              {
+                  "name": "_user",
+                  "type": "address"
+              }
+          ],
+          "calls": [
+              "balanceOf",
+              "tokenOfOwnerByIndex"
+          ]
+      },
+      "_msgSender": {
+          "visibility": "internal",
+          "state_mutability": "read",
+          "modifiers": [],
+          "parameters": [],
+          "calls": [
+              "_msgSender"
+          ]
+      },
+      "_msgData": {
+          "visibility": "internal",
+          "state_mutability": "read",
+          "modifiers": [],
+          "parameters": [],
+          "calls": [
+              "_msgData"
+          ]
+      }
+  },
+  "dependencies": [
+      "MetaContext.sol",
+      "interfaces/IGovNFT.sol",
+      "interfaces/ILayerZeroEndpoint.sol",
+      "interfaces/ILayerZeroReceiver.sol"
+  ]
+}

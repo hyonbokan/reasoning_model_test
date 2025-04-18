@@ -1,0 +1,104 @@
+{
+    "pipelineName": "Solidity Contract Vulnerability Audit Pipeline",
+    "description": "An end-to-end pipeline that uses OpenAI embeddings with LanceDB and an LLM to audit Solidity contracts. The system leverages pre-computed JSON ASTs and raw contract code to generate code chunks, build global invariants, iteratively retrieve relevant segments via RAG, and then have the LLM analyze these segments for vulnerabilities until the entire codebase is covered. Finally, a comprehensive vulnerability report is generated.",
+    "stages": [
+      {
+        "stageName": "Input & Preprocessing",
+        "description": "Gather and preprocess the contract data. The input includes JSON ASTs (already stored) and the flattened Solidity contract code. Preprocessing involves verifying the completeness of the AST and associating each contract file with its source code.",
+        "steps": [
+          {
+            "stepName": "Load JSON ASTs",
+            "action": "Read JSON AST files for each contract from storage.",
+            "output": "AST objects per contract"
+          },
+          {
+            "stepName": "Load Contract Source Code",
+            "action": "Read the flattened Solidity source files corresponding to each AST.",
+            "output": "Contract source text"
+          }
+        ]
+      },
+      {
+        "stageName": "Chunking & Invariant Generation",
+        "description": "Using the JSON AST, split each contract into logical code chunks (such as functions, modifiers, events). Additionally, compute global invariants (e.g. overall control flow graphs, dependency maps, and contract-level summaries) so that the LLM has an understanding of the entire codebase beyond isolated chunks.",
+        "steps": [
+          {
+            "stepName": "AST-Based Chunking",
+            "action": "Traverse the JSON AST to extract code chunks (for example, each FunctionDefinition, ModifierDefinition, and other logical units). Preserve metadata such as file name, function name, and source location.",
+            "output": "Array of code chunks with metadata"
+          },
+          {
+            "stepName": "Global Invariant Generation",
+            "action": "Analyze the entire codebase to generate invariants. This may include: (a) building a dependency graph of contracts; (b) summarizing state variables, function call relationships, and modifiers; (c) creating a high-level repository map that indicates critical security-relevant structures (e.g., use of external calls, reentrancy guards, arithmetic operations).",
+            "output": "Global invariants and codebase summary"
+          }
+        ]
+      },
+      {
+        "stageName": "Embedding & Indexing",
+        "description": "For every code chunk, generate a semantic embedding using OpenAI’s embeddings model. Then, index these embeddings in a vector database (LanceDB) along with associated metadata.",
+        "steps": [
+          {
+            "stepName": "Generate Embeddings",
+            "action": "For each code chunk (text extracted from the contract), call the OpenAI embeddings API (e.g., text-embedding-ada-002) to produce a vector representation.",
+            "output": "Embedding vectors per chunk"
+          },
+          {
+            "stepName": "Index in LanceDB",
+            "action": "Store each embedding along with its metadata (file name, function name, chunk type, source location) in a LanceDB collection for efficient retrieval.",
+            "output": "Indexed vector database for code chunks"
+          }
+        ]
+      },
+      {
+        "stageName": "RAG-Based Retrieval & Iterative Analysis",
+        "description": "Using vulnerability-specific queries (or even LLM-generated queries), retrieve code chunks from LanceDB that are relevant to known vulnerability patterns. This stage is iterative, so that if an area of the codebase requires further analysis, additional context is fetched from the vector index.",
+        "steps": [
+          {
+            "stepName": "Vulnerability Query Formulation",
+            "action": "Define a set of queries targeting specific vulnerability classes (e.g., 'reentrancy check missing', 'unchecked arithmetic', 'improper external call usage'). Optionally, the LLM may refine or generate new queries based on prior responses.",
+            "output": "List of vulnerability queries"
+          },
+          {
+            "stepName": "Semantic Retrieval",
+            "action": "For each query, generate its embedding and query LanceDB for the top-k most similar code chunks. Optionally, integrate keyword-based search to capture specific tokens (such as 'call.value', 'transfer', or 'require').",
+            "output": "Retrieved code chunks relevant to each query"
+          },
+          {
+            "stepName": "Iterative Context Expansion",
+            "action": "If initial retrieval does not cover the entire contract or if the LLM flags incomplete analysis, issue follow-up queries (potentially leveraging the global invariant summaries) to retrieve additional context until the entire codebase is scanned.",
+            "output": "Complete set of code segments for vulnerability assessment"
+          }
+        ]
+      },
+      {
+        "stageName": "LLM-Based Vulnerability Analysis",
+        "description": "With the retrieved code chunks and global invariants, use the LLM to analyze each segment for potential vulnerabilities. The LLM is prompted with both the code snippets and the overarching repository summary to better understand context.",
+        "steps": [
+          {
+            "stepName": "LLM Prompting",
+            "action": "Compose detailed prompts that include (a) the retrieved code snippet, (b) metadata (e.g., location, function name), and (c) relevant global invariants. Ask the LLM to identify issues such as reentrancy, integer overflow, unchecked external calls, missing access controls, and other known Solidity vulnerabilities.",
+            "output": "LLM responses with vulnerability findings per chunk"
+          },
+          {
+            "stepName": "Response Aggregation",
+            "action": "Aggregate individual vulnerability findings from different code chunks. Cross-reference these with the global invariants to detect patterns (for example, repeated issues across similar functions) and verify that all parts of the contract have been examined.",
+            "output": "Consolidated vulnerability data for each contract"
+          }
+        ]
+      },
+      {
+        "stageName": "Report Generation",
+        "description": "Compile the analysis into a comprehensive vulnerability audit report. The report lists each contract along with discovered vulnerabilities, relevant code locations, and recommended remediation.",
+        "steps": [
+          {
+            "stepName": "Generate Vulnerability Report",
+            "action": "Format the aggregated LLM responses and invariant analysis into a structured report. The report should include: contract names, vulnerability types, affected functions or code segments, detailed explanations, and remediation recommendations.",
+            "output": "Final audit report (e.g., in markdown or PDF format)"
+          }
+        ]
+      }
+    ],
+    "notes": "This pipeline is designed to overcome the limitations of a single prompt-based RAG system by incorporating a global codebase overview (invariants) and iteratively refining the context. The multi-stage design allows for both high-level analysis (via the invariant generation) and fine-grained vulnerability detection (via chunk-based retrieval and LLM analysis). Each stage can be optimized or extended based on testing and specific security requirements."
+  }
+  

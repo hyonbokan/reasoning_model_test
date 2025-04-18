@@ -1,0 +1,4928 @@
+{
+  "document_id": "audit_run_001",
+  "finding_reviews": [
+    {
+      "finding_index": 0,
+      "qa_trace": [
+        {
+          "question_id": "O-1",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "O-2",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "O-3",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "R-1",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "R-2",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "R-3",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "A-1",
+          "answer": "Yes",
+          "refs": [
+            {
+              "file": "Packs.sol",
+              "lines": [
+                216
+              ],
+              "why": "The reveal function does not have a specific privilege condition and can be accessed by any pack owner."
+            }
+          ]
+        },
+        {
+          "question_id": "A-2",
+          "answer": "Yes",
+          "refs": [
+            {
+              "file": "Packs.sol",
+              "lines": [
+                210
+              ],
+              "why": "This behavior undermines the fairness and individual commitment premise expected by users."
+            }
+          ]
+        },
+        {
+          "question_id": "F-1",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "F-2",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "S-1",
+          "answer": "Medium",
+          "refs": null
+        },
+        {
+          "question_id": "S-2",
+          "answer": "High",
+          "refs": null
+        },
+        {
+          "question_id": "S-3",
+          "answer": "Medium",
+          "refs": null
+        },
+        {
+          "question_id": "X-1",
+          "answer": "No",
+          "refs": null
+        }
+      ],
+      "adjustment": {
+        "index": 0,
+        "new_severity": "unchanged",
+        "should_be_removed": false,
+        "comments": "The issue is confirmed; adjustments to mitigate front-running are necessary."
+      }
+    },
+    {
+      "finding_index": 1,
+      "qa_trace": [
+        {
+          "question_id": "O-1",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "O-2",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "O-3",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "R-1",
+          "answer": "Yes",
+          "refs": [
+            {
+              "file": "Packs.sol",
+              "lines": [
+                235,
+                242
+              ],
+              "why": "The reveal function makes external calls to NFT contracts."
+            }
+          ]
+        },
+        {
+          "question_id": "R-2",
+          "answer": "No",
+          "refs": [
+            {
+              "file": "Packs.sol",
+              "lines": [
+                236,
+                237
+              ],
+              "why": "State changes affecting metadataPool occur before the external calls."
+            }
+          ]
+        },
+        {
+          "question_id": "R-3",
+          "answer": "Yes",
+          "refs": [
+            {
+              "file": "Packs.sol",
+              "lines": [
+                216
+              ],
+              "why": "No reentrancy guard like nonReentrant modifier is applied."
+            }
+          ]
+        },
+        {
+          "question_id": "A-1",
+          "answer": "No",
+          "refs": [
+            {
+              "file": "Packs.sol",
+              "lines": [
+                216
+              ],
+              "why": "Only the pack owner can call the reveal function."
+            }
+          ]
+        },
+        {
+          "question_id": "A-2",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "F-1",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "F-2",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "S-1",
+          "answer": "Low",
+          "refs": null
+        },
+        {
+          "question_id": "S-2",
+          "answer": "Low",
+          "refs": null
+        },
+        {
+          "question_id": "S-3",
+          "answer": "Low",
+          "refs": null
+        },
+        {
+          "question_id": "X-1",
+          "answer": "No",
+          "refs": null
+        }
+      ],
+      "adjustment": {
+        "index": 1,
+        "new_severity": "unchanged",
+        "should_be_removed": false,
+        "comments": "The finding highlights a reentrancy risk which is valid. Adjustments appear unneeded as the described vulnerability severity aligns with the risk and its low likelihood."
+      }
+    },
+    {
+      "finding_index": 2,
+      "qa_trace": [
+        {
+          "question_id": "O-1",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "O-2",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "O-3",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "R-1",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "R-2",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "R-3",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "A-1",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "A-2",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "F-1",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "F-2",
+          "answer": "No, the behavior appears unintended and likely an oversight.",
+          "refs": [
+            {
+              "file": "Packs.sol",
+              "lines": [
+                224,
+                229
+              ],
+              "why": "Lines indicate the critical section where the unseal data is removed prior to verification."
+            }
+          ]
+        },
+        {
+          "question_id": "S-1",
+          "answer": "Low",
+          "refs": null
+        },
+        {
+          "question_id": "S-2",
+          "answer": "Medium",
+          "refs": null
+        },
+        {
+          "question_id": "S-3",
+          "answer": "low",
+          "refs": null
+        },
+        {
+          "question_id": "X-1",
+          "answer": "No",
+          "refs": null
+        }
+      ],
+      "adjustment": {
+        "index": 2,
+        "new_severity": "low",
+        "should_be_removed": false,
+        "comments": "Severity remains low but clarification and rephrasing may help explain the potential improvements to mitigate poor UX due to behavior."
+      }
+    },
+    {
+      "finding_index": 3,
+      "qa_trace": [
+        {
+          "question_id": "O-1",
+          "answer": "No, this finding is not about arithmetic overflow/underflow.",
+          "refs": null
+        },
+        {
+          "question_id": "O-2",
+          "answer": "No, the issue is not related to unchecked blocks in Solidity >= 0.8.",
+          "refs": null
+        },
+        {
+          "question_id": "O-3",
+          "answer": "No, there is no business requirement to handle overflow differently than revert.",
+          "refs": null
+        },
+        {
+          "question_id": "R-1",
+          "answer": "No, the affected function `reveal` does not make external calls to untrusted addresses. It interacts with specific NFT contracts that are provided during initialization.",
+          "refs": [
+            {
+              "file": "Packs.sol",
+              "lines": [
+                215,
+                242
+              ],
+              "why": "This range includes the logic and calls within the `reveal` function."
+            }
+          ]
+        },
+        {
+          "question_id": "R-2",
+          "answer": "No, the state changes in the function occur after external calls.",
+          "refs": [
+            {
+              "file": "Packs.sol",
+              "lines": [
+                217,
+                242
+              ],
+              "why": "Checks and state changes relative to the external call context."
+            }
+          ]
+        },
+        {
+          "question_id": "R-3",
+          "answer": "No, the function `reveal` does not appear to allow reentrancy as it has suitable state and logic handling.",
+          "refs": null
+        },
+        {
+          "question_id": "A-1",
+          "answer": "No, the function requiring the relevant admin roles cannot be called by unprivileged users.",
+          "refs": [
+            {
+              "file": "Packs.sol",
+              "lines": [
+                144,
+                162
+              ],
+              "why": "The admin roles are required for configuration that affects this finding."
+            }
+          ]
+        },
+        {
+          "question_id": "A-2",
+          "answer": "Yes, because an incorrect configuration by an admin deviates from operational assumptions that `unsealDelay` will be correctly managed.",
+          "refs": null
+        },
+        {
+          "question_id": "F-1",
+          "answer": "No, this issue is unique within the report.",
+          "refs": null
+        },
+        {
+          "question_id": "F-2",
+          "answer": "No, the issue is not explicitly documented as acceptable behavior.",
+          "refs": null
+        },
+        {
+          "question_id": "S-1",
+          "answer": "This has a medium severity because it potentially makes the core functionality unusable if improperly configured.",
+          "refs": null
+        },
+        {
+          "question_id": "S-2",
+          "answer": "This has a low likelihood because it depends on admin misconfiguration.",
+          "refs": null
+        },
+        {
+          "question_id": "S-3",
+          "answer": "Using the risk matrix, the adjusted severity is medium.",
+          "refs": null
+        },
+        {
+          "question_id": "X-1",
+          "answer": "No, this finding should not be removed as a definite false positive, as it raises a valid concern.",
+          "refs": null
+        }
+      ],
+      "adjustment": {
+        "index": 3,
+        "new_severity": "medium",
+        "should_be_removed": false,
+        "comments": "The finding highlights a potential issue in administrative configuration leading to inaccessible functionality. This warrants a medium severity adjustment for appropriate attention."
+      }
+    },
+    {
+      "finding_index": 4,
+      "qa_trace": [
+        {
+          "question_id": "O-1",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "O-2",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "O-3",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "R-1",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "R-2",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "R-3",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "A-1",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "A-2",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "F-1",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "F-2",
+          "answer": "Yes",
+          "refs": [
+            {
+              "file": "Packs.sol",
+              "lines": [
+                230,
+                232
+              ],
+              "why": "It is stated in the code that after certain blocks the blockhash is unavailable, hence reverting."
+            }
+          ]
+        },
+        {
+          "question_id": "S-1",
+          "answer": "Business Continuity",
+          "refs": null
+        },
+        {
+          "question_id": "S-2",
+          "answer": "Medium",
+          "refs": null
+        },
+        {
+          "question_id": "S-3",
+          "answer": "Medium",
+          "refs": null
+        },
+        {
+          "question_id": "X-1",
+          "answer": "No",
+          "refs": null
+        }
+      ],
+      "adjustment": {
+        "index": 4,
+        "new_severity": "medium",
+        "should_be_removed": false,
+        "comments": "While the reported issue is valid, the implications suggest a reduction in severity given user awareness and the fact that this behavior is consistent with documented implementation quirks of blockchain state access."
+      }
+    },
+    {
+      "finding_index": 5,
+      "qa_trace": [
+        {
+          "question_id": "O-1",
+          "answer": "No, this finding is not about arithmetic overflow or underflow.",
+          "refs": null
+        },
+        {
+          "question_id": "O-2",
+          "answer": "No, the relevant code does not have unchecked arithmetic operations.",
+          "refs": null
+        },
+        {
+          "question_id": "O-3",
+          "answer": "No, there is no business requirement to handle overflow differently since it does not pertain to overflow.",
+          "refs": null
+        },
+        {
+          "question_id": "R-1",
+          "answer": "No, the affected function does not make external calls to untrusted addresses.",
+          "refs": null
+        },
+        {
+          "question_id": "R-2",
+          "answer": "No, as no external calls exist in the scope of the affected function, state changes are not subordinate to such calls.",
+          "refs": null
+        },
+        {
+          "question_id": "R-3",
+          "answer": "No, reentrancy guards are not applicable as no external calls occur.",
+          "refs": null
+        },
+        {
+          "question_id": "A-1",
+          "answer": "No, the function is restricted to pack owners due to the modifier `onlyPackOwner`.",
+          "refs": [
+            {
+              "file": "Packs.sol",
+              "lines": [
+                99,
+                100,
+                196
+              ],
+              "why": "Refers to the access control check for pack owners."
+            }
+          ]
+        },
+        {
+          "question_id": "A-2",
+          "answer": "No, the decentralization or timelock assumptions are not explicitly violated as the issue pertains to metadata availability in pools.",
+          "refs": null
+        },
+        {
+          "question_id": "F-1",
+          "answer": "No, the report does not list duplicate findings for this issue.",
+          "refs": null
+        },
+        {
+          "question_id": "F-2",
+          "answer": "No, the function's behavior regarding metadata pool exhaustion is not clearly documented.",
+          "refs": [
+            {
+              "file": "Packs.sol",
+              "lines": [
+                192,
+                243
+              ],
+              "why": "Relevant to the `unseal` and `reveal` function implementation and their respective checks."
+            }
+          ]
+        },
+        {
+          "question_id": "S-1",
+          "answer": "The impact category is medium. Users may experience stuck assets but there is no significant financial loss.",
+          "refs": null
+        },
+        {
+          "question_id": "S-2",
+          "answer": "The likelihood category is medium, as metadata exhaustion could occur but users could avoid it with admin interventions.",
+          "refs": null
+        },
+        {
+          "question_id": "S-3",
+          "answer": "Using the impact and likelihood matrix, the adjusted severity remains medium: medium impact multiplied by medium likelihood.",
+          "refs": null
+        },
+        {
+          "question_id": "X-1",
+          "answer": "No, this finding should not be removed as it is a valid concern about the functionality under specific conditions.",
+          "refs": null
+        }
+      ],
+      "adjustment": {
+        "index": 5,
+        "new_severity": "medium",
+        "should_be_removed": false,
+        "comments": "The finding is valid, and its severity is deemed medium due to the potential for issues but not a complete financial risk."
+      }
+    },
+    {
+      "finding_index": 6,
+      "qa_trace": [
+        {
+          "question_id": "O-1",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "O-2",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "O-3",
+          "answer": "No, there is no such requirement explicitly stated.",
+          "refs": null
+        },
+        {
+          "question_id": "R-1",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "R-2",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "R-3",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "A-1",
+          "answer": "No, the function has access controls enforced by the 'onlyPackOwner' modifier.",
+          "refs": [
+            {
+              "file": "Packs.sol",
+              "lines": [
+                99,
+                196
+              ],
+              "why": "The 'unseal' function is accessible only to the pack owner due to the 'onlyPackOwner' modifier."
+            }
+          ]
+        },
+        {
+          "question_id": "A-2",
+          "answer": "No, there is no stated decentralization or timelock assumption applicable to this permission.",
+          "refs": null
+        },
+        {
+          "question_id": "F-1",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "F-2",
+          "answer": "No. While it could be argued that this is a design choice, it isn't clearly documented as such and could lead to unintended user grievances.",
+          "refs": null
+        },
+        {
+          "question_id": "S-1",
+          "answer": "Business Logic Vulnerability",
+          "refs": null
+        },
+        {
+          "question_id": "S-2",
+          "answer": "Medium",
+          "refs": null
+        },
+        {
+          "question_id": "S-3",
+          "answer": "Moderate",
+          "refs": null
+        },
+        {
+          "question_id": "X-1",
+          "answer": "No, this is not a false positive.",
+          "refs": null
+        }
+      ],
+      "adjustment": {
+        "index": 6,
+        "new_severity": "medium",
+        "should_be_removed": false,
+        "comments": "The issue highlights a valid concern about unexpected behavior in user experience due to global tracking of unsealing actions, which is relevant in usage scenarios where such tracking might lead to conflicts between users. It is advised to consider user-specific unseal tracking to prevent these issues."
+      }
+    },
+    {
+      "finding_index": 7,
+      "qa_trace": [
+        {
+          "question_id": "O-1",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "O-2",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "O-3",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "R-1",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "R-2",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "R-3",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "A-1",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "A-2",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "F-1",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "F-2",
+          "answer": "Yes",
+          "refs": [
+            {
+              "file": "Packs.sol",
+              "lines": [
+                230,
+                234
+              ],
+              "why": "The use of blockhash-derived randomness is intentional and documented in the code."
+            }
+          ]
+        },
+        {
+          "question_id": "S-1",
+          "answer": "low",
+          "refs": null
+        },
+        {
+          "question_id": "S-2",
+          "answer": "medium",
+          "refs": null
+        },
+        {
+          "question_id": "S-3",
+          "answer": "low",
+          "refs": null
+        },
+        {
+          "question_id": "X-1",
+          "answer": "No",
+          "refs": null
+        }
+      ],
+      "adjustment": {
+        "index": 7,
+        "new_severity": "low",
+        "should_be_removed": false,
+        "comments": "The use of blockhash for randomness is recognized as having limitations, which are mitigated here by the included unseal delay."
+      }
+    },
+    {
+      "finding_index": 8,
+      "qa_trace": [
+        {
+          "question_id": "O-1",
+          "answer": "No, this finding is not related to arithmetic overflow or underflow.",
+          "refs": null
+        },
+        {
+          "question_id": "O-2",
+          "answer": "No, the finding does not involve unchecked arithmetic blocks.",
+          "refs": null
+        },
+        {
+          "question_id": "O-3",
+          "answer": "No, there is no business requirement to handle overflow differently than reverting in this context.",
+          "refs": null
+        },
+        {
+          "question_id": "R-1",
+          "answer": "No, the affected function does not make external calls to un-trusted addresses.",
+          "refs": null
+        },
+        {
+          "question_id": "R-2",
+          "answer": "No, there are no state changes placed after external calls that could enable reentrancy.",
+          "refs": null
+        },
+        {
+          "question_id": "R-3",
+          "answer": "No, reentrancy guards are not applicable to this finding.",
+          "refs": null
+        },
+        {
+          "question_id": "A-1",
+          "answer": "No, only users authorized (owners of the packs) can call the function `unseal`.",
+          "refs": null
+        },
+        {
+          "question_id": "A-2",
+          "answer": "No, the functionality aligns with decentralized access and does not violate assumptions.",
+          "refs": null
+        },
+        {
+          "question_id": "F-1",
+          "answer": "No, this issue regarding potential gas implications is not duplicated elsewhere in the report.",
+          "refs": null
+        },
+        {
+          "question_id": "F-2",
+          "answer": "Yes, the behavior of the array growth is covered in the documentation or appears intended for functionality.",
+          "refs": null
+        },
+        {
+          "question_id": "S-1",
+          "answer": "The impact is categorized as medium due to operational concerns such as potential gas consumption growth.",
+          "refs": null
+        },
+        {
+          "question_id": "S-2",
+          "answer": "The likelihood is categorized as low, as it requires particular user patterns not typically expected in intended use.",
+          "refs": null
+        },
+        {
+          "question_id": "S-3",
+          "answer": "Using the matrix, the adjusted severity would remain low.",
+          "refs": null
+        },
+        {
+          "question_id": "X-1",
+          "answer": "No, this finding should not be removed as a false positive because the concern is valid, though its impact and likelihood are limited.",
+          "refs": null
+        }
+      ],
+      "adjustment": {
+        "index": 8,
+        "new_severity": "unchanged",
+        "should_be_removed": false,
+        "comments": "While the described issue of unbounded array growth is valid, its likelihood is low given the expected user behavior. Therefore, the original severity of 'low' remains appropriate."
+      }
+    },
+    {
+      "finding_index": 9,
+      "qa_trace": [
+        {
+          "question_id": "O-1",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "O-2",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "O-3",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "R-1",
+          "answer": "No",
+          "refs": [
+            {
+              "file": "Packs.sol",
+              "lines": [
+                240,
+                241,
+                242
+              ],
+              "why": "The calls are made to NFT contracts assumed to be trusted as stated in the finding description."
+            }
+          ]
+        },
+        {
+          "question_id": "R-2",
+          "answer": "Not Applicable",
+          "refs": null
+        },
+        {
+          "question_id": "R-3",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "A-1",
+          "answer": "No",
+          "refs": [
+            {
+              "file": "Packs.sol",
+              "lines": [
+                216
+              ],
+              "why": "The `reveal` function is gated with an `onlyPackOwner` modifier."
+            }
+          ]
+        },
+        {
+          "question_id": "A-2",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "F-1",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "F-2",
+          "answer": "Yes",
+          "refs": [
+            {
+              "file": "Packs.sol",
+              "lines": [
+                240,
+                241,
+                242
+              ],
+              "why": "The dependency on external contracts for minting is an explicit design choice and noted in the finding description."
+            }
+          ]
+        },
+        {
+          "question_id": "S-1",
+          "answer": "Low",
+          "refs": null
+        },
+        {
+          "question_id": "S-2",
+          "answer": "Low",
+          "refs": null
+        },
+        {
+          "question_id": "S-3",
+          "answer": "Low",
+          "refs": null
+        },
+        {
+          "question_id": "X-1",
+          "answer": "No",
+          "refs": null
+        }
+      ],
+      "adjustment": {
+        "index": 9,
+        "new_severity": "unchanged",
+        "should_be_removed": false,
+        "comments": "The finding accurately describes a known dependency risk, but since these NFTs are under the same managing entity, the risk severity remains low."
+      }
+    },
+    {
+      "finding_index": 10,
+      "qa_trace": [
+        {
+          "question_id": "O-1",
+          "answer": "No, this finding is not about arithmetic overflow/underflow.",
+          "refs": null
+        },
+        {
+          "question_id": "O-2",
+          "answer": "Not applicable, the finding is not about arithmetic, so this is not relevant.",
+          "refs": null
+        },
+        {
+          "question_id": "O-3",
+          "answer": "Not applicable, there is no business requirement in this context to handle overflow differently than revert since no arithmetic issues are involved.",
+          "refs": null
+        },
+        {
+          "question_id": "R-1",
+          "answer": "No, the affected function does not make any external calls to untrusted addresses.",
+          "refs": [
+            {
+              "file": "Packs.sol",
+              "lines": [
+                196,
+                209
+              ],
+              "why": "Examining the function `unseal`, the operations are internal to the contract and do not involve external calls."
+            }
+          ]
+        },
+        {
+          "question_id": "R-2",
+          "answer": "Not applicable, there are no external calls in this function.",
+          "refs": null
+        },
+        {
+          "question_id": "R-3",
+          "answer": "No, a reentrancy guard is not missing; the contract's logic does not present risk of reentrancy.",
+          "refs": [
+            {
+              "file": "Packs.sol",
+              "lines": [
+                196,
+                209
+              ],
+              "why": "The contract design around state changes is secure against reentrancy."
+            }
+          ]
+        },
+        {
+          "question_id": "A-1",
+          "answer": "No, only the owner of a specific pack can call this function due to the `onlyPackOwner` modifier.",
+          "refs": [
+            {
+              "file": "Packs.sol",
+              "lines": [
+                99,
+                104
+              ],
+              "why": "The `onlyPackOwner` modifier ensures this."
+            }
+          ]
+        },
+        {
+          "question_id": "A-2",
+          "answer": "No, this does not violate decentralisation or timelock assumptions.",
+          "refs": null
+        },
+        {
+          "question_id": "F-1",
+          "answer": "No, this finding is not duplicated elsewhere in the report.",
+          "refs": null
+        },
+        {
+          "question_id": "F-2",
+          "answer": "Yes, this behavior is documented and intentional, aiming to control the schedule of pack unsealing.",
+          "refs": [
+            {
+              "file": "Packs.sol",
+              "lines": [
+                201,
+                202
+              ],
+              "why": "The restriction is enforced explicitly in the contract implementation."
+            }
+          ]
+        },
+        {
+          "question_id": "S-1",
+          "answer": "low",
+          "refs": null
+        },
+        {
+          "question_id": "S-2",
+          "answer": "low",
+          "refs": null
+        },
+        {
+          "question_id": "S-3",
+          "answer": "info",
+          "refs": null
+        },
+        {
+          "question_id": "X-1",
+          "answer": "No, this finding should not be removed; it provides useful clarification regarding intentional design choices.",
+          "refs": null
+        }
+      ],
+      "adjustment": {
+        "index": 10,
+        "new_severity": "info",
+        "should_be_removed": false,
+        "comments": "The finding is an expected and intentional behavior of the contract, reflecting designed limitations for operational control."
+      }
+    },
+    {
+      "finding_index": 11,
+      "qa_trace": [
+        {
+          "question_id": "O-1",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "O-2",
+          "answer": "N/A",
+          "refs": null
+        },
+        {
+          "question_id": "O-3",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "R-1",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "R-2",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "R-3",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "A-1",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "A-2",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "F-1",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "F-2",
+          "answer": "Yes",
+          "refs": [
+            {
+              "file": "Packs.sol",
+              "lines": [
+                196,
+                243
+              ],
+              "why": "The absence of specific events for certain actions seems intended and based on leveraging standard ERC1155 events."
+            }
+          ]
+        },
+        {
+          "question_id": "S-1",
+          "answer": "best practices",
+          "refs": null
+        },
+        {
+          "question_id": "S-2",
+          "answer": "low",
+          "refs": null
+        },
+        {
+          "question_id": "S-3",
+          "answer": "best practices",
+          "refs": null
+        },
+        {
+          "question_id": "X-1",
+          "answer": "No",
+          "refs": null
+        }
+      ],
+      "adjustment": {
+        "index": 11,
+        "new_severity": "best practices",
+        "should_be_removed": false,
+        "comments": "The issue regarding missing events is a best practice consideration rather than a direct vulnerability. It is aligned with the standard ERC1155 protocol."
+      }
+    },
+    {
+      "finding_index": 12,
+      "qa_trace": [
+        {
+          "question_id": "O-1",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "O-2",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "O-3",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "R-1",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "R-2",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "R-3",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "A-1",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "A-2",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "F-1",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "F-2",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "S-1",
+          "answer": "Inappropriate Access Control",
+          "refs": null
+        },
+        {
+          "question_id": "S-2",
+          "answer": "High",
+          "refs": null
+        },
+        {
+          "question_id": "S-3",
+          "answer": "High",
+          "refs": null
+        },
+        {
+          "question_id": "X-1",
+          "answer": "No",
+          "refs": null
+        }
+      ],
+      "adjustment": {
+        "index": 12,
+        "new_severity": "high",
+        "should_be_removed": false,
+        "comments": "This finding highlights a critical issue regarding improper access controls and resource management, allowing misuse such as front-running and denial-of-service. Since it's well-supported and impactful, the severity should remain as high."
+      }
+    },
+    {
+      "finding_index": 13,
+      "qa_trace": [
+        {
+          "question_id": "O-1",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "O-2",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "O-3",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "R-1",
+          "answer": "Yes",
+          "refs": [
+            {
+              "file": "Packs.sol",
+              "lines": [
+                240,
+                242
+              ],
+              "why": "These lines call external contracts nft1, nft2, and nft3, which are untrusted by nature."
+            }
+          ]
+        },
+        {
+          "question_id": "R-2",
+          "answer": "Yes",
+          "refs": [
+            {
+              "file": "Packs.sol",
+              "lines": [
+                228,
+                238
+              ],
+              "why": "These lines perform internal state changes, which occur before the external calls are made."
+            }
+          ]
+        },
+        {
+          "question_id": "R-3",
+          "answer": "Yes",
+          "refs": [
+            {
+              "file": "Packs.sol",
+              "lines": [
+                216,
+                243
+              ],
+              "why": "The function `reveal` lacks any modifiers or mechanisms such as nonReentrant for reentrancy protection."
+            }
+          ]
+        },
+        {
+          "question_id": "A-1",
+          "answer": "No",
+          "refs": [
+            {
+              "file": "Packs.sol",
+              "lines": [
+                216
+              ],
+              "why": "The function can only be called by the pack owner, requiring a check with onlyPackOwner checking their token balance."
+            }
+          ]
+        },
+        {
+          "question_id": "A-2",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "F-1",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "F-2",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "S-1",
+          "answer": "medium",
+          "refs": null
+        },
+        {
+          "question_id": "S-2",
+          "answer": "high",
+          "refs": null
+        },
+        {
+          "question_id": "S-3",
+          "answer": "high",
+          "refs": null
+        },
+        {
+          "question_id": "X-1",
+          "answer": "No",
+          "refs": null
+        }
+      ],
+      "adjustment": {
+        "index": 13,
+        "new_severity": "high",
+        "should_be_removed": false,
+        "comments": "The issue is valid and impactful. Allowing reentrancy calls from potentially malicious NFT contracts due to the absence of a reentrancy guard poses a significant risk."
+      }
+    },
+    {
+      "finding_index": 14,
+      "qa_trace": [
+        {
+          "question_id": "O-1",
+          "answer": "No, this finding is not about arithmetic overflow/underflow.",
+          "refs": [
+            {
+              "file": "Packs.sol",
+              "lines": [
+                78,
+                161,
+                186
+              ],
+              "why": "The issue pertains to a potential division by zero, which is an error not related to arithmetic overflow or underflow."
+            }
+          ]
+        },
+        {
+          "question_id": "O-2",
+          "answer": "No, the Solidity version is ≥ 0.8 and does not use unchecked blocks for this context.",
+          "refs": null
+        },
+        {
+          "question_id": "O-3",
+          "answer": "No, there is no business requirement to handle overflow differently in this case.",
+          "refs": null
+        },
+        {
+          "question_id": "R-1",
+          "answer": "No, the functions in question do not make external calls to untrusted addresses.",
+          "refs": [
+            {
+              "file": "Packs.sol",
+              "lines": [
+                156,
+                181
+              ],
+              "why": "The functions referenced (`addMetadata` and `mintPack`) operate solely with internal state and role-based conditions without interacting with external entities."
+            }
+          ]
+        },
+        {
+          "question_id": "R-2",
+          "answer": "No, there are no state changes after external calls as no such calls are made.",
+          "refs": null
+        },
+        {
+          "question_id": "R-3",
+          "answer": "No, the functions do not involve any external calls, hence reentrancy does not apply.",
+          "refs": null
+        },
+        {
+          "question_id": "A-1",
+          "answer": "No, these functions are protected by role-based access control, limiting calls to privileged users.",
+          "refs": [
+            {
+              "file": "Packs.sol",
+              "lines": [
+                114,
+                127,
+                138,
+                184
+              ],
+              "why": "The functions use `onlyRole` modifiers ensuring only accounts with respective roles can execute them."
+            }
+          ]
+        },
+        {
+          "question_id": "A-2",
+          "answer": "No, there is no stated decentralisation or timelock assumption that this finding contravenes.",
+          "refs": null
+        },
+        {
+          "question_id": "F-1",
+          "answer": "No, this finding is not duplicated elsewhere in the report.",
+          "refs": null
+        },
+        {
+          "question_id": "F-2",
+          "answer": "Yes, the behaviour is clearly not intended by design and results from a missing validation step for `metadataInterval`.",
+          "refs": [
+            {
+              "file": "Packs.sol",
+              "lines": [
+                78
+              ],
+              "why": "The contract allows a zero `metadataInterval` to be set via the constructor without checks."
+            }
+          ]
+        },
+        {
+          "question_id": "S-1",
+          "answer": "The impact category is medium, as it potentially makes critical functions bricked.",
+          "refs": null
+        },
+        {
+          "question_id": "S-2",
+          "answer": "The likelihood category is low, as the occurrence depends on improper deployment configuration.",
+          "refs": null
+        },
+        {
+          "question_id": "S-3",
+          "answer": "Using the severity matrix, the adjusted severity is medium, considering the impact outweighs the likelihood.",
+          "refs": null
+        },
+        {
+          "question_id": "X-1",
+          "answer": "No, this finding should not be removed as a definite false positive because the issue could indeed occur under poor deployment configuration.",
+          "refs": null
+        }
+      ],
+      "adjustment": {
+        "index": 14,
+        "new_severity": "medium",
+        "should_be_removed": false,
+        "comments": "The finding is valid and warrants a medium severity classification due to its impact on the contract's operability when improperly configured on deployment."
+      }
+    },
+    {
+      "finding_index": 15,
+      "qa_trace": [
+        {
+          "question_id": "O-1",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "O-2",
+          "answer": "Not applicable",
+          "refs": null
+        },
+        {
+          "question_id": "O-3",
+          "answer": "Not applicable",
+          "refs": null
+        },
+        {
+          "question_id": "R-1",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "R-2",
+          "answer": "No changes follow external calls in this finding",
+          "refs": null
+        },
+        {
+          "question_id": "R-3",
+          "answer": "Not applicable",
+          "refs": null
+        },
+        {
+          "question_id": "A-1",
+          "answer": "No, only a privileged user with specific roles can call functions impacted by this finding.",
+          "refs": null
+        },
+        {
+          "question_id": "A-2",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "F-1",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "F-2",
+          "answer": "No, as randomness fairness is a property expected by users and not specified as breakable.",
+          "refs": [
+            {
+              "file": "Packs.sol",
+              "lines": [
+                193,
+                215
+              ],
+              "why": "Documentation and implementation lack direct indications allowing biasing randomness as an intended feature."
+            }
+          ]
+        },
+        {
+          "question_id": "S-1",
+          "answer": "Integrity and Trust Breach",
+          "refs": null
+        },
+        {
+          "question_id": "S-2",
+          "answer": "Medium (users may strategically benefit from this)",
+          "refs": null
+        },
+        {
+          "question_id": "S-3",
+          "answer": "Medium severity aligns per impact and likelihood matrix",
+          "refs": null
+        },
+        {
+          "question_id": "X-1",
+          "answer": "No",
+          "refs": null
+        }
+      ],
+      "adjustment": {
+        "index": 15,
+        "new_severity": "medium",
+        "should_be_removed": false,
+        "comments": "The random mechanism must be revisited to prevent manipulation."
+      }
+    },
+    {
+      "finding_index": 16,
+      "qa_trace": [
+        {
+          "question_id": "O-1",
+          "answer": "No",
+          "refs": []
+        },
+        {
+          "question_id": "O-2",
+          "answer": "No",
+          "refs": []
+        },
+        {
+          "question_id": "O-3",
+          "answer": "Not applicable",
+          "refs": null
+        },
+        {
+          "question_id": "R-1",
+          "answer": "No",
+          "refs": []
+        },
+        {
+          "question_id": "R-2",
+          "answer": "Not applicable",
+          "refs": null
+        },
+        {
+          "question_id": "R-3",
+          "answer": "No",
+          "refs": []
+        },
+        {
+          "question_id": "A-1",
+          "answer": "No",
+          "refs": []
+        },
+        {
+          "question_id": "A-2",
+          "answer": "No",
+          "refs": []
+        },
+        {
+          "question_id": "F-1",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "F-2",
+          "answer": "Yes",
+          "refs": [
+            {
+              "file": "Packs.sol",
+              "lines": [
+                230,
+                231
+              ],
+              "why": "The potential for the blockhash to be unavailable and reverting is explicitly handled by design."
+            }
+          ]
+        },
+        {
+          "question_id": "S-1",
+          "answer": "potential denial of service and loss of funds.",
+          "refs": null
+        },
+        {
+          "question_id": "S-2",
+          "answer": "low",
+          "refs": []
+        },
+        {
+          "question_id": "S-3",
+          "answer": "info",
+          "refs": []
+        },
+        {
+          "question_id": "X-1",
+          "answer": "No",
+          "refs": null
+        }
+      ],
+      "adjustment": {
+        "index": 16,
+        "new_severity": "info",
+        "should_be_removed": false,
+        "comments": "The described behavior is consistent with the design since the issue arises from expired `blockhash` availability. The severity has been adjusted to reflect its informational nature."
+      }
+    },
+    {
+      "finding_index": 17,
+      "qa_trace": [
+        {
+          "question_id": "O-1",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "O-2",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "O-3",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "R-1",
+          "answer": "Yes",
+          "refs": [
+            {
+              "file": "Packs.sol",
+              "lines": [
+                238,
+                239
+              ],
+              "why": "_burn and _mint operations call external token receiver hooks if the msg.sender is a contract."
+            }
+          ]
+        },
+        {
+          "question_id": "R-2",
+          "answer": "No",
+          "refs": [
+            {
+              "file": "Packs.sol",
+              "lines": [
+                228,
+                237
+              ],
+              "why": "All state-changing operations (updates to metadataPool and unsealBlocks) are done before the external token transfer calls."
+            }
+          ]
+        },
+        {
+          "question_id": "R-3",
+          "answer": "Yes",
+          "refs": null
+        },
+        {
+          "question_id": "A-1",
+          "answer": "No",
+          "refs": [
+            {
+              "file": "Packs.sol",
+              "lines": [
+                196
+              ],
+              "why": "The unseal function is restricted to the pack owner only."
+            }
+          ]
+        },
+        {
+          "question_id": "A-2",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "F-1",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "F-2",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "S-1",
+          "answer": "Low",
+          "refs": null
+        },
+        {
+          "question_id": "S-2",
+          "answer": "Low",
+          "refs": null
+        },
+        {
+          "question_id": "S-3",
+          "answer": "Low",
+          "refs": null
+        },
+        {
+          "question_id": "X-1",
+          "answer": "No",
+          "refs": null
+        }
+      ],
+      "adjustment": {
+        "index": 17,
+        "new_severity": "unchanged",
+        "should_be_removed": false,
+        "comments": "While a reentrancy guard is not strictly necessary due to restricted access control and prior state updates, suggesting guarded practices."
+      }
+    },
+    {
+      "finding_index": 18,
+      "qa_trace": [
+        {
+          "question_id": "O-1",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "O-2",
+          "answer": "N/A",
+          "refs": null
+        },
+        {
+          "question_id": "O-3",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "R-1",
+          "answer": "No",
+          "refs": [
+            {
+              "file": "Packs.sol",
+              "lines": [
+                156,
+                172
+              ],
+              "why": "The `addMetadata` function only uses computations and mappings within its scope."
+            }
+          ]
+        },
+        {
+          "question_id": "R-2",
+          "answer": "N/A",
+          "refs": null
+        },
+        {
+          "question_id": "R-3",
+          "answer": "N/A",
+          "refs": null
+        },
+        {
+          "question_id": "A-1",
+          "answer": "No",
+          "refs": [
+            {
+              "file": "Packs.sol",
+              "lines": [
+                159
+              ],
+              "why": "The `addMetadata` function is restricted by the `onlyRole(ADMIN_ROLE)` modifier ensuring privilege constraints."
+            }
+          ]
+        },
+        {
+          "question_id": "A-2",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "F-1",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "F-2",
+          "answer": "Yes, intended by design.",
+          "refs": [
+            {
+              "file": "Packs.sol",
+              "lines": [
+                161,
+                172
+              ],
+              "why": "The constraints within `addMetadata` consider metadata interval upper bounds, but does not itself restrict the interval setup."
+            }
+          ]
+        },
+        {
+          "question_id": "S-1",
+          "answer": "Low",
+          "refs": null
+        },
+        {
+          "question_id": "S-2",
+          "answer": "Low",
+          "refs": null
+        },
+        {
+          "question_id": "S-3",
+          "answer": "low",
+          "refs": null
+        },
+        {
+          "question_id": "X-1",
+          "answer": "No",
+          "refs": null
+        }
+      ],
+      "adjustment": {
+        "index": 18,
+        "new_severity": "low",
+        "should_be_removed": false,
+        "comments": "The severity of the finding has been confirmed to be low due to the privileged nature of the function and implementation constraints, emphasizing best practices for administrative operations."
+      }
+    },
+    {
+      "finding_index": 19,
+      "qa_trace": [
+        {
+          "question_id": "O-1",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "O-2",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "O-3",
+          "answer": "No specific requirement noted.",
+          "refs": null
+        },
+        {
+          "question_id": "R-1",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "R-2",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "R-3",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "A-1",
+          "answer": "No, only users with MINTER_ROLE can call this function.",
+          "refs": [
+            {
+              "file": "Packs.sol",
+              "lines": [
+                182
+              ],
+              "why": "Ensures only privileged calls."
+            }
+          ]
+        },
+        {
+          "question_id": "A-2",
+          "answer": "No explicit decentralisation assumptions are defined for this functionality.",
+          "refs": null
+        },
+        {
+          "question_id": "F-1",
+          "answer": "It is unique in this report.",
+          "refs": null
+        },
+        {
+          "question_id": "F-2",
+          "answer": "The function's behavior aligns with the current design intention but can be improved to meet practical operational scenarios.",
+          "refs": null
+        },
+        {
+          "question_id": "S-1",
+          "answer": "medium",
+          "refs": null
+        },
+        {
+          "question_id": "S-2",
+          "answer": "medium",
+          "refs": null
+        },
+        {
+          "question_id": "S-3",
+          "answer": "Using the impact and likelihood matrix, the adjusted severity remains 'medium'.",
+          "refs": null
+        },
+        {
+          "question_id": "X-1",
+          "answer": "No, it is valid.",
+          "refs": null
+        }
+      ],
+      "adjustment": {
+        "index": 19,
+        "new_severity": "medium",
+        "should_be_removed": false,
+        "comments": "The finding highlights a valid scenario where excessive minting without metadata availability checks leads to practical user constraints during the `reveal` functionality. This could lead to user dissatisfaction and operational risks. Consider adding the proposed checks or constraints during minting."
+      }
+    },
+    {
+      "finding_index": 20,
+      "qa_trace": [
+        {
+          "question_id": "O-1",
+          "answer": "No, this finding is not about arithmetic overflow/underflow.",
+          "refs": null
+        },
+        {
+          "question_id": "O-2",
+          "answer": "Not applicable, as Solidity version >= 0.8 already reverts on overflow/underflow natively unless explicitly handled with unchecked blocks, which is unrelated to this finding.",
+          "refs": null
+        },
+        {
+          "question_id": "O-3",
+          "answer": "No, there is no evident business logic here, requiring the handling of overflow differently.",
+          "refs": null
+        },
+        {
+          "question_id": "R-1",
+          "answer": "No, the function in question (`reveal`) does not make external calls to untrusted contracts.",
+          "refs": [
+            {
+              "file": "Packs.sol",
+              "lines": [
+                211,
+                243
+              ],
+              "why": "The `reveal` function manipulates blockhash primarily, which is intrinsic to the Ethereum environment and does not rely on external or user-defined contracts."
+            }
+          ]
+        },
+        {
+          "question_id": "R-2",
+          "answer": "Not applicable since no external calls to untrusted addresses exist.",
+          "refs": null
+        },
+        {
+          "question_id": "R-3",
+          "answer": "Not applicable because there is no evident re-entrancy possible due to no external calls to other contracts.",
+          "refs": null
+        },
+        {
+          "question_id": "A-1",
+          "answer": "No, only the pack owner can call the privileged (`reveal`) function after satisfying specified conditions.",
+          "refs": [
+            {
+              "file": "Packs.sol",
+              "lines": [
+                196,
+                243
+              ],
+              "why": "`onlyPackOwner` modifier ensures proper ownership constraint in `reveal`."
+            }
+          ]
+        },
+        {
+          "question_id": "A-2",
+          "answer": "No such decentralization or timelock assumptions are violated by this function.",
+          "refs": null
+        },
+        {
+          "question_id": "F-1",
+          "answer": "No, this finding is not duplicated elsewhere in the report.",
+          "refs": null
+        },
+        {
+          "question_id": "F-2",
+          "answer": "No, this behavior is not clearly documented as evident from the finding.",
+          "refs": null
+        },
+        {
+          "question_id": "S-1",
+          "answer": "Low.",
+          "refs": null
+        },
+        {
+          "question_id": "S-2",
+          "answer": "Low.",
+          "refs": null
+        },
+        {
+          "question_id": "S-3",
+          "answer": "Low.",
+          "refs": null
+        },
+        {
+          "question_id": "X-1",
+          "answer": "No, this issue should remain as it identifies a potentially impactful limitation in a feature.",
+          "refs": null
+        }
+      ],
+      "adjustment": {
+        "index": 20,
+        "new_severity": "low",
+        "should_be_removed": false,
+        "comments": "The severity has been adjusted from medium to low considering the limited conditions where this issue would arise and the low likelihood of it manifesting under typical scenarios."
+      }
+    },
+    {
+      "finding_index": 21,
+      "qa_trace": [
+        {
+          "question_id": "O-1",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "O-2",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "O-3",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "R-1",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "R-2",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "R-3",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "A-1",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "A-2",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "F-1",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "F-2",
+          "answer": "The behavior is documented and aligns with the implementation; however, it could be more explicitly stated in the comments or documentation.",
+          "refs": [
+            {
+              "file": "Packs.sol",
+              "lines": [
+                216,
+                219
+              ],
+              "why": "To show where the LIFO behavior is implemented in the 'reveal' function."
+            }
+          ]
+        },
+        {
+          "question_id": "S-1",
+          "answer": "Low",
+          "refs": null
+        },
+        {
+          "question_id": "S-2",
+          "answer": "Low",
+          "refs": null
+        },
+        {
+          "question_id": "S-3",
+          "answer": "Low",
+          "refs": null
+        },
+        {
+          "question_id": "X-1",
+          "answer": "No",
+          "refs": null
+        }
+      ],
+      "adjustment": {
+        "index": 21,
+        "new_severity": "low",
+        "should_be_removed": false,
+        "comments": "The LIFO behavior of the 'reveal' function is as documented in the source code, and the described finding highlights a potential for user confusion but does not indicate a flaw or a critical issue."
+      }
+    },
+    {
+      "finding_index": 22,
+      "qa_trace": [
+        {
+          "question_id": "O-1",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "O-2",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "O-3",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "R-1",
+          "answer": "No",
+          "refs": [
+            {
+              "file": "Packs.sol",
+              "lines": [
+                146
+              ],
+              "why": "The switchPaused function toggles a state variable but does not make external calls."
+            }
+          ]
+        },
+        {
+          "question_id": "R-2",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "R-3",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "A-1",
+          "answer": "No",
+          "refs": [
+            {
+              "file": "Packs.sol",
+              "lines": [
+                146
+              ],
+              "why": "The switchPaused function is protected by the onlyRole(ADMIN_ROLE) modifier."
+            }
+          ]
+        },
+        {
+          "question_id": "A-2",
+          "answer": "No",
+          "refs": [
+            {
+              "file": "Packs.sol",
+              "lines": [
+                19
+              ],
+              "why": "The contract specifically defines an ADMIN_ROLE and employs Access Control to manage permissions."
+            }
+          ]
+        },
+        {
+          "question_id": "F-1",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "F-2",
+          "answer": "Yes",
+          "refs": [
+            {
+              "file": "Packs.sol",
+              "lines": [
+                66
+              ],
+              "why": "The constructor and comments indicate that roles are intentionally granted to msg.sender initially."
+            }
+          ]
+        },
+        {
+          "question_id": "S-1",
+          "answer": "centralization",
+          "refs": null
+        },
+        {
+          "question_id": "S-2",
+          "answer": "low",
+          "refs": null
+        },
+        {
+          "question_id": "S-3",
+          "answer": "low",
+          "refs": null
+        },
+        {
+          "question_id": "X-1",
+          "answer": "No",
+          "refs": null
+        }
+      ],
+      "adjustment": {
+        "index": 22,
+        "new_severity": "unchanged",
+        "should_be_removed": false,
+        "comments": "The finding indicates a centralization risk due to reliance on admin roles. The issue is noteworthy and aligns with the intended structure of the smart contract, as specified. However, appropriate precautionary measures and security practices should be followed to ensure the integrity of access control."
+      }
+    },
+    {
+      "finding_index": 23,
+      "qa_trace": [
+        {
+          "question_id": "O-1",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "O-2",
+          "answer": "N/A",
+          "refs": null
+        },
+        {
+          "question_id": "O-3",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "R-1",
+          "answer": "No",
+          "refs": [
+            {
+              "file": "Packs.sol",
+              "lines": [
+                240,
+                241,
+                242
+              ],
+              "why": "The external calls to the NFT contract are to controlled contracts instantiated on deployment."
+            }
+          ]
+        },
+        {
+          "question_id": "R-2",
+          "answer": "No",
+          "refs": [
+            {
+              "file": "Packs.sol",
+              "lines": [
+                238,
+                239,
+                240
+              ],
+              "why": "The state changes are ordered before the external calls."
+            }
+          ]
+        },
+        {
+          "question_id": "R-3",
+          "answer": "No",
+          "refs": [
+            {
+              "file": "Packs.sol",
+              "lines": [
+                216,
+                243
+              ],
+              "why": "The contract does not need a reentrancy guard for this specific function as no recursive calls can occur."
+            }
+          ]
+        },
+        {
+          "question_id": "A-1",
+          "answer": "No",
+          "refs": [
+            {
+              "file": "Packs.sol",
+              "lines": [
+                216
+              ],
+              "why": "The reveal function checks ownership ensuring only stakeholders can invoke it."
+            }
+          ]
+        },
+        {
+          "question_id": "A-2",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "F-1",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "F-2",
+          "answer": "Yes, the documentation states this mechanism explicitly and holds this to be a valid design for its purpose.",
+          "refs": [
+            {
+              "file": "Packs.sol",
+              "lines": [
+                70,
+                216
+              ],
+              "why": "The blockhash mechanism is described as fundamental in Architect strategy."
+            }
+          ]
+        },
+        {
+          "question_id": "S-1",
+          "answer": "Low",
+          "refs": [
+            {
+              "file": "Packs.sol",
+              "lines": [],
+              "why": "Manipulatable randomness in allocation pools yields mild share misbalance but fails integrity against larger organizational setups."
+            }
+          ]
+        },
+        {
+          "question_id": "S-2",
+          "answer": "Low",
+          "refs": [
+            {
+              "file": "Packs.sol",
+              "lines": [
+                216
+              ],
+              "why": "Actor specializing for higher GPU-grade improvement per delete while enforced constraints pertaining to gas limited activities further solidifying attacks could remain low game scalabilities."
+            }
+          ]
+        },
+        {
+          "question_id": "S-3",
+          "answer": "Low",
+          "refs": [
+            {
+              "file": "Packs.sol",
+              "lines": [
+                216
+              ],
+              "why": "Recognizing low recurrent strategies applied globally given equal prospects respective individual decays betting odds revealed transparency settings anyhow lacks fringe proponent maneuvers cycles restraining adaptations specializing barriers also reflected impacts reduced gradient densities reveal discarded strategy requirements fulfilled promises applying novice design outlined much slower leadline partnerships partition aligning skills optimization stops to forge massive control positions heavily overthrown principles consistency skeptically directing guidelines."
+            }
+          ]
+        },
+        {
+          "question_id": "X-1",
+          "answer": "No",
+          "refs": null
+        }
+      ],
+      "adjustment": {
+        "index": 23,
+        "new_severity": "low",
+        "should_be_removed": false,
+        "comments": "This finding is valid and holds a low level of risk based on its impact and likelihood. The randomness mechanism is aligned with the recognized design decisions provided for this specific use case. Adjusting severity is not necessary."
+      }
+    },
+    {
+      "finding_index": 24,
+      "qa_trace": [
+        {
+          "question_id": "O-1",
+          "answer": "No, this finding is not about arithmetic overflow or underflow.",
+          "refs": []
+        },
+        {
+          "question_id": "O-2",
+          "answer": "Not applicable as the finding is not related to arithmetic behavior.",
+          "refs": []
+        },
+        {
+          "question_id": "O-3",
+          "answer": "Not applicable as the finding does not pertain to overflow handling.",
+          "refs": []
+        },
+        {
+          "question_id": "R-1",
+          "answer": "No, the affected function does not make an external call to an un‑trusted address.",
+          "refs": []
+        },
+        {
+          "question_id": "R-2",
+          "answer": "No, state changes are not made after external calls as no such call exists in the focus functions.",
+          "refs": []
+        },
+        {
+          "question_id": "R-3",
+          "answer": "No, as there are no external calls to protect from reentrancy.",
+          "refs": []
+        },
+        {
+          "question_id": "A-1",
+          "answer": "Yes, unprivileged users can call the `unseal` and `reveal` functions subject to access constraints like ownership.",
+          "refs": [
+            {
+              "file": "Packs.sol",
+              "lines": [
+                196,
+                223
+              ],
+              "why": "These lines check permissions before executing logic."
+            }
+          ]
+        },
+        {
+          "question_id": "A-2",
+          "answer": "No, the assumption of privileged access control is maintained.",
+          "refs": []
+        },
+        {
+          "question_id": "F-1",
+          "answer": "No, the finding is not duplicated elsewhere in the report.",
+          "refs": []
+        },
+        {
+          "question_id": "F-2",
+          "answer": "No, the described behavior seems like a design oversight and is not documented or intended for expected operation.",
+          "refs": []
+        },
+        {
+          "question_id": "S-1",
+          "answer": "high",
+          "refs": []
+        },
+        {
+          "question_id": "S-2",
+          "answer": "medium",
+          "refs": []
+        },
+        {
+          "question_id": "S-3",
+          "answer": "high",
+          "refs": []
+        }
+      ],
+      "adjustment": {
+        "index": 24,
+        "new_severity": "high",
+        "should_be_removed": false,
+        "comments": "The severity of 'high' accurately reflects both the potential for misuse by malicious actors and the medium likelihood due to design flaws allowing such scenarios."
+      }
+    },
+    {
+      "finding_index": 25,
+      "qa_trace": [
+        {
+          "question_id": "O-1",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "O-2",
+          "answer": "Not Applicable",
+          "refs": null
+        },
+        {
+          "question_id": "O-3",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "R-1",
+          "answer": "No",
+          "refs": [
+            {
+              "file": "Packs.sol",
+              "lines": [
+                213,
+                243
+              ],
+              "why": "The function 'reveal' does not call an external contract under user control in a way that could lead to harmful reentrancy risks."
+            }
+          ]
+        },
+        {
+          "question_id": "R-2",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "R-3",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "A-1",
+          "answer": "No",
+          "refs": [
+            {
+              "file": "Packs.sol",
+              "lines": [
+                193,
+                243
+              ],
+              "why": "Access to the 'reveal' function is gated by the 'onlyPackOwner' modifier, ensuring only the pack owner can call it."
+            }
+          ]
+        },
+        {
+          "question_id": "A-2",
+          "answer": "Not Applicable",
+          "refs": null
+        },
+        {
+          "question_id": "F-1",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "F-2",
+          "answer": "No",
+          "refs": [
+            {
+              "file": "Packs.sol",
+              "lines": [
+                66,
+                173
+              ],
+              "why": "The issue with using blockhash for randomness has not been documented or justified as an intended design feature."
+            }
+          ]
+        },
+        {
+          "question_id": "S-1",
+          "answer": "Scalability and reliability",
+          "refs": null
+        },
+        {
+          "question_id": "S-2",
+          "answer": "Medium",
+          "refs": null
+        },
+        {
+          "question_id": "S-3",
+          "answer": "Medium",
+          "refs": null
+        },
+        {
+          "question_id": "X-1",
+          "answer": "No",
+          "refs": null
+        }
+      ],
+      "adjustment": {
+        "index": 25,
+        "new_severity": "medium",
+        "should_be_removed": false,
+        "comments": "The finding is accurate in identifying an issue involving the use of blockhash for randomness. The medium severity rating appropriately reflects the limitations and potential risks associated with this method. However, since this mechanism is integral to the current design, mitigation should consider redesigning the randomness source while aligning with smart contract capabilities."
+      }
+    },
+    {
+      "finding_index": 26,
+      "qa_trace": [
+        {
+          "question_id": "O-1",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "O-2",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "O-3",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "R-1",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "R-2",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "R-3",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "A-1",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "A-2",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "F-1",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "F-2",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "S-1",
+          "answer": "Low",
+          "refs": null
+        },
+        {
+          "question_id": "S-2",
+          "answer": "Medium",
+          "refs": null
+        },
+        {
+          "question_id": "S-3",
+          "answer": "Low to Medium",
+          "refs": null
+        },
+        {
+          "question_id": "X-1",
+          "answer": "No",
+          "refs": null
+        }
+      ],
+      "adjustment": {
+        "index": 26,
+        "new_severity": "medium",
+        "should_be_removed": false,
+        "comments": "The severity is adjusted to medium due to the potential security issues affecting key features of the contract, such as `addMetadata` and `reveal`, when inputs are improperly defined. Addressing this improves the robustness of the contract."
+      }
+    },
+    {
+      "finding_index": 27,
+      "qa_trace": [
+        {
+          "question_id": "O-1",
+          "answer": "No, this finding is not about arithmetic overflow or underflow.",
+          "refs": null
+        },
+        {
+          "question_id": "O-2",
+          "answer": "No, there is no unchecked block affecting arithmetic in the identified code.",
+          "refs": null
+        },
+        {
+          "question_id": "O-3",
+          "answer": "No, there is no business requirement to handle arithmetic overflow differently than revert.",
+          "refs": null
+        },
+        {
+          "question_id": "R-1",
+          "answer": "No, the affected functions do not make external calls to untrusted addresses.",
+          "refs": null
+        },
+        {
+          "question_id": "R-2",
+          "answer": "Not applicable, as there are no external calls to untrusted addresses in the affected functions.",
+          "refs": null
+        },
+        {
+          "question_id": "R-3",
+          "answer": "No, a reentrancy guard is not missing, as such a concern does not arise in this context.",
+          "refs": null
+        },
+        {
+          "question_id": "A-1",
+          "answer": "Yes, any holder of a given packId can invoke the relevant functions.",
+          "refs": null
+        },
+        {
+          "question_id": "A-2",
+          "answer": "No, this does not directly violate decentralisation or timelock assumptions, but it violates fair distribution and usability expectations.",
+          "refs": null
+        },
+        {
+          "question_id": "F-1",
+          "answer": "No, this finding is not duplicated elsewhere in the report.",
+          "refs": null
+        },
+        {
+          "question_id": "F-2",
+          "answer": "No, the behaviour is not documented or intended, as it has significant unanticipated consequences.",
+          "refs": null
+        },
+        {
+          "question_id": "S-1",
+          "answer": "The impact category is high, as the issues can result in denial of service and unfair outcomes.",
+          "refs": null
+        },
+        {
+          "question_id": "S-2",
+          "answer": "The likelihood category is high, as the misuse scenario is straightforward and doesn’t require special conditions.",
+          "refs": null
+        },
+        {
+          "question_id": "S-3",
+          "answer": "Based on the high impact and high likelihood, the adjusted severity remains High.",
+          "refs": null
+        },
+        {
+          "question_id": "X-1",
+          "answer": "No, this finding should not be removed as a false positive, the issue appears valid and significant.",
+          "refs": null
+        }
+      ],
+      "adjustment": {
+        "index": 27,
+        "new_severity": "high",
+        "should_be_removed": false,
+        "comments": "The finding identifies a high-severity issue with shared metadata tracking that contradicts expected contract behavior, leading to multiple potential vulnerabilities such as DoS, unfair reward allocation, and delay bypass."
+      }
+    },
+    {
+      "finding_index": 28,
+      "qa_trace": [
+        {
+          "question_id": "O-1",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "O-2",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "O-3",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "R-1",
+          "answer": "Yes",
+          "refs": [
+            {
+              "file": "Packs.sol",
+              "lines": [
+                230,
+                241,
+                242,
+                243
+              ],
+              "why": "The reveal function makes external calls to NFT mint methods."
+            }
+          ]
+        },
+        {
+          "question_id": "R-2",
+          "answer": "No",
+          "refs": [
+            {
+              "file": "Packs.sol",
+              "lines": [
+                228,
+                243
+              ],
+              "why": "State changes occur before making external calls."
+            }
+          ]
+        },
+        {
+          "question_id": "R-3",
+          "answer": "Yes",
+          "refs": [
+            {
+              "file": "Packs.sol",
+              "lines": [
+                216,
+                243
+              ],
+              "why": "The reveal function lacks a nonReentrant modifier or similar protection against reentrancy."
+            }
+          ]
+        },
+        {
+          "question_id": "A-1",
+          "answer": "No",
+          "refs": [
+            {
+              "file": "Packs.sol",
+              "lines": [
+                216,
+                243
+              ],
+              "why": "The function is restricted by the onlyPackOwner modifier."
+            }
+          ]
+        },
+        {
+          "question_id": "A-2",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "F-1",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "F-2",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "S-1",
+          "answer": "Low",
+          "refs": null
+        },
+        {
+          "question_id": "S-2",
+          "answer": "Low",
+          "refs": null
+        },
+        {
+          "question_id": "S-3",
+          "answer": "Low",
+          "refs": null
+        },
+        {
+          "question_id": "X-1",
+          "answer": "No",
+          "refs": null
+        }
+      ],
+      "adjustment": {
+        "index": 28,
+        "new_severity": "low",
+        "should_be_removed": false,
+        "comments": "The finding is accurate and its severity appropriately categorized as Low given the mitigations in state handling before the external calls."
+      }
+    },
+    {
+      "finding_index": 29,
+      "qa_trace": [
+        {
+          "question_id": "O-1",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "O-2",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "O-3",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "R-1",
+          "answer": "No",
+          "refs": [
+            {
+              "file": "Packs.sol",
+              "lines": [
+                240,
+                242,
+                243
+              ],
+              "why": "However, the calls are made to trusted pre-configured contracts, and do not pose a concern here."
+            }
+          ]
+        },
+        {
+          "question_id": "R-2",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "R-3",
+          "answer": "No",
+          "refs": [
+            {
+              "file": "Packs.sol",
+              "lines": [
+                216
+              ],
+              "why": "`reveal()` function correctly manages state transitions and external calls. No reentrancy vulnerability is present."
+            }
+          ]
+        },
+        {
+          "question_id": "A-1",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "A-2",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "F-1",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "F-2",
+          "answer": "No",
+          "refs": [
+            {
+              "file": "Packs.sol",
+              "lines": [
+                231,
+                232
+              ],
+              "why": "The behavior of blockhash unavailability is not mitigated within the code nor stated in the documentation."
+            }
+          ]
+        },
+        {
+          "question_id": "S-1",
+          "answer": "high",
+          "refs": null
+        },
+        {
+          "question_id": "S-2",
+          "answer": "high",
+          "refs": null
+        },
+        {
+          "question_id": "S-3",
+          "answer": "high",
+          "refs": null
+        },
+        {
+          "question_id": "X-1",
+          "answer": "No",
+          "refs": null
+        }
+      ],
+      "adjustment": {
+        "index": 29,
+        "new_severity": "high",
+        "should_be_removed": false,
+        "comments": "The finding accurately identifies a high-severity issue that requires addressing to ensure user assets are not at risk due to blockhash unavailability. It is not a false positive, and the impact necessitates maintaining high severity for this issue."
+      }
+    },
+    {
+      "finding_index": 30,
+      "qa_trace": [
+        {
+          "question_id": "O-1",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "O-2",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "O-3",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "R-1",
+          "answer": "No, the function initializes values that enact external calls indirectly; however, no direct untrusted external call invoked within.",
+          "refs": [
+            {
+              "file": "Packs.sol",
+              "lines": [
+                75,
+                92
+              ],
+              "why": "Constructor setting the NFT addresses as input parameters"
+            }
+          ]
+        },
+        {
+          "question_id": "R-2",
+          "answer": "There are no state changes following an external call in the affected function as it simply sets the constructor parameters provided.",
+          "refs": [
+            {
+              "file": "Packs.sol",
+              "lines": [
+                75,
+                92
+              ],
+              "why": "Constructor initializing parameters based on inputs"
+            }
+          ]
+        },
+        {
+          "question_id": "R-3",
+          "answer": "No, the finding involves the constructor and not runtime logic with reentrancy potential.",
+          "refs": null
+        },
+        {
+          "question_id": "A-1",
+          "answer": "No, the constructor is automatically invoked upon contract deployment and cannot be called afterward.",
+          "refs": [
+            {
+              "file": "Packs.sol",
+              "lines": [
+                75,
+                92
+              ],
+              "why": "Constructor execution controlled strictly during deployment"
+            }
+          ]
+        },
+        {
+          "question_id": "A-2",
+          "answer": "No, there is no decentralization assumption violated by validating constructor parameters.",
+          "refs": null
+        },
+        {
+          "question_id": "F-1",
+          "answer": "No, no similar issue reported among other findings.",
+          "refs": null
+        },
+        {
+          "question_id": "F-2",
+          "answer": "No, the current undefined validation is likely an oversight due to lack of explicit intent.",
+          "refs": null
+        },
+        {
+          "question_id": "S-1",
+          "answer": "Medium",
+          "refs": null
+        },
+        {
+          "question_id": "S-2",
+          "answer": "Medium (subjective to frequency of occurrence and validation impact)",
+          "refs": null
+        },
+        {
+          "question_id": "S-3",
+          "answer": "Using the matrix: Medium",
+          "refs": null
+        },
+        {
+          "question_id": "X-1",
+          "answer": "No",
+          "refs": null
+        }
+      ],
+      "adjustment": {
+        "index": 30,
+        "new_severity": "medium",
+        "should_be_removed": false,
+        "comments": "While the constructor lacks direct logic validation of its parameters, downstream operations reliant on given NFT addresses are exposed to post-deployment stagnation risk. Suggested enhancement ensures interfaces are protectively defined during initialization safeguards operational integrity long-term."
+      }
+    },
+    {
+      "finding_index": 31,
+      "qa_trace": [
+        {
+          "question_id": "O-1",
+          "answer": "No",
+          "refs": []
+        },
+        {
+          "question_id": "O-2",
+          "answer": "No impact, Solidity >= 0.8 handles this.",
+          "refs": null
+        },
+        {
+          "question_id": "O-3",
+          "answer": "No, handling arithmetic overflow differently is not a requirement here.",
+          "refs": []
+        },
+        {
+          "question_id": "R-1",
+          "answer": "No, it does not make external calls to an un‑trusted address.",
+          "refs": null
+        },
+        {
+          "question_id": "R-2",
+          "answer": "Not applicable.",
+          "refs": null
+        },
+        {
+          "question_id": "R-3",
+          "answer": "No, the reentrancy guard is not applicable to this context.",
+          "refs": []
+        },
+        {
+          "question_id": "A-1",
+          "answer": "No, access is restricted through constructor access control provisioning.",
+          "refs": [
+            {
+              "file": "Packs.sol",
+              "lines": [
+                90,
+                91,
+                92
+              ],
+              "why": "Roles are granted within the constructor to restrict call permissions."
+            }
+          ]
+        },
+        {
+          "question_id": "A-2",
+          "answer": "No, it does not challenge decentralisation assumptions.",
+          "refs": null
+        },
+        {
+          "question_id": "F-1",
+          "answer": "No, this issue is unique.",
+          "refs": []
+        },
+        {
+          "question_id": "F-2",
+          "answer": "No, the omission of validation might be unintentional.",
+          "refs": []
+        },
+        {
+          "question_id": "S-1",
+          "answer": "Medium",
+          "refs": []
+        },
+        {
+          "question_id": "S-2",
+          "answer": "Medium likelihood due to input restrictions missing.",
+          "refs": []
+        },
+        {
+          "question_id": "S-3",
+          "answer": "Medium",
+          "refs": []
+        },
+        {
+          "question_id": "X-1",
+          "answer": "No, the finding provides valid concerns requiring attention.",
+          "refs": null
+        }
+      ],
+      "adjustment": {
+        "index": 31,
+        "new_severity": "unchanged",
+        "should_be_removed": false,
+        "comments": "The issue outlines a lack of validation on a critical parameter (`unsealDelay`). It's essential to verify inputs to ensure functionality aligns with intended security and practical usability, avoiding issues from overly high or trivial values."
+      }
+    },
+    {
+      "finding_index": 32,
+      "qa_trace": [
+        {
+          "question_id": "O-1",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "O-2",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "O-3",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "R-1",
+          "answer": "No",
+          "refs": [
+            {
+              "file": "Packs.sol",
+              "lines": [
+                146,
+                149
+              ],
+              "why": "The function 'switchPaused' does not make an external call."
+            }
+          ]
+        },
+        {
+          "question_id": "R-2",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "R-3",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "A-1",
+          "answer": "No",
+          "refs": [
+            {
+              "file": "Packs.sol",
+              "lines": [
+                146,
+                149
+              ],
+              "why": "The function 'switchPaused' is restricted to the 'ADMIN_ROLE'."
+            }
+          ]
+        },
+        {
+          "question_id": "A-2",
+          "answer": "Yes",
+          "refs": [
+            {
+              "file": "Packs.sol",
+              "lines": [
+                146,
+                149
+              ],
+              "why": "The finding discusses the centralization risk, hence it does align with decentralization concerns."
+            }
+          ]
+        },
+        {
+          "question_id": "F-1",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "F-2",
+          "answer": "Yes",
+          "refs": [
+            {
+              "file": "Packs.sol",
+              "lines": [
+                146,
+                149
+              ],
+              "why": "The contract intentionally includes a pausing mechanism with associated documentation."
+            }
+          ]
+        },
+        {
+          "question_id": "S-1",
+          "answer": "High centralization risk",
+          "refs": null
+        },
+        {
+          "question_id": "S-2",
+          "answer": "Medium likelihood to exercise",
+          "refs": null
+        },
+        {
+          "question_id": "S-3",
+          "answer": "Medium",
+          "refs": null
+        },
+        {
+          "question_id": "X-1",
+          "answer": "No",
+          "refs": null
+        }
+      ],
+      "adjustment": {
+        "index": 32,
+        "new_severity": "medium",
+        "should_be_removed": false,
+        "comments": "The severity of the finding is appropriate given the context and identified centralization risks."
+      }
+    },
+    {
+      "finding_index": 33,
+      "qa_trace": [
+        {
+          "question_id": "O-1",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "O-2",
+          "answer": "No",
+          "refs": [
+            {
+              "file": "Packs.sol",
+              "lines": [
+                75,
+                257
+              ],
+              "why": "The contract is explicitly written for Solidity version ^0.8.29, which has built-in overflow checks."
+            }
+          ]
+        },
+        {
+          "question_id": "O-3",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "R-1",
+          "answer": "No",
+          "refs": [
+            {
+              "file": "Packs.sol",
+              "lines": [
+                195,
+                214
+              ],
+              "why": "The function does not involve external calls to untrusted addresses."
+            }
+          ]
+        },
+        {
+          "question_id": "R-2",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "R-3",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "A-1",
+          "answer": "No",
+          "refs": [
+            {
+              "file": "Packs.sol",
+              "lines": [
+                195,
+                214
+              ],
+              "why": "The function uses access control and restrictions ensuring only specific roles or conditions allow entry."
+            }
+          ]
+        },
+        {
+          "question_id": "A-2",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "F-1",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "F-2",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "S-1",
+          "answer": "Low",
+          "refs": [
+            {
+              "file": "Packs.sol",
+              "lines": [
+                195,
+                214
+              ],
+              "why": "The potential issue could increase gas costs for users if not mitigated or managed with adequate documentation."
+            }
+          ]
+        },
+        {
+          "question_id": "S-2",
+          "answer": "Low",
+          "refs": null
+        },
+        {
+          "question_id": "S-3",
+          "answer": "Low",
+          "refs": null
+        },
+        {
+          "question_id": "X-1",
+          "answer": "No",
+          "refs": null
+        }
+      ],
+      "adjustment": {
+        "index": 33,
+        "new_severity": "unchanged",
+        "should_be_removed": false,
+        "comments": "The finding is accurate in reporting the potential gas exhaustion issue. However, as documented, the impact and likelihood are minimal because excessive growth is unlikely and would require operations beyond reasonable use."
+      }
+    },
+    {
+      "finding_index": 34,
+      "qa_trace": [
+        {
+          "question_id": "O-1",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "O-2",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "O-3",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "R-1",
+          "answer": "No",
+          "refs": [
+            {
+              "file": "Packs.sol",
+              "lines": [
+                181,
+                189
+              ],
+              "why": "The `mintPack` function does not perform any external call beyond interacting with the inherited `_mint` function from the ERC1155 standard."
+            }
+          ]
+        },
+        {
+          "question_id": "R-2",
+          "answer": "No",
+          "refs": [
+            {
+              "file": "Packs.sol",
+              "lines": [
+                181,
+                189
+              ],
+              "why": "The function does not perform any external calls, so state change ordering related to external interactions is irrelevant."
+            }
+          ]
+        },
+        {
+          "question_id": "R-3",
+          "answer": "No",
+          "refs": [
+            {
+              "file": "Packs.sol",
+              "lines": [
+                181,
+                189
+              ],
+              "why": "The function does not require reentrancy protection as it doesn't involve external contracts."
+            }
+          ]
+        },
+        {
+          "question_id": "A-1",
+          "answer": "No",
+          "refs": [
+            {
+              "file": "Packs.sol",
+              "lines": [
+                184
+              ],
+              "why": "The `mintPack` function is restricted to addresses with the MINTER_ROLE as verified by the `onlyRole(MINTER_ROLE)` modifier."
+            }
+          ]
+        },
+        {
+          "question_id": "A-2",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "F-1",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "F-2",
+          "answer": "No",
+          "refs": [
+            {
+              "file": "Packs.sol",
+              "lines": [
+                181,
+                189
+              ],
+              "why": "The omission of a zero address check in the `mintPack` function is not explicitly specified in the documentation, and such a check should generally be included as a precautionary measure."
+            }
+          ]
+        },
+        {
+          "question_id": "S-1",
+          "answer": "best practices",
+          "refs": null
+        },
+        {
+          "question_id": "S-2",
+          "answer": "low",
+          "refs": null
+        },
+        {
+          "question_id": "S-3",
+          "answer": "best practices",
+          "refs": null
+        },
+        {
+          "question_id": "X-1",
+          "answer": "No",
+          "refs": null
+        }
+      ],
+      "adjustment": {
+        "index": 34,
+        "new_severity": "best practices",
+        "should_be_removed": false,
+        "comments": "The finding addresses a potential improvement to include a zero address check in `mintPack`. While this is not a critical vulnerability, it adheres to best practices and would enhance the code's robustness by preventing misuse."
+      }
+    },
+    {
+      "finding_index": 35,
+      "qa_trace": [
+        {
+          "question_id": "O-1",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "O-2",
+          "answer": "No, there are no unchecked blocks in this version of Solidity (≥ 0.8.0) without safe arithmetic",
+          "refs": null
+        },
+        {
+          "question_id": "O-3",
+          "answer": "No, there doesn't appear to be a specific business requirement to handle overflows differently.",
+          "refs": null
+        },
+        {
+          "question_id": "R-1",
+          "answer": "No, the affected functions do not make external calls to un-trusted addresses but call trusted contracts.",
+          "refs": null
+        },
+        {
+          "question_id": "R-2",
+          "answer": "No, there are no state changes after external calls that could be impacted by re-entrancy.",
+          "refs": null
+        },
+        {
+          "question_id": "R-3",
+          "answer": "No, reentrancy guards are not relevant in this context as there are no re-entry vulnerabilities identified.",
+          "refs": null
+        },
+        {
+          "question_id": "A-1",
+          "answer": "No, only privileged users with specific roles can call the function.",
+          "refs": null
+        },
+        {
+          "question_id": "A-2",
+          "answer": "No, this does not violate decentralisation or timelock assumptions.",
+          "refs": null
+        },
+        {
+          "question_id": "F-1",
+          "answer": "No, this finding doesn't seem to be duplicated elsewhere.",
+          "refs": null
+        },
+        {
+          "question_id": "F-2",
+          "answer": "Yes, it is intended by design as standard ERC1155 events cover most tracking purposes.",
+          "refs": null
+        },
+        {
+          "question_id": "S-1",
+          "answer": "Low",
+          "refs": null
+        },
+        {
+          "question_id": "S-2",
+          "answer": "Low",
+          "refs": null
+        },
+        {
+          "question_id": "S-3",
+          "answer": "Low",
+          "refs": null
+        },
+        {
+          "question_id": "X-1",
+          "answer": "No, this cannot be removed as a definite false positive—it holds merit for improvement.",
+          "refs": null
+        }
+      ],
+      "adjustment": {
+        "index": 35,
+        "new_severity": "unchanged",
+        "should_be_removed": false,
+        "comments": "The finding suggests an improvement rather than a vulnerability, addressing how adding specific event emissions could enhance integration capabilities and tracking granularity."
+      }
+    },
+    {
+      "finding_index": 36,
+      "qa_trace": [
+        {
+          "question_id": "O-1",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "O-2",
+          "answer": "Not applicable",
+          "refs": null
+        },
+        {
+          "question_id": "O-3",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "R-1",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "R-2",
+          "answer": "Not applicable",
+          "refs": null
+        },
+        {
+          "question_id": "R-3",
+          "answer": "Not applicable",
+          "refs": null
+        },
+        {
+          "question_id": "A-1",
+          "answer": "No",
+          "refs": [
+            {
+              "file": "Packs.sol",
+              "lines": [
+                196
+              ],
+              "why": "The `reveal` function includes the `onlyPackOwner` modifier, restricting access to pack holders."
+            }
+          ]
+        },
+        {
+          "question_id": "A-2",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "F-1",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "F-2",
+          "answer": "No, this behavior is not documented or intended.",
+          "refs": [
+            {
+              "file": "Packs.sol",
+              "lines": [
+                196,
+                256
+              ],
+              "why": "Ownership-based access control is implied, but the implementation of `unsealBlocks` and `reveal` does not align with such expectations."
+            }
+          ]
+        },
+        {
+          "question_id": "S-1",
+          "answer": "Security Misconfiguration",
+          "refs": null
+        },
+        {
+          "question_id": "S-2",
+          "answer": "Medium",
+          "refs": null
+        },
+        {
+          "question_id": "S-3",
+          "answer": "Medium",
+          "refs": null
+        },
+        {
+          "question_id": "X-1",
+          "answer": "No",
+          "refs": null
+        }
+      ],
+      "adjustment": {
+        "index": 36,
+        "new_severity": "medium",
+        "should_be_removed": false,
+        "comments": "The severity is adjusted to 'medium' as the finding does not inherently allow functionality failure but presents a significant security flaw."
+      }
+    },
+    {
+      "finding_index": 37,
+      "qa_trace": [
+        {
+          "question_id": "O-1",
+          "answer": "No, this finding is not about arithmetic overflow/underflow.",
+          "refs": null
+        },
+        {
+          "question_id": "O-2",
+          "answer": "Not applicable, as the finding is not about arithmetic overflow/underflow.",
+          "refs": null
+        },
+        {
+          "question_id": "O-3",
+          "answer": "Not applicable, as the finding is not about arithmetic overflow/underflow.",
+          "refs": null
+        },
+        {
+          "question_id": "R-1",
+          "answer": "Yes, the function makes external calls to untrusted contracts through the invocation of NFT contracts for minting.",
+          "refs": [
+            {
+              "file": "Packs.sol",
+              "lines": [
+                240,
+                241,
+                242
+              ],
+              "why": "Those lines involve calls to external NFT contracts."
+            }
+          ]
+        },
+        {
+          "question_id": "R-2",
+          "answer": "Yes, critical state changes are performed before the external calls.",
+          "refs": [
+            {
+              "file": "Packs.sol",
+              "lines": [
+                227,
+                229,
+                237
+              ],
+              "why": "State changes include removal of metadata and burning of the pack."
+            }
+          ]
+        },
+        {
+          "question_id": "R-3",
+          "answer": "Yes, there is no reentrancy guard in the function.",
+          "refs": [
+            {
+              "file": "Packs.sol",
+              "lines": [
+                216,
+                243
+              ],
+              "why": "No reentrancy guard is applied to the `reveal` function."
+            }
+          ]
+        },
+        {
+          "question_id": "A-1",
+          "answer": "Yes, any user capable of owning a pack can invoke this function without privilege restrictions.",
+          "refs": [
+            {
+              "file": "Packs.sol",
+              "lines": [
+                216,
+                243
+              ],
+              "why": "The implementation allows any pack owner to call `reveal`."
+            }
+          ]
+        },
+        {
+          "question_id": "A-2",
+          "answer": "No, this behavior is not in violation of specific decentralization or timelock assumptions.",
+          "refs": null
+        },
+        {
+          "question_id": "F-1",
+          "answer": "No, this behavior is not duplicated elsewhere in the report.",
+          "refs": null
+        },
+        {
+          "question_id": "F-2",
+          "answer": "No, the behavior does not appear to be explicitly intended or documented.",
+          "refs": null
+        },
+        {
+          "question_id": "S-1",
+          "answer": "The impact category is medium due to the potential for unintended resource exhaustion in the contract.",
+          "refs": null
+        },
+        {
+          "question_id": "S-2",
+          "answer": "The likelihood category is high because the existence of a vulnerability permits reentrancy under the defined conditions.",
+          "refs": null
+        },
+        {
+          "question_id": "S-3",
+          "answer": "The adjusted severity rating should remain medium, as the impact aligns with medium, and the likelihood does not elevate it to high.",
+          "refs": null
+        },
+        {
+          "question_id": "X-1",
+          "answer": "No, this finding should not be removed, as it describes a legitimate security concern.",
+          "refs": null
+        }
+      ],
+      "adjustment": {
+        "index": 37,
+        "new_severity": "medium",
+        "should_be_removed": false,
+        "comments": "The finding correctly identifies a vulnerability regarding reentrancy risks due to the absence of a reentrancy guard in functions with external calls."
+      }
+    },
+    {
+      "finding_index": 38,
+      "qa_trace": [
+        {
+          "question_id": "O-1",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "O-2",
+          "answer": "N/A",
+          "refs": null
+        },
+        {
+          "question_id": "O-3",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "R-1",
+          "answer": "No",
+          "refs": [
+            {
+              "file": "Packs.sol",
+              "lines": [
+                229
+              ],
+              "why": "There is no external call in 'reveal' that targets an untrusted address."
+            }
+          ]
+        },
+        {
+          "question_id": "R-2",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "R-3",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "A-1",
+          "answer": "No",
+          "refs": [
+            {
+              "file": "Packs.sol",
+              "lines": [
+                216
+              ],
+              "why": "The function includes access restrictions."
+            }
+          ]
+        },
+        {
+          "question_id": "A-2",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "F-1",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "F-2",
+          "answer": "Yes",
+          "refs": [
+            {
+              "file": "Packs.sol",
+              "lines": [
+                230
+              ],
+              "why": "The use of 'blockhash' in this manner aligns with the contract's intended design."
+            }
+          ]
+        },
+        {
+          "question_id": "S-1",
+          "answer": "Manipulation",
+          "refs": null
+        },
+        {
+          "question_id": "S-2",
+          "answer": "Medium",
+          "refs": null
+        },
+        {
+          "question_id": "S-3",
+          "answer": "Medium",
+          "refs": null
+        },
+        {
+          "question_id": "X-1",
+          "answer": "No",
+          "refs": null
+        }
+      ],
+      "adjustment": {
+        "index": 38,
+        "new_severity": "medium",
+        "should_be_removed": false,
+        "comments": "The issue with 'blockhash' is acknowledged but does not warrant removal. Lower severity due to contextual applicability."
+      }
+    },
+    {
+      "finding_index": 39,
+      "qa_trace": [
+        {
+          "question_id": "O-1",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "O-2",
+          "answer": "No",
+          "refs": [
+            {
+              "file": "Packs.sol",
+              "lines": [
+                196,
+                210
+              ],
+              "why": "The arithmetic operations in this function are in a safe range and do not employ unchecked blocks."
+            }
+          ]
+        },
+        {
+          "question_id": "O-3",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "R-1",
+          "answer": "No",
+          "refs": [
+            {
+              "file": "Packs.sol",
+              "lines": [
+                196,
+                210
+              ],
+              "why": "The function does not perform external calls to untrusted addresses."
+            }
+          ]
+        },
+        {
+          "question_id": "R-2",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "R-3",
+          "answer": "Not Applicable",
+          "refs": null
+        },
+        {
+          "question_id": "A-1",
+          "answer": "No",
+          "refs": [
+            {
+              "file": "Packs.sol",
+              "lines": [
+                196,
+                210
+              ],
+              "why": "The function correctly restricts caller permissions to designated pack owners."
+            }
+          ]
+        },
+        {
+          "question_id": "A-2",
+          "answer": "N/A",
+          "refs": null
+        },
+        {
+          "question_id": "F-1",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "F-2",
+          "answer": "Yes",
+          "refs": [
+            {
+              "file": "Packs.sol",
+              "lines": [
+                33,
+                209
+              ],
+              "why": "The behaviour aligns with the intended design of the unsealBlocks mapping."
+            }
+          ]
+        },
+        {
+          "question_id": "S-1",
+          "answer": "medium",
+          "refs": [
+            {
+              "file": "Packs.sol",
+              "lines": [],
+              "why": "The impact is primarily a DoS scenario for specific users of the contract."
+            }
+          ]
+        },
+        {
+          "question_id": "S-2",
+          "answer": "medium",
+          "refs": null
+        },
+        {
+          "question_id": "S-3",
+          "answer": "medium",
+          "refs": null
+        },
+        {
+          "question_id": "X-1",
+          "answer": "No",
+          "refs": null
+        }
+      ],
+      "adjustment": {
+        "index": 39,
+        "new_severity": "medium",
+        "should_be_removed": false,
+        "comments": "The severity and validity of the finding remain consistent upon audit details examination."
+      }
+    },
+    {
+      "finding_index": 40,
+      "qa_trace": [
+        {
+          "question_id": "O-1",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "O-2",
+          "answer": "No",
+          "refs": [
+            {
+              "file": "Packs.sol",
+              "lines": [
+                231,
+                237
+              ],
+              "why": "There are no unchecked arithmetic operations within the affected function."
+            }
+          ]
+        },
+        {
+          "question_id": "O-3",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "R-1",
+          "answer": "No",
+          "refs": [
+            {
+              "file": "Packs.sol",
+              "lines": [
+                216,
+                243
+              ],
+              "why": "The function does not directly interact with external contracts apart from the internal NFT contract calls."
+            }
+          ]
+        },
+        {
+          "question_id": "R-2",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "R-3",
+          "answer": "No",
+          "refs": [
+            {
+              "file": "Packs.sol",
+              "lines": [
+                216,
+                243
+              ],
+              "why": "A reentrancy guard is unnecessary as there are no untrusted external calls within this function."
+            }
+          ]
+        },
+        {
+          "question_id": "A-1",
+          "answer": "No",
+          "refs": [
+            {
+              "file": "Packs.sol",
+              "lines": [
+                216
+              ],
+              "why": "The function has access control: it requires the caller to own the respective pack."
+            }
+          ]
+        },
+        {
+          "question_id": "A-2",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "F-1",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "F-2",
+          "answer": "No",
+          "refs": [
+            {
+              "file": "Packs.sol",
+              "lines": [
+                216
+              ],
+              "why": "The behavior is unintended as the described issue could allow misuse causing interference with other users' packs, which likely contradicts design intentions."
+            }
+          ]
+        },
+        {
+          "question_id": "S-1",
+          "answer": "Loss of Functionality or Data Integrity",
+          "refs": null
+        },
+        {
+          "question_id": "S-2",
+          "answer": "Medium",
+          "refs": null
+        },
+        {
+          "question_id": "S-3",
+          "answer": "Medium",
+          "refs": [
+            {
+              "file": "Packs.sol",
+              "lines": [
+                223
+              ],
+              "why": "The finding severity remains appropriate as 'Medium' due to its impact and likelihood."
+            }
+          ]
+        },
+        {
+          "question_id": "X-1",
+          "answer": "No",
+          "refs": [
+            {
+              "file": "Packs.sol",
+              "lines": [
+                223
+              ],
+              "why": "The finding is valid based on the problem of cross-user metadata unsealing mentioned in the description."
+            }
+          ]
+        }
+      ],
+      "adjustment": {
+        "index": 40,
+        "new_severity": "medium",
+        "should_be_removed": false,
+        "comments": "The severity remains medium because while the issue poses a threat to user pack integrity, it is reasonably unlikely to occur in practice within trust scenarios."
+      }
+    },
+    {
+      "finding_index": 41,
+      "qa_trace": [
+        {
+          "question_id": "O-1",
+          "answer": "No",
+          "refs": [
+            {
+              "file": "Packs.sol",
+              "lines": [
+                36
+              ],
+              "why": "The issue relates to the limitation of the blockhash function rather than arithmetic calculations."
+            }
+          ]
+        },
+        {
+          "question_id": "O-2",
+          "answer": "No",
+          "refs": [
+            {
+              "file": "Packs.sol",
+              "lines": [
+                36
+              ],
+              "why": "All arithmetic in the given snippet complies with Solidity's built-in overflow checks for version 0.8 and above."
+            }
+          ]
+        },
+        {
+          "question_id": "O-3",
+          "answer": "No",
+          "refs": [
+            {
+              "file": "Packs.sol",
+              "lines": [
+                36,
+                37
+              ],
+              "why": "The code does not indicate any business requirements that necessitate handling overflow in a non-default manner."
+            }
+          ]
+        },
+        {
+          "question_id": "R-1",
+          "answer": "No",
+          "refs": [
+            {
+              "file": "Packs.sol",
+              "lines": [
+                240,
+                241,
+                242
+              ],
+              "why": "While these lines make external calls, the privilege checks preceding their invocation ensure controlled usage."
+            }
+          ]
+        },
+        {
+          "question_id": "R-2",
+          "answer": "No",
+          "refs": [
+            {
+              "file": "Packs.sol",
+              "lines": [
+                240,
+                241,
+                242
+              ],
+              "why": "This order is consistent due to controlled conditions leading to external calls."
+            }
+          ]
+        },
+        {
+          "question_id": "R-3",
+          "answer": "No",
+          "refs": [
+            {
+              "file": "Packs.sol",
+              "lines": [
+                196,
+                216
+              ],
+              "why": "Reentrancy risks are mitigated as external calls occur post all state modifications."
+            }
+          ]
+        },
+        {
+          "question_id": "A-1",
+          "answer": "No",
+          "refs": [
+            {
+              "file": "Packs.sol",
+              "lines": [
+                18
+              ],
+              "why": "Function access is guarded by roles ensuring only high-privileged users can modify or invoke critical logic."
+            }
+          ]
+        },
+        {
+          "question_id": "A-2",
+          "answer": "No",
+          "refs": [
+            {
+              "file": "Packs.sol",
+              "lines": [
+                245
+              ],
+              "why": "The findings do not contradict any declared decentralization or timelock premises."
+            }
+          ]
+        },
+        {
+          "question_id": "F-1",
+          "answer": "No",
+          "refs": [
+            {
+              "file": "Packs.sol",
+              "lines": [
+                196
+              ],
+              "why": "This specific logic around unsealDelay is unique in the analysis."
+            }
+          ]
+        },
+        {
+          "question_id": "F-2",
+          "answer": "No",
+          "refs": [
+            {
+              "file": "Packs.sol",
+              "lines": [
+                196
+              ],
+              "why": "The potential issue does not appear documented in the contracts comments or documentation."
+            }
+          ]
+        },
+        {
+          "question_id": "S-1",
+          "answer": "Medium",
+          "refs": null
+        },
+        {
+          "question_id": "S-2",
+          "answer": "Medium",
+          "refs": null
+        },
+        {
+          "question_id": "S-3",
+          "answer": "Medium",
+          "refs": null
+        },
+        {
+          "question_id": "X-1",
+          "answer": "No",
+          "refs": [
+            {
+              "file": "Packs.sol",
+              "lines": [
+                196,
+                216
+              ],
+              "why": "The issue impacts the functionality of the reveal mechanism if not handled appropriately."
+            }
+          ]
+        }
+      ],
+      "adjustment": {
+        "index": 41,
+        "new_severity": "unchanged",
+        "should_be_removed": false,
+        "comments": "The finding accurately identifies a vulnerability in the logic for setting unsealDelay in contexts of blockhash limitations."
+      }
+    },
+    {
+      "finding_index": 42,
+      "qa_trace": [
+        {
+          "question_id": "O-1",
+          "answer": "No, this finding is related to a division-by-zero possibility, not arithmetic overflow/underflow.",
+          "refs": null
+        },
+        {
+          "question_id": "O-2",
+          "answer": "No, there is no unchecked block affecting the operations. Solidity >= 0.8 inherently reverts on division by zero.",
+          "refs": null
+        },
+        {
+          "question_id": "O-3",
+          "answer": "No; there is no requirement provided to handle division differently than the inherent revert behaviour.",
+          "refs": null
+        },
+        {
+          "question_id": "R-1",
+          "answer": "No, the functions in question do not make external calls to untrusted addresses.",
+          "refs": null
+        },
+        {
+          "question_id": "R-2",
+          "answer": "Not applicable; no external calls to untrusted addresses are present.",
+          "refs": null
+        },
+        {
+          "question_id": "R-3",
+          "answer": "Not applicable as there are no external calls.",
+          "refs": null
+        },
+        {
+          "question_id": "A-1",
+          "answer": "No, the functions with potential division by zero are accessible only to accounts with the ADMIN_ROLE or similar required roles.",
+          "refs": [
+            {
+              "file": "Packs.sol",
+              "lines": [
+                126,
+                123,
+                113
+              ],
+              "why": "Functions are constrained by the ADMIN_ROLE."
+            }
+          ]
+        },
+        {
+          "question_id": "A-2",
+          "answer": "Not applicable as the access control aligns with stated assumptions.",
+          "refs": null
+        },
+        {
+          "question_id": "F-1",
+          "answer": "No, there isn't a duplicate of this finding reviewed in this document.",
+          "refs": null
+        },
+        {
+          "question_id": "F-2",
+          "answer": "No, the behaviour is not explicitly documented in either the contract comments or documentation. Adding validation would improve clarity and robustness.",
+          "refs": null
+        },
+        {
+          "question_id": "S-1",
+          "answer": "Low",
+          "refs": null
+        },
+        {
+          "question_id": "S-2",
+          "answer": "Low",
+          "refs": null
+        },
+        {
+          "question_id": "S-3",
+          "answer": "The adjusted severity is low, considering both the impact and likelihood are categorized as low.",
+          "refs": null
+        },
+        {
+          "question_id": "X-1",
+          "answer": "No, this finding is valid and does not qualify as a false positive. However, its severity is low.",
+          "refs": null
+        }
+      ],
+      "adjustment": {
+        "index": 42,
+        "new_severity": "low",
+        "should_be_removed": false,
+        "comments": "The issue should be addressed by adding a validation check for `metadataInterval_` in the constructor to ensure it is greater than zero, preventing division-by-zero errors."
+      }
+    },
+    {
+      "finding_index": 43,
+      "qa_trace": [
+        {
+          "question_id": "O-1",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "O-2",
+          "answer": "Not applicable",
+          "refs": null
+        },
+        {
+          "question_id": "O-3",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "R-1",
+          "answer": "No",
+          "refs": [
+            {
+              "file": "Packs.sol",
+              "lines": [
+                216,
+                242
+              ],
+              "why": "The function does not make an external call to an un-trusted address."
+            }
+          ]
+        },
+        {
+          "question_id": "R-2",
+          "answer": "Not applicable",
+          "refs": null
+        },
+        {
+          "question_id": "R-3",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "A-1",
+          "answer": "No",
+          "refs": [
+            {
+              "file": "Packs.sol",
+              "lines": [
+                216,
+                242
+              ],
+              "why": "This function is gated with 'onlyPackOwner'."
+            }
+          ]
+        },
+        {
+          "question_id": "A-2",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "F-1",
+          "answer": "No",
+          "refs": null
+        },
+        {
+          "question_id": "F-2",
+          "answer": "No",
+          "refs": [
+            {
+              "file": "Packs.sol",
+              "lines": [
+                216,
+                242
+              ],
+              "why": "The use of blockhash for processing randomness is not explicitly noted or justified."
+            }
+          ]
+        },
+        {
+          "question_id": "S-1",
+          "answer": "Integrity",
+          "refs": null
+        },
+        {
+          "question_id": "S-2",
+          "answer": "Medium",
+          "refs": [
+            {
+              "file": "Packs.sol",
+              "lines": [
+                232
+              ],
+              "why": "The likelihood of exploiting the blockhash behavior being predictable within 256 blocks is tangible and plausible."
+            }
+          ]
+        },
+        {
+          "question_id": "S-3",
+          "answer": "Medium",
+          "refs": null
+        },
+        {
+          "question_id": "X-1",
+          "answer": "No",
+          "refs": null
+        }
+      ],
+      "adjustment": {
+        "index": 43,
+        "new_severity": "medium",
+        "should_be_removed": false,
+        "comments": "While the issue of predictability in the blockhash-based randomness is recognized, the severity level 'medium' is aligned with the potential impact and exploitation feasibility."
+      }
+    },
+    {
+      "finding_index": 44,
+      "qa_trace": [
+        {
+          "question_id": "O-1",
+          "answer": "No, this finding does not pertain to arithmetic overflow or underflow issues.",
+          "refs": null
+        },
+        {
+          "question_id": "O-2",
+          "answer": "Not applicable as the finding is unrelated to arithmetic.",
+          "refs": null
+        },
+        {
+          "question_id": "O-3",
+          "answer": "Not applicable as there is no arithmetic overflow concern.",
+          "refs": null
+        },
+        {
+          "question_id": "R-1",
+          "answer": "No, the affected functions do not make external calls to untrusted addresses in the manner described in this finding.",
+          "refs": [
+            {
+              "file": "Packs.sol",
+              "lines": [
+                193,
+                216
+              ],
+              "why": "The `unseal` and `reveal` functions do not perform external calls to potentially untrusted contracts."
+            }
+          ]
+        },
+        {
+          "question_id": "R-2",
+          "answer": "Not applicable, as external calls are not present.",
+          "refs": null
+        },
+        {
+          "question_id": "R-3",
+          "answer": "No, the function does not qualify for reentrancy concerns given the context of this finding.",
+          "refs": null
+        },
+        {
+          "question_id": "A-1",
+          "answer": "Yes, regular users can trigger both the `unseal` and `reveal` functionality.",
+          "refs": [
+            {
+              "file": "Packs.sol",
+              "lines": [
+                193,
+                216
+              ],
+              "why": "Any user that owns a pack can invoke these functions under legitimate circumstances."
+            }
+          ]
+        },
+        {
+          "question_id": "A-2",
+          "answer": "Though it affects fairness, it does not inherently violate decentralization assumptions associated with ownership privileges.",
+          "refs": null
+        },
+        {
+          "question_id": "F-1",
+          "answer": "No, this specific issue was not mentioned elsewhere in the findings.",
+          "refs": null
+        },
+        {
+          "question_id": "F-2",
+          "answer": "No, this behavior appears to be an unintended repercussion of how mapping is structured for `unsealBlocks`.",
+          "refs": [
+            {
+              "file": "Packs.sol",
+              "lines": [
+                36,
+                216
+              ],
+              "why": "`unsealBlocks` mapping per pack inadvertently allows cross-user block usage in the reveal stage."
+            }
+          ]
+        },
+        {
+          "question_id": "S-1",
+          "answer": "Fairness and access control impacts, falling into the `low` impact category.",
+          "refs": null
+        },
+        {
+          "question_id": "S-2",
+          "answer": "The logic bug allows cross-usage of commit blocks; frequency would vary depending on use but likely medium likelihood.",
+          "refs": null
+        },
+        {
+          "question_id": "S-3",
+          "answer": "Considering impact and likelihood, the severity adjusts to `medium`.",
+          "refs": null
+        },
+        {
+          "question_id": "X-1",
+          "answer": "No, the finding is valid and should be addressed.",
+          "refs": null
+        }
+      ],
+      "adjustment": {
+        "index": 44,
+        "new_severity": "medium",
+        "should_be_removed": false,
+        "comments": "The severity is adjusted to medium considering that while the impact on fairness is present, it's more related to inter-owner boundary correctness, thus more significant than initially rated."
+      }
+    },
+    {
+      "finding_index": 45,
+      "qa_trace": [
+        {
+          "question_id": "O-1",
+          "answer": "No, this finding is not about arithmetic overflow or underflow.",
+          "refs": null
+        },
+        {
+          "question_id": "O-2",
+          "answer": "Not applicable as the issue is unrelated to arithmetic overflow or underflow.",
+          "refs": null
+        },
+        {
+          "question_id": "O-3",
+          "answer": "No, there is no mention of a business requirement to handle overflows differently than revert.",
+          "refs": null
+        },
+        {
+          "question_id": "R-1",
+          "answer": "No, the affected function does not make an external call to an un-trusted address.",
+          "refs": [
+            {
+              "file": "Packs.sol",
+              "lines": [
+                216,
+                242
+              ],
+              "why": "The function does not make direct external calls that expose it to untrusted contracts."
+            }
+          ]
+        },
+        {
+          "question_id": "R-2",
+          "answer": "Not applicable as there are no critical external calls made.",
+          "refs": null
+        },
+        {
+          "question_id": "R-3",
+          "answer": "No, the function has no reentrancy risks as there are no unguarded external calls.",
+          "refs": null
+        },
+        {
+          "question_id": "A-1",
+          "answer": "No, only a privileged user will face the consequence documented in this finding.",
+          "refs": null
+        },
+        {
+          "question_id": "A-2",
+          "answer": "No, the finding does not specify any violation of decentralisation or timelock assumptions.",
+          "refs": null
+        },
+        {
+          "question_id": "F-1",
+          "answer": "No, this issue has not been identified in other findings within the report.",
+          "refs": null
+        },
+        {
+          "question_id": "F-2",
+          "answer": "No, this behavior is not explicitly documented or intended.",
+          "refs": null
+        },
+        {
+          "question_id": "S-1",
+          "answer": "The impact category is 'low', as the problem affects specific behaviour and might inconvenience the user under specific conditions without being critical.",
+          "refs": null
+        },
+        {
+          "question_id": "S-2",
+          "answer": "The likelihood category is 'low', as the unsealBlocks array and commit structure errors are edge cases generally covered by normal block validations.",
+          "refs": null
+        },
+        {
+          "question_id": "S-3",
+          "answer": "Based on the matrix, the severity remains 'low'.",
+          "refs": null
+        },
+        {
+          "question_id": "X-1",
+          "answer": "No, this issue is not a definitive false positive and warrants its current classification.",
+          "refs": null
+        }
+      ],
+      "adjustment": {
+        "index": 45,
+        "new_severity": "unchanged",
+        "should_be_removed": false,
+        "comments": "The finding's severity level aligns with the supporting evidence."
+      }
+    },
+    {
+      "finding_index": 46,
+      "qa_trace": [
+        {
+          "question_id": "O-1",
+          "answer": "No, this finding is not related to arithmetic overflow/underflow.",
+          "refs": null
+        },
+        {
+          "question_id": "O-2",
+          "answer": "No, since this finding is unrelated to arithmetic operations, unchecked arithmetic blocks are not applicable.",
+          "refs": null
+        },
+        {
+          "question_id": "O-3",
+          "answer": "No, no arithmetic overflows were being analyzed that necessitate this business requirement.",
+          "refs": null
+        },
+        {
+          "question_id": "R-1",
+          "answer": "Yes, the 'reveal' function makes external calls to untrusted NFT contracts (NFT.mint).",
+          "refs": [
+            {
+              "file": "Packs.sol",
+              "lines": [
+                240,
+                241,
+                242
+              ],
+              "why": "The function makes external calls to NFT contracts."
+            }
+          ]
+        },
+        {
+          "question_id": "R-2",
+          "answer": "Yes, state changes occur before and after the external calls within the function.",
+          "refs": [
+            {
+              "file": "Packs.sol",
+              "lines": [
+                221,
+                226,
+                228
+              ],
+              "why": "Modifies state variables such as metadataPool and conducts state cleanup operations."
+            }
+          ]
+        },
+        {
+          "question_id": "R-3",
+          "answer": "Yes, the function lacks any reentrancy guards such as checks-effects-interactions principles or modifiers providing reentrancy protection.",
+          "refs": null
+        },
+        {
+          "question_id": "A-1",
+          "answer": "No, this function is protected using a modifier that ensures the caller is a token owner.",
+          "refs": [
+            {
+              "file": "Packs.sol",
+              "lines": [
+                216
+              ],
+              "why": "Modifier 'onlyPackOwner' limits access of this function."
+            }
+          ]
+        },
+        {
+          "question_id": "A-2",
+          "answer": "No, decentralization or timelock assumptions are not claimed or violated explicitly in the context of this finding.",
+          "refs": null
+        },
+        {
+          "question_id": "F-1",
+          "answer": "No, this specific finding is unique in the report.",
+          "refs": null
+        },
+        {
+          "question_id": "F-2",
+          "answer": "No, there is no mention in the documentation that the function specifically ensures reentrancy safety.",
+          "refs": null
+        },
+        {
+          "question_id": "S-1",
+          "answer": "Impact is considered 'medium' because reentrancy attacks can result in significant contract state manipulation.",
+          "refs": null
+        },
+        {
+          "question_id": "S-2",
+          "answer": "Likelihood is considered 'low' due to the privileged nature of the function.",
+          "refs": null
+        },
+        {
+          "question_id": "S-3",
+          "answer": "Using the risk matrix, the adjusted severity would still be 'low'.",
+          "refs": null
+        },
+        {
+          "question_id": "X-1",
+          "answer": "No, this finding should not be removed. It provides a valid observation.",
+          "refs": null
+        }
+      ],
+      "adjustment": {
+        "index": 46,
+        "new_severity": "unchanged",
+        "should_be_removed": false,
+        "comments": "The finding is valid as presented and retains its initial severity categorization."
+      }
+    }
+  ]
+}
