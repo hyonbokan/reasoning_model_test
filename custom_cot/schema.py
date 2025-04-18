@@ -9,6 +9,7 @@ class CodeRef(BaseModel):
 
 class QA(BaseModel):
     question_id: str
+    question: str
     answer: str                           # e.g. "yes", "no", "high"
     refs: List[CodeRef] | None = None
 
