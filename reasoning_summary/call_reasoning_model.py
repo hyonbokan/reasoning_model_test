@@ -21,7 +21,7 @@ response = client.responses.create(
     model=MODEL,
     reasoning={
         "effort": "high",
-        # "summary": "detailed"
+        "summary": "detailed"
         },
     input=[
         {
@@ -30,5 +30,13 @@ response = client.responses.create(
         }
     ]
 )
+
+timestamp = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+filename = f"response_log_{MODEL}_{timestamp}.json"
+log_dir = "logs"
+os.makedirs(log_dir, exist_ok=True)
+
+with open(os.path.join(log_dir, filename), "w", encoding="utf-8") as f:
+    json.dump(response.model_dump(), f, ensure_ascii=False, indent=2)
 
 print(response.output_text)
