@@ -1,0 +1,30 @@
+[
+    { "id": "O-1", "text": "Is the finding explicitly about arithmetic overflow or underflow?" },
+    { "id": "O-2", "text": "Is the affected contract compiled with Solidity ≥ 0.8.0?" },
+    { "id": "O-3", "text": "Does the vulnerable code lie inside an unchecked { } block?" },
+    { "id": "O-4", "text": "Is there a documented business requirement to handle overflow differently than revert?" },
+    { "id": "O-5", "text": "Is this overflow/underflow part of a larger exploit chain described in the finding?" },
+  
+    { "id": "R-1", "text": "Does the function call an external *untrusted* contract?" },
+    { "id": "R-2", "text": "Are state‑changing operations placed *after* that external call?" },
+    { "id": "R-3", "text": "Is there NO ReentrancyGuard modifier or equivalent guard?" },
+    { "id": "R-4", "text": "Is the CEI (Checks‑Effects‑Interactions) pattern **NOT** followed?" },
+    { "id": "R-5", "text": "Is the call internal (within the same contract) rather than external?" },
+  
+    { "id": "A-1", "text": "Can an un‑privileged user invoke the privileged function?" },
+    { "id": "A-2", "text": "Does this break stated decentralisation or timelock assumptions?" },
+    { "id": "A-3", "text": "Does the issue enable critical protocol manipulation?" },
+  
+    { "id": "F-1", "text": "Is this finding duplicated elsewhere in the report?" },
+    { "id": "F-2", "text": "Is the behaviour clearly documented or intended by design?" },
+    { "id": "F-3", "text": "Is the issue purely theoretical with no practical exploit path?" },
+    { "id": "F-4", "text": "For overflow/underflow: Solidity ≥ 0.8 **and** no unchecked block?" },
+    { "id": "F-5", "text": "For reentrancy: Are proper guards or CEI pattern present?" },
+  
+    { "id": "S-1", "text": "Select the **impact** category (high / medium / low)." },
+    { "id": "S-2", "text": "Select the **likelihood** category (high / medium / low)." },
+    { "id": "S-3", "text": "According to the matrix, what is the adjusted severity (high / medium / low / info / best practices)?" },
+  
+    { "id": "X-1", "text": "Should this finding be removed as a definite false positive?" }
+  ]
+  

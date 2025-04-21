@@ -1,11 +1,16 @@
 from openai import OpenAI
-from schema import AuditResponse
-import json, pathlib, os
+from schema.mitigate_schema import AuditResponse
+import json, pathlib, os, time
 from dotenv import load_dotenv
 
+# ---------- GPT models ----------
+GPT_4O = "gpt-4o-2024-08-06"
+GPT_4_1 = "gpt-4.1-2025-04-14"
+
 # ---------- artefacts ----------
+MODEL = GPT_4_1
 TASK_PROMPT  = pathlib.Path("utils/task_prompt.py").read_text()
-CHECKLIST    = json.loads(pathlib.Path("utils/checklist.json").read_text())
+CHECKLIST    = json.loads(pathlib.Path("checklists/mitigate_checklist_1.1.json").read_text())
 FINDINGS     = json.loads(pathlib.Path("utils/findings.json").read_text())
 CODE         = pathlib.Path("utils/contract_with_lines.sol").read_text()
 
@@ -31,7 +36,7 @@ for idx, finding in enumerate(FINDINGS):
     ]
 
     result = client.beta.chat.completions.parse(
-        model="gpt-4o-2024-11-20",
+        model=MODEL,
         response_format=AuditResponse,
         messages=msgs,
     )
@@ -42,7 +47,7 @@ for idx, finding in enumerate(FINDINGS):
     if message.refusal:
         refusals.append({
             "finding_index": idx,
-            "reason": message.refusal,          # usually a short text
+            "reason": message.refusal,
         })
         print(f"Model refused on finding {idx}: {message.refusal}")
         continue
@@ -57,10 +62,10 @@ final = AuditResponse(
     finding_reviews=all_reviews,
 )
 
-pathlib.Path("audit_response.json").write_text(
+pathlib.Path(f"logs/audit_{MODEL}_response.json").write_text(
     final.model_dump_json(indent=2)
 )
-pathlib.Path("audit_refusals.json").write_text(
+pathlib.Path(f"logs/audit_{MODEL}_refusals.json").write_text(
     json.dumps(refusals, indent=2)
 )
 
