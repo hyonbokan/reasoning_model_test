@@ -12,10 +12,7 @@ class YesNoQA(BaseModel):
     question_id: str  # e.g. "O-1"
     answer: Literal["yes", "no"]
     refs: List[CodeRef] | None = None
-    confidence: float | None = Field(
-        None, ge=0.0, le=1.0,
-        description="0‑10 subjective confidence score"
-    )
+    confidence: float | None = None
 
 class ImpactQA(BaseModel):
     question_id: Literal["S-1"]
