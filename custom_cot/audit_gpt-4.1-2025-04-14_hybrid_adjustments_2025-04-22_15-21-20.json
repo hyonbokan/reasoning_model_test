@@ -1,0 +1,284 @@
+[
+  {
+    "index": 0,
+    "new_severity": "high",
+    "should_be_removed": false,
+    "comments": "Severity should be escalated to high due to the combination of plausible exploitability and major fairness violation, although tokens are not directly stolen."
+  },
+  {
+    "index": 1,
+    "new_severity": "unchanged",
+    "should_be_removed": true,
+    "comments": "False positive under reentrancy rules\u2014CEI pattern is respected, so this is not a true risk."
+  },
+  {
+    "index": 2,
+    "new_severity": "low",
+    "should_be_removed": false,
+    "comments": "UX issue is real, not a false positive, and 'low' severity is appropriate."
+  },
+  {
+    "index": 3,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Raised severity to medium. The risk requires privileged action (admin error or malice), but the impact is protocol-breaking, and therefore merits at least medium per rules."
+  },
+  {
+    "index": 4,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Downgraded to medium. Substantial user loss is possible if blockhash window is missed, but with clear communication and reasonable unsealDelay it can generally be avoided."
+  },
+  {
+    "index": 5,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Downgrade to medium; the bug can harm individual users, but protocol funds and security are not at risk. Issue is real and should be fixed, but is not a worst-case/high-severity item."
+  },
+  {
+    "index": 6,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "This is a valid state-tracking vulnerability with medium impact and likelihood, due to exploitable edge cases in user pack transfer and reveal sequencing."
+  },
+  {
+    "index": 7,
+    "new_severity": "low",
+    "should_be_removed": false,
+    "comments": "Appropriate as 'low'\u2014impacts only extremely rare miner adversaries and is standard in many NFT/randomness contracts with delay."
+  },
+  {
+    "index": 8,
+    "new_severity": "low",
+    "should_be_removed": false,
+    "comments": "Valid but low-severity DoS vector due to potential for unbounded array growth; recommend monitoring and mitigation if usage ever approaches problematic levels."
+  },
+  {
+    "index": 9,
+    "new_severity": "low",
+    "should_be_removed": false,
+    "comments": "External dependency exists but is mitigated by CEI and centralized management; 'Low' severity remains appropriate."
+  },
+  {
+    "index": 10,
+    "new_severity": "unchanged",
+    "should_be_removed": true,
+    "comments": "Behavior is intentional and documented (explicit error and revert), not a vulnerability; recommend removal as false positive per rulebook."
+  },
+  {
+    "index": 11,
+    "new_severity": "info",
+    "should_be_removed": false,
+    "comments": "Appropriately classified as info; useful for transparency but not a security or correctness risk."
+  },
+  {
+    "index": 12,
+    "new_severity": "high",
+    "should_be_removed": false,
+    "comments": "Issue is valid and the severity is accurate; the finding should remain as high due to the critical security impact."
+  },
+  {
+    "index": 13,
+    "new_severity": "unchanged",
+    "should_be_removed": true,
+    "comments": "False positive: CEI pattern is observed\u2014state fully updated before external calls, so reentrancy is not exploitable. Remove per [reentrancy] rule."
+  },
+  {
+    "index": 14,
+    "new_severity": "low",
+    "should_be_removed": false,
+    "comments": "Real bug (division by zero risk); recommend constructor check for metadataInterval != 0. Low severity since only admin mistake at deploy-time can cause it."
+  },
+  {
+    "index": 15,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "This is a real attack avenue with economic consequence; severity is appropriately medium (high impact, medium likelihood)."
+  },
+  {
+    "index": 16,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Should be raised to 'medium' since users can permanently lose value if missing the short reveal window; impact and likelihood are both non-negligible."
+  },
+  {
+    "index": 17,
+    "new_severity": "unchanged",
+    "should_be_removed": true,
+    "comments": "False positive under [reentrancy] and [fp] rules: CEI pattern is strictly respected with all state changes preceding the external call, so no practical reentrancy is possible in the current code."
+  },
+  {
+    "index": 18,
+    "new_severity": "low",
+    "should_be_removed": false,
+    "comments": "This is an admin best-practice risk (gas exhaustion); severity is best rated as 'low' per the matrix."
+  },
+  {
+    "index": 19,
+    "new_severity": "low",
+    "should_be_removed": false,
+    "comments": "Valid but low-severity finding: only privileged minters can create this risk, but users could be affected if operational diligence is lacking."
+  },
+  {
+    "index": 20,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Liveness/design risk is real; severity appropriate at medium due to permanent asset loss potential for misconfiguration or user error. Not a false positive."
+  },
+  {
+    "index": 21,
+    "new_severity": "low",
+    "should_be_removed": false,
+    "comments": "The LIFO behavior could surprise users, but this is a low-severity, non-security implementation detail. Consider documenting intended behavior or refactoring if FIFO is desired."
+  },
+  {
+    "index": 22,
+    "new_severity": "info",
+    "should_be_removed": false,
+    "comments": "Per rules, this is a centralization/info risk unless protocol promises decentralized governance or timelocks, which are not evident here."
+  },
+  {
+    "index": 23,
+    "new_severity": "low",
+    "should_be_removed": false,
+    "comments": "The randomness weakness is minor but present. Low severity is appropriate since actual exploitation is difficult but not impossible."
+  },
+  {
+    "index": 24,
+    "new_severity": "high",
+    "should_be_removed": false,
+    "comments": "This is a valid, high-severity vulnerability due to global sharing and lack of per-user tracking for unseal state, enabling theft and DoS."
+  },
+  {
+    "index": 25,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "The finding is valid\u2014blockhash-based randomness exposes miner manipulation and liveness risks for users who delay; severity should remain Medium."
+  },
+  {
+    "index": 26,
+    "new_severity": "low",
+    "should_be_removed": false,
+    "comments": "Downgraded to low: Only deployers/admins can introduce this at deploy time, but it can irreversibly brick the contract instance if misconfigured."
+  },
+  {
+    "index": 27,
+    "new_severity": "high",
+    "should_be_removed": false,
+    "comments": "Confirmed as a high-severity, real protocol flaw; not a false positive."
+  },
+  {
+    "index": 28,
+    "new_severity": "low",
+    "should_be_removed": false,
+    "comments": "Proper state update order (CEI) prevents practical reentrancy exploit in the current logic; risk is only for future changes or complex griefing, warranting 'low' severity."
+  },
+  {
+    "index": 29,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Downgraded to Medium per impact/likelihood matrix; issue is real and asset-loss risk is significant but window can be missed only through user inaction or downtime."
+  },
+  {
+    "index": 30,
+    "new_severity": "unchanged",
+    "should_be_removed": false,
+    "comments": "The issue is correctly identified and severity (medium) is appropriate: a deploy-time address error permanently breaks key functionality. Keep the finding."
+  },
+  {
+    "index": 31,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "The missing bounds check on unsealDelay can cause usability or randomness security issues but does not enable direct fund loss; severity is appropriate at medium."
+  },
+  {
+    "index": 32,
+    "new_severity": "info",
+    "should_be_removed": false,
+    "comments": "Centralization risk from pausing is acknowledged but follows expected admin role patterns; downgrade severity to info per rulebook."
+  },
+  {
+    "index": 33,
+    "new_severity": "low",
+    "should_be_removed": false,
+    "comments": "The potential DoS with gas is limited to individual users spamming their own unseal array, so overall risk is low and not false positive. No global DoS risk is present."
+  },
+  {
+    "index": 34,
+    "new_severity": "unchanged",
+    "should_be_removed": true,
+    "comments": "OpenZeppelin's ERC1155 _mint implementation already prevents minting to the zero address by reverting, making this a false positive and safe to remove."
+  },
+  {
+    "index": 35,
+    "new_severity": "low",
+    "should_be_removed": false,
+    "comments": "Legitimate finding affecting off-chain tracking; not a security bug. Severity 'low' is more appropriate than 'info' because integrations can be impacted, but this does not affect protocol integrity."
+  },
+  {
+    "index": 36,
+    "new_severity": "high",
+    "should_be_removed": false,
+    "comments": "Severity is correctly set to high due to critical exploitability and practical likelihood; the finding is valid and should not be removed."
+  },
+  {
+    "index": 37,
+    "new_severity": "unchanged",
+    "should_be_removed": true,
+    "comments": "This finding is a false positive because CEI pattern is strictly followed in `reveal()`, preventing reentrancy exploits as per reentrancy mitigation rules."
+  },
+  {
+    "index": 38,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Severity should be increased to medium: randomness is manipulable and reverts are a practical risk affecting protocol fairness and user experience."
+  },
+  {
+    "index": 39,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Confirmed: DoS via global unsealBlocks is real. Impact and exploitability justify medium severity."
+  },
+  {
+    "index": 40,
+    "new_severity": "high",
+    "should_be_removed": false,
+    "comments": "Global unsealBlocks allows pack holders to steal rewards intended for others. Impact and likelihood both high; do not remove."
+  },
+  {
+    "index": 41,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Severity should remain medium: this is a business logic/initialization risk with high impact but low likelihood (deploy-time only, not runtime)."
+  },
+  {
+    "index": 42,
+    "new_severity": "best practices",
+    "should_be_removed": false,
+    "comments": "Recommend keeping the finding as 'best practices' for defensive programming, as the practical risk is low but may cause broken deployments."
+  },
+  {
+    "index": 43,
+    "new_severity": "high",
+    "should_be_removed": false,
+    "comments": "Severity elevated to high due to practical and well-documented exploitability of blockhash-based randomness in the context of asset allocation. This should be fixed to ensure fairness and security of reveals."
+  },
+  {
+    "index": 44,
+    "new_severity": "low",
+    "should_be_removed": false,
+    "comments": "The finding is real but consequences are limited to unfairness among pack holders; classified as low severity."
+  },
+  {
+    "index": 45,
+    "new_severity": "low",
+    "should_be_removed": false,
+    "comments": "Confirmed: low-severity logic bug. User missing reveal window loses their pack permanently, but does not affect protocol or all users. Should be fixed but not removed."
+  },
+  {
+    "index": 46,
+    "new_severity": "unchanged",
+    "should_be_removed": true,
+    "comments": "All sensitive state changes occur before any external interaction, respecting Checks-Effects-Interactions. This is a textbook CEI implementation per the master rule book, so the finding should be removed as a false positive."
+  }
+]

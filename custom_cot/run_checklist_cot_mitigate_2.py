@@ -25,6 +25,7 @@ load_dotenv()
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 all_reviews = []       # successful FindingReview objects
+all_adjustments = []    # flattened adjustment dicts
 refusals = []      # bookkeeping for refusals
 
 for idx, finding in enumerate(FINDINGS):
@@ -59,7 +60,10 @@ for idx, finding in enumerate(FINDINGS):
 
     # ----- success branch --------------------------------------------
     parsed: AuditResponse = message.parsed
-    all_reviews.append(parsed.finding_reviews[0])
+    fr = parsed.finding_reviews[0]
+    
+    all_reviews.append(fr)
+    all_adjustments.append(fr.adjustment.dict())
 
 # ---------- wrap up --------------------------------------------------
 final = AuditResponse(
@@ -69,9 +73,18 @@ final = AuditResponse(
 
 timestamp = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
 
-pathlib.Path(f"logs/audit_{MODEL}_hybrid_{timestamp}.json").write_text(
-    final.model_dump_json(indent=2)
+pathlib.Path(
+    f"logs/audit_{MODEL}_hybrid_{timestamp}.json"
+    ).write_text(
+    final.model_dump(indent=2)
 )
+    
+pathlib.Path(
+    f"audit_{MODEL}_hybrid_adjustments_{timestamp}.json"
+    ).write_text(
+        json.dumps(all_adjustments, indent=2)
+)
+
 pathlib.Path(f"logs/audit_{MODEL}_hybrid_refusals_{timestamp}.json").write_text(
     json.dumps(refusals, indent=2)
 )

@@ -1,0 +1,163 @@
+{
+    "updates": [
+      {
+        "index": 1,
+        "severity": "Low",
+        "comments": "CEI pattern ensures no state changes after external interactions, safe from reentrancy",
+        "should_be_removed": true
+      },
+      {
+        "index": 3,
+        "severity": "Medium",
+        "comments": "High impact freeze if unsealDelay > 255 blocks, low likelihood misconfiguration",
+        "should_be_removed": false
+      },
+      {
+        "index": 6,
+        "severity": "Medium",
+        "should_be_removed": true
+      },
+      {
+        "index": 7,
+        "severity": "Low",
+        "should_be_removed": true
+      },
+      {
+        "index": 12,
+        "severity": "High",
+        "should_be_removed": true
+      },
+      {
+        "index": 13,
+        "severity": "Medium",
+        "should_be_removed": true
+      },
+      {
+        "index": 16,
+        "severity": "Low",
+        "should_be_removed": true
+      },
+      {
+        "index": 17,
+        "severity": "Low",
+        "should_be_removed": true
+      },
+      {
+        "index": 20,
+        "severity": "Medium",
+        "should_be_removed": true
+      },
+      {
+        "index": 22,
+        "severity": "Info",
+        "comments": "Centralization risk only; no unauthorized access vulnerability",
+        "should_be_removed": false
+      },
+      {
+        "index": 23,
+        "severity": "Low",
+        "should_be_removed": true
+      },
+      {
+        "index": 24,
+        "severity": "High",
+        "should_be_removed": true
+      },
+      {
+        "index": 25,
+        "severity": "Medium",
+        "should_be_removed": true
+      },
+      {
+        "index": 26,
+        "severity": "Low",
+        "should_be_removed": true
+      },
+      {
+        "index": 27,
+        "severity": "High",
+        "should_be_removed": true
+      },
+      {
+        "index": 28,
+        "severity": "Low",
+        "should_be_removed": true
+      },
+      {
+        "index": 29,
+        "severity": "High",
+        "should_be_removed": true
+      },
+      {
+        "index": 32,
+        "severity": "Medium",
+        "should_be_removed": true
+      },
+      {
+        "index": 33,
+        "severity": "Low",
+        "should_be_removed": true
+      },
+      {
+        "index": 35,
+        "severity": "Low",
+        "should_be_removed": true
+      },
+      {
+        "index": 36,
+        "severity": "High",
+        "should_be_removed": true
+      },
+      {
+        "index": 37,
+        "severity": "Medium",
+        "should_be_removed": true
+      },
+      {
+        "index": 38,
+        "severity": "Low",
+        "should_be_removed": true
+      },
+      {
+        "index": 39,
+        "severity": "Medium",
+        "should_be_removed": true
+      },
+      {
+        "index": 40,
+        "severity": "Medium",
+        "should_be_removed": true
+      },
+      {
+        "index": 41,
+        "severity": "Medium",
+        "should_be_removed": true
+      },
+      {
+        "index": 42,
+        "severity": "Best Practices",
+        "should_be_removed": true
+      },
+      {
+        "index": 43,
+        "severity": "Medium",
+        "should_be_removed": true
+      },
+      {
+        "index": 44,
+        "severity": "Low",
+        "should_be_removed": true
+      },
+      {
+        "index": 45,
+        "severity": "Low",
+        "should_be_removed": true
+      },
+      {
+        "index": 46,
+        "severity": "Low",
+        "should_be_removed": true
+      }
+    ]
+  }
+  
