@@ -9,7 +9,7 @@ GPT_4O = "gpt-4o-2024-08-06"
 GPT_4_1 = "gpt-4.1-2025-04-14"
 O4_MINI = "o4-mini"
 # ---------- artefacts ----------
-MODEL = O4_MINI
+MODEL = GPT_4_1
 TASK_PROMPT  = pathlib.Path("utils/prompts/task_prompt_free_reasoning.py").read_text()
 RULEBOOK = pathlib.Path("utils/prompts/mitigate_rulebook_1.md").read_text()
 CHECKLIST = json.loads(pathlib.Path("checklists/mitigate_checklist_1.1.json").read_text())
@@ -43,7 +43,7 @@ for idx, finding in enumerate(FINDINGS):
     ]
 
     result = client.beta.chat.completions.parse(
-        model=O4_MINI,
+        model=MODEL,
         response_format=AuditResponse,
         messages=messages,
     )
@@ -91,4 +91,4 @@ out_dir.joinpath(
 #     f"audit_{MODEL}_hybrid_refusals_{timestamp}.json"
 # ).write_text(json.dumps(refusals, indent=2))
 
-print("✅  Done!  Saved full report, adjustments, and refusals in /logs")
+print("Done! Saved full report, adjustments, and refusals in /logs")
