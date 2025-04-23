@@ -78,12 +78,12 @@ out_dir.mkdir(exist_ok=True)
 
 # 1. full reasoning + QA trace
 out_dir.joinpath(
-    f"audit_{MODEL}_hybrid_{timestamp}.json"
+    f"cot_schema2_{MODEL}_hybrid_{timestamp}.json"
 ).write_text(final.model_dump_json(indent=2))
 
 # 2. flat list of adjustments for quick diff
 out_dir.joinpath(
-    f"audit_{MODEL}_hybrid_adjustments_{timestamp}.json"
+    f"cot_schema2_{MODEL}_hybrid_adjustments_{timestamp}.json"
 ).write_text(json.dumps(all_adjustments, indent=2))
 
 # 3. refusals log (if any)
