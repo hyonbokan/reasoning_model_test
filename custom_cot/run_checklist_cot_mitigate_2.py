@@ -7,9 +7,9 @@ import datetime
 # ---------- GPT models ----------
 GPT_4O = "gpt-4o-2024-08-06"
 GPT_4_1 = "gpt-4.1-2025-04-14"
-
+O4_MINI = "o4-mini"
 # ---------- artefacts ----------
-MODEL = GPT_4_1
+MODEL = O4_MINI
 TASK_PROMPT  = pathlib.Path("utils/prompts/task_prompt_free_reasoning.py").read_text()
 RULEBOOK = pathlib.Path("utils/prompts/mitigate_rulebook_1.md").read_text()
 CHECKLIST = json.loads(pathlib.Path("checklists/mitigate_checklist_1.1.json").read_text())
@@ -61,9 +61,10 @@ for idx, finding in enumerate(FINDINGS):
     # ----- success branch --------------------------------------------
     parsed: AuditResponse = message.parsed
     fr = parsed.finding_reviews[0]
+
+    all_reviews.append(fr)                      # full object
+    all_adjustments.append(fr.adjustment.dict())  # just the summary line
     
-    all_reviews.append(fr)
-    all_adjustments.append(fr.adjustment.dict())
 
 # ---------- wrap up --------------------------------------------------
 final = AuditResponse(
@@ -72,21 +73,22 @@ final = AuditResponse(
 )
 
 timestamp = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+out_dir   = pathlib.Path("logs")
+out_dir.mkdir(exist_ok=True)
 
-pathlib.Path(
-    f"logs/audit_{MODEL}_hybrid_{timestamp}.json"
-    ).write_text(
-    final.model_dump(indent=2)
-)
-    
-pathlib.Path(
+# 1. full reasoning + QA trace
+out_dir.joinpath(
+    f"audit_{MODEL}_hybrid_{timestamp}.json"
+).write_text(final.model_dump_json(indent=2))
+
+# 2. flat list of adjustments for quick diff
+out_dir.joinpath(
     f"audit_{MODEL}_hybrid_adjustments_{timestamp}.json"
-    ).write_text(
-        json.dumps(all_adjustments, indent=2)
-)
+).write_text(json.dumps(all_adjustments, indent=2))
 
-pathlib.Path(f"logs/audit_{MODEL}_hybrid_refusals_{timestamp}.json").write_text(
-    json.dumps(refusals, indent=2)
-)
+# 3. refusals log (if any)
+# out_dir.joinpath(
+#     f"audit_{MODEL}_hybrid_refusals_{timestamp}.json"
+# ).write_text(json.dumps(refusals, indent=2))
 
-print("Done!")
+print("✅  Done!  Saved full report, adjustments, and refusals in /logs")
