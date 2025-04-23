@@ -43,7 +43,7 @@ for idx, finding in enumerate(FINDINGS):
     ]
 
     result = client.beta.chat.completions.parse(
-        model=MODEL,
+        model=O4_MINI,
         response_format=AuditResponse,
         messages=messages,
     )

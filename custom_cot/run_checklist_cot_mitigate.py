@@ -43,6 +43,10 @@ for idx, finding in enumerate(FINDINGS):
 
     result = client.beta.chat.completions.parse(
         model=MODEL,
+        reasoning={
+        "effort": "high",
+        "summary": "detailed"
+        },
         response_format=AuditResponse,
         messages=messages,
     )
@@ -72,6 +76,10 @@ pathlib.Path(f"logs/audit_{MODEL}_response_with_rules.json").write_text(
 )
 pathlib.Path(f"logs/audit_{MODEL}_refusals.json").write_text(
     json.dumps(refusals, indent=2)
+)
+
+pathlib.Path(f"logs/response/audit_{MODEL}_response.json").write_text(
+    json.dump(message, indent=2)
 )
 
 print("Done!")
