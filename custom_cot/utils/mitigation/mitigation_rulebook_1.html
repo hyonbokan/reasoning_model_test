@@ -1,0 +1,101 @@
+<!-- RULE:overflow -->
+<h3>[overflow] Overflow / Underflow Mitigation Rules</h3>
+<ul>
+  <li>Compiler versions <strong>&ge; 0.8</strong> automatically revert on overflow/underflow.</li>
+  <li><strong>Flag as a true vulnerability only if <em>any</em> of the following is true:</strong>
+    <ol>
+      <li>Code is wrapped in an explicit <code>unchecked {}</code> block.</li>
+      <li>Business requirements demand alternative handling (e.g., custom error).</li>
+      <li>The arithmetic flaw participates in a <strong>larger exploit chain</strong>.</li>
+    </ol>
+  </li>
+  <li>Otherwise classify as <strong>false positive</strong> and recommend removal.</li>
+</ul>
+<!-- END -->
+
+<!-- RULE:reentrancy -->
+<h3>[reentrancy] Re-Entrancy Mitigation Rules</h3>
+<ul>
+  <li>A finding is <strong>kept</strong> <em>only if all of these are met:</em>
+    <ol>
+      <li><strong>No</strong> re-entrancy guard (<code>nonReentrant</code>, Solidity <code>ReentrancyGuard</code>, etc.).</li>
+      <li>External call targets an <strong>untrusted</strong> contract.</li>
+      <li><strong>State changes occur <em>after</em> the external call</strong>.</li>
+    </ol>
+  </li>
+  <li><strong>Mark as false positive</strong> if <em>any</em> of the following apply:
+    <ul>
+      <li>Guard present</li>
+      <li>CEI pattern respected</li>
+      <li>No post-call state change</li>
+      <li>Call is internal (same contract)</li>
+    </ul>
+  </li>
+</ul>
+<!-- END -->
+
+<!-- RULE:access -->
+<h3>[access] Access-Control Mitigation Rules</h3>
+<ul>
+  <li>Distinguish security flaws from mere centralisation.</li>
+  <li>Flag <strong>High</strong> severity <strong>only</strong> if:
+    <ol>
+      <li>An un-privileged actor can invoke a privileged function <strong>and</strong></li>
+      <li>A clear exploit path exists with significant impact <strong>and</strong></li>
+      <li>It contradicts declared protocol assumptions.</li>
+    </ol>
+  </li>
+  <li>Otherwise:
+    <ul>
+      <li>Centralisation risks default to <strong>Info</strong>.</li>
+      <li>Elevate to <strong>Medium/High</strong> only if they break stated decentralisation goals, permit critical manipulation, or omit necessary timelocks.</li>
+    </ul>
+  </li>
+</ul>
+<!-- END -->
+
+<!-- RULE:fp -->
+<h3>[fp] False-Positive Identification Rules</h3>
+<p>Remove a finding entirely (<code>should_be_removed : true</code>) if <strong>any</strong> is true:</p>
+<ol>
+  <li>Overflow/underflow on Solidity &ge; 0.8 with <strong>no</strong> <code>unchecked</code> block.</li>
+  <li>Re-entrancy finding where proper guard/CEI is present.</li>
+  <li>Exact or near-duplicate of another finding.</li>
+  <li>Behaviour is <strong>documented and intentional</strong>.</li>
+  <li>Purely theoretical; no practical exploit path.</li>
+</ol>
+<!-- END -->
+
+<!-- RULE:severity -->
+<h3>[severity] Severity Adjustment Rules</h3>
+<ul>
+  <li><strong>Step 1 Impact</strong> (high / medium / low) — consequence if exploited.</li>
+  <li><strong>Step 2 Likelihood</strong> (high / medium / low) — probability of exploit.</li>
+  <li><strong>Step 3 Matrix</strong> — combine as table below.</li>
+  <li>If torn between two severities, pick the <strong>lower</strong>.</li>
+  <li>Allowed output values: <code>"high"</code>, <code>"medium"</code>, <code>"low"</code>, <code>"info"</code>, <code>"best practices"</code>.</li>
+</ul>
+
+<table border="1">
+  <thead>
+    <tr><th>Impact \\ Likelihood</th><th>High</th><th>Medium</th><th>Low</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><strong>High</strong></td><td>High</td><td>Medium</td><td>Medium</td></tr>
+    <tr><td><strong>Medium</strong></td><td>High</td><td>Medium</td><td>Low</td></tr>
+    <tr><td><strong>Low</strong></td><td>Medium</td><td>Low</td><td>Low</td></tr>
+  </tbody>
+</table>
+<!-- END -->
+
+<!-- RULE:additional -->
+<h3>[additional] Response & Formatting Rules</h3>
+<ul>
+  <li>Output must follow the <strong>AuditResponse</strong> JSON schema.</li>
+  <li>Use lowercase field name <code>"severity"</code>.</li>
+  <li>Return <code>index</code>, adjusted <code>"severity"</code>, and optional <code>"comments"</code>.</li>
+  <li><strong>Do not</strong> modify unrelated description/code in the finding.</li>
+  <li>Only set <code>"should_be_removed": true</code> when <strong>certain</strong> it is a false positive.</li>
+  <li>Be concise but clear in <code>"comments"</code>.</li>
+</ul>
+<!-- END -->

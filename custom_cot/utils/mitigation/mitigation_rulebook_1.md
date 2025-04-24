@@ -69,3 +69,7 @@ Remove a finding entirely (`should_be_removed : true`) if **any** is true:
 * Be concise but clear in `"comments"`.
 
 ---
+
+#### [final]  Final-disposition Rules
+* No specific. Use checklist answer X-1 only.
+---

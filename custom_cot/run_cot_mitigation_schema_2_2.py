@@ -3,6 +3,7 @@ from schema.mitigate_schema_2 import AuditResponse
 import json, pathlib, os, time
 from dotenv import load_dotenv
 import datetime
+from utils.mitigation.load_rulebook import load_rulebook_md
 
 # ---------- GPT models ----------
 GPT_4O = "gpt-4o-2024-08-06"
@@ -10,15 +11,20 @@ GPT_4_1 = "gpt-4.1-2025-04-14"
 O4_MINI = "o4-mini"
 # ---------- artefacts ----------
 MODEL = GPT_4_1
-TASK_PROMPT  = pathlib.Path("utils/prompts/task_prompt_free_reasoning.py").read_text()
-RULEBOOK = pathlib.Path("utils/prompts/mitigate_rulebook_1.md").read_text()
-CHECKLIST = json.loads(pathlib.Path("checklists/mitigate_checklist_1.1.json").read_text())
-FINDINGS = json.loads(pathlib.Path("utils/findings.json").read_text())
-CONTRACT = pathlib.Path("utils/contract_with_lines.sol").read_text()
+TASK_PROMPT  = pathlib.Path("utils/mitigation/task_prompt_reasoning.py").read_text()
+# RULEBOOK = pathlib.Path("utils/mitigation/mitigation_rulebook_1.md").read_text()
+RULE_CHUNKS = load_rulebook_md()
+CHECKLIST = json.loads(pathlib.Path("utils/mitigation/mitigation_checklist_1_1.json").read_text())
+FINDINGS = json.loads(pathlib.Path("utils/mitigation/findings.json").read_text())
+CONTRACT = pathlib.Path("utils/mitigation/contract_with_lines.sol").read_text()
 
 def checklist_bullets(items: list[dict]) -> str:
     """Render checklist as numbered bullets for the LLM."""
     return "\n".join(f"{q['id']} [{q['rule']}] {q['text']}" for q in items)
+
+def build_rule_context(checklist):
+    needed_tags = {q["rule"] for q in checklist}
+    return "\n\n".join(RULE_CHUNKS[tag] for tag in needed_tags)
 
 # ---------- client ----------
 load_dotenv()
@@ -29,10 +35,12 @@ all_adjustments = []    # flattened adjustment dicts
 refusals = []      # bookkeeping for refusals
 
 for idx, finding in enumerate(FINDINGS):
+    rule_context = build_rule_context(CHECKLIST)
+    
     messages = [
         # static context (identical for all iterations) -----------------
         {"role": "system", "content": TASK_PROMPT},
-        {"role": "user",   "content": RULEBOOK},
+        {"role": "user",   "content": rule_context},
         {"role": "user",   "content": CONTRACT},
 
         # dynamic per‑finding ------------------------------------------
@@ -47,6 +55,20 @@ for idx, finding in enumerate(FINDINGS):
         response_format=AuditResponse,
         messages=messages,
     )
+    
+    # Struct from doc:
+    # result = client.chat.completions.create(
+    #     model=MODEL,
+    #     messages=messages,
+    #     text={
+    #         "format": {
+    #             "type": "json_schema",
+    #             "schema": AuditResponse.model_json_schema(),
+    #             "strict": True
+    #         }
+    #     }
+    # )
+
     message = result.choices[0].message
 
     # ----- refusal branch --------------------------------------------
@@ -68,22 +90,22 @@ for idx, finding in enumerate(FINDINGS):
 
 # ---------- wrap up --------------------------------------------------
 final = AuditResponse(
-    document_id="audit_run_001",
+    document_id="audit_run_002",
     finding_reviews=all_reviews,
 )
 
 timestamp = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-out_dir   = pathlib.Path("logs")
+out_dir   = pathlib.Path("logs/mitigation")
 out_dir.mkdir(exist_ok=True)
 
 # 1. full reasoning + QA trace
 out_dir.joinpath(
-    f"cot_schema2_{MODEL}_hybrid_{timestamp}.json"
+    f"cot_schema2_2_{MODEL}_hybrid_{timestamp}.json"
 ).write_text(final.model_dump_json(indent=2))
 
 # 2. flat list of adjustments for quick diff
 out_dir.joinpath(
-    f"cot_schema2_{MODEL}_hybrid_adjustments_{timestamp}.json"
+    f"cot_schema2_2_{MODEL}_hybrid_adjustments_{timestamp}.json"
 ).write_text(json.dumps(all_adjustments, indent=2))
 
 # 3. refusals log (if any)
