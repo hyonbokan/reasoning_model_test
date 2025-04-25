@@ -70,6 +70,11 @@ Remove a finding entirely (`should_be_removed : true`) if **any** is true:
 
 ---
 
-#### [final]  Final-disposition Rules
-* No specific. Use checklist answer X-1 only.
+#### [final]  Final Response Rules
+* Output must follow the AuditResponse JSON schema.
+* Use lowercase field name "severity".
+* Return index, adjusted "severity", and optional "comments".
+* Do not modify unrelated description/code in the finding.
+* Only set "should_be_removed": true when certain it is a false positive.
+* Be concise but clear in "comments".
 ---

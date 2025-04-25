@@ -14,7 +14,7 @@ MODEL = GPT_4_1
 TASK_PROMPT  = pathlib.Path("utils/mitigation/task_prompt_reasoning.py").read_text()
 RULEBOOK = pathlib.Path("utils/mitigation/mitigation_rulebook_1.md").read_text()
 CHECKLIST = json.loads(pathlib.Path("utils/mitigation/mitigation_checklist_1_1.json").read_text())
-FINDINGS = json.loads(pathlib.Path("utils/mitigation/findings.json").read_text())
+FINDINGS = json.loads(pathlib.Path("utils/mitigation/LandManager_findings.json").read_text())
 CONTRACT = pathlib.Path("utils/mitigation/contract_with_lines.sol").read_text()
 
 def checklist_bullets(items: list[dict]) -> str:
@@ -28,6 +28,8 @@ client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 all_reviews = []       # successful FindingReview objects
 all_adjustments = []    # flattened adjustment dicts
 refusals = []      # bookkeeping for refusals
+
+start_time = time.time()
 
 for idx, finding in enumerate(FINDINGS):
     messages = [
@@ -78,7 +80,7 @@ for idx, finding in enumerate(FINDINGS):
     fr = parsed.finding_reviews[0]
 
     all_reviews.append(fr)                      # full object
-    all_adjustments.append(fr.adjustment.dict())  # just the summary line
+    all_adjustments.append(fr.adjustment.model_dump())  # just the summary line
     
 
 # ---------- wrap up --------------------------------------------------
@@ -89,21 +91,29 @@ final = AuditResponse(
 
 timestamp = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
 out_dir   = pathlib.Path("logs/mitigation")
-out_dir.mkdir(exist_ok=True)
+out_dir.mkdir(parents=True, exist_ok=True)
+
+base_name = f"cot_schema2_{MODEL}_{timestamp}"
 
 # 1. full reasoning + QA trace
-out_dir.joinpath(
-    f"cot_schema2_{MODEL}_hybrid_{timestamp}.json"
-).write_text(final.model_dump_json(indent=2))
+full_path = out_dir / f"{base_name}.json"
+full_path.write_text(final.model_dump_json(indent=2))
 
-# 2. flat list of adjustments for quick diff
-out_dir.joinpath(
-    f"cot_schema2_{MODEL}_hybrid_adjustments_{timestamp}.json"
-).write_text(json.dumps(all_adjustments, indent=2))
+# 2. flat list of adjustments
+adj_path = out_dir / f"{base_name}_adjustments.json"
+adj_path.write_text(json.dumps(all_adjustments, indent=2))
 
 # 3. refusals log (if any)
-# out_dir.joinpath(
-#     f"audit_{MODEL}_hybrid_refusals_{timestamp}.json"
-# ).write_text(json.dumps(refusals, indent=2))
+# refusals_path = out_dir / f"{base_name}_refusals.json"
+# refusals_path.write_text(json.dumps(refusals, indent=2))
 
-print("Done! Saved full report, adjustments, and refusals in /logs")
+# Compute elapsed time
+end_time = time.time()
+duration = end_time - start_time
+
+# 4. write the note file
+note_path = out_dir / f"{base_name}.txt"
+note_path.write_text(f"Script completed in {duration:.2f} seconds\n")
+
+print(f"Done! Reports saved under {out_dir}/")
+print(f"Total time: {duration:.2f} seconds (see {note_path.name})")

@@ -1,258 +1,348 @@
-// File: Packs.sol
-// SPDX-License-Identifier: MIT
-pragma solidity ^0.8.29;
+// File: LandManager.sol
+// SPDX-License-Identifier: UNLICENSED
+pragma solidity 0.8.25;
 
-import { NFT } from "./mock/NFT.sol";
-import { ERC1155URIStorage, ERC1155 } from "@openzeppelin/contracts/token/ERC1155/extensions/ERC1155URIStorage.sol";
-import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
-import { AccessControl } from "@openzeppelin/contracts/access/AccessControl.sol";
-import { IPacks } from "./IPacks.sol";
+import "../interfaces/ILandManager.sol";
+import "../interfaces/ILockManager.sol";
+import "../interfaces/IAccountManager.sol";
+import "./BaseBlastManagerUpgradeable.sol";
+import "../interfaces/INFTAttributesManager.sol";
+import "openzeppelin-contracts/contracts/token/ERC721/IERC721.sol";
 
-/**
- * @title Packs
- * @author zer0.tech
- * @custom:security-contact admin@zer0.tech
- * @notice ERC1155-based pack contract allowing multiple unseals per pack ID
- * @dev Implements IPacks, minimal changes from your original code
- */
-contract Packs is IPacks, ERC1155URIStorage, AccessControl {
-    bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
-    bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
+contract LandManager is BaseBlastManagerUpgradeable, ILandManager {
+    uint256 MIN_TAX_RATE;
+    uint256 MAX_TAX_RATE;
+    uint256 DEFAULT_TAX_RATE;
+    uint256 BASE_SCHNIBBLE_RATE;
+    uint256 PRICE_PER_PLOT;
+    int16[] REALM_BONUSES;
+    uint8[] RARITY_BONUSES;
 
-    error NotPackOwner(address sender, uint256 packId);
-    error Sealed(uint256 packId);
-    error Paused();
-    error InvalidPack(uint256 packId);
-    error OutOfMetadata(uint256 packId);
-    error ExceedsMaxMetadatas(uint256 packId, uint256 amount, uint256 numMetadatas, uint256 maxMetadatas);
-    error NoAvailablePacks(address user, uint256 packId);
-    error AlreadyUnsealedThisBlock(address user, uint256 blockNumber);
-    error NoneUnsealed(uint256 packId);
+    // landlord to plot metadata
+    mapping(address => PlotMetadata) plotMetadata;
+    // landlord to plot id to plot
+    mapping(address => mapping(uint256 => Plot)) plotOccupied;
+    // token id to original owner
+    mapping(uint256 => address) munchableOwner;
+    // main account to staked munchables list
+    mapping(address => uint256[]) munchablesStaked;
+    // token id -> toiler state
+    mapping(uint256 => ToilerState) toilerState;
 
-    bool public override paused;
-    uint256 public override unsealDelay;
-    uint256 public override metadataInterval;
+    ILockManager lockManager;
+    IAccountManager accountManager;
+    IERC721 munchNFT;
+    INFTAttributesManager nftAttributesManager;
 
-    mapping(uint256 packId => uint256[] blocks) public unsealBlocks;
-    mapping(uint256 packId => uint256[] pool) public metadataPool;
-    mapping(address sender => uint256 block) public lastUnsealBlock;
-
-    NFT private nft1;
-    NFT private nft2;
-    NFT private nft3;
-
-    /**
-     * @notice Emitted when metadata is added to a pack ID
-     * @param packId The pack ID
-     * @param amount The number of new metadata entries added
-     */
-    event MetadataAdded(uint256 packId, uint256 amount);
-
-    /**
-     * @notice Emitted when the paused state changes
-     * @param toState The new paused state
-     */
-    event PausedStateChanged(bool toState);
-
-    /**
-     * @notice Emitted when a user unseals a single copy of a pack
-     * @param user The address unsealing the pack
-     * @param packId The pack ID
-     * @param atBlock The block at which unsealing happened (for logging)
-     */
-    event Unsealed(address indexed user, uint256 indexed packId, uint256 atBlock);
-
-    /**
-     * @notice Constructor for the Packs contract
-     * @dev Grants DEFAULT_ADMIN_ROLE, ADMIN_ROLE, MINTER_ROLE to msg.sender
-     * @param nft1_ First NFT contract
-     * @param nft2_ Second NFT contract
-     * @param nft3_ Third NFT contract
-     * @param unsealDelay_ Number of blocks to wait between unseal and reveal
-     * @param metadataInterval_ Must evenly divide a valid packId
-     * @param metadataURI_ Base URI for ERC1155
-     */
-    constructor(
-        NFT nft1_,
-        NFT nft2_,
-        NFT nft3_,
-        uint256 unsealDelay_,
-        uint256 metadataInterval_,
-        string memory metadataURI_
-    )
-        ERC1155(metadataURI_)
-    {
-        nft1 = nft1_;
-        nft2 = nft2_;
-        nft3 = nft3_;
-        unsealDelay = unsealDelay_;
-        metadataInterval = metadataInterval_;
-        _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
-        _grantRole(ADMIN_ROLE, msg.sender);
-        _grantRole(MINTER_ROLE, msg.sender);
+    constructor() {
+        _disableInitializers();
     }
 
-    /**
-     * @notice Modifier to ensure caller holds at least 1 copy of a given pack
-     * @param packId The pack ID
-     */
-    modifier onlyPackOwner(uint256 packId) {
-        if (balanceOf(msg.sender, packId) == 0) {
-            revert NotPackOwner(msg.sender, packId);
-        }
+    modifier forceFarmPlots(address _account) {
+        _farmPlots(_account);
         _;
     }
 
-    /**
-     * @notice Sets the token-specific URI in ERC1155URIStorage
-     * @param tokenId The token ID
-     * @param tokenURI The new URI for that token
-     */
-    function setURI(uint256 tokenId, string memory tokenURI)
-        external
-        override
-        onlyRole(ADMIN_ROLE)
-    {
-        _setURI(tokenId, tokenURI);
+    function initialize(address _configStorage) public override initializer {
+        BaseBlastManagerUpgradeable.initialize(_configStorage);
+        _reconfigure();
     }
 
-    /**
-     * @notice Sets the base URI in ERC1155URIStorage
-     * @param baseURI The new base URI
-     */
-    function setBaseURI(string memory baseURI)
-        external
-        override
-        onlyRole(ADMIN_ROLE)
-    {
-        _setBaseURI(baseURI);
+    function _reconfigure() internal {
+        // load config from the config storage contract and configure myself
+        lockManager = ILockManager(
+            IConfigStorage(configStorage).getAddress(StorageKey.LockManager)
+        );
+        accountManager = IAccountManager(
+            IConfigStorage(configStorage).getAddress(StorageKey.AccountManager)
+        );
+        munchNFT = IERC721(configStorage.getAddress(StorageKey.MunchNFT));
+        nftAttributesManager = INFTAttributesManager(
+            IConfigStorage(configStorage).getAddress(
+                StorageKey.NFTAttributesManager
+            )
+        );
+
+        MIN_TAX_RATE = IConfigStorage(configStorage).getUint(
+            StorageKey.LockManager
+        );
+        MAX_TAX_RATE = IConfigStorage(configStorage).getUint(
+            StorageKey.AccountManager
+        );
+        DEFAULT_TAX_RATE = IConfigStorage(configStorage).getUint(
+            StorageKey.ClaimManager
+        );
+        BASE_SCHNIBBLE_RATE = IConfigStorage(configStorage).getUint(
+            StorageKey.MigrationManager
+        );
+        PRICE_PER_PLOT = IConfigStorage(configStorage).getUint(
+            StorageKey.NFTOverlord
+        );
+        REALM_BONUSES = configStorage.getSmallIntArray(StorageKey.RealmBonuses);
+        RARITY_BONUSES = configStorage.getSmallUintArray(
+            StorageKey.RarityBonuses
+        );
+
+        __BaseBlastManagerUpgradeable_reconfigure();
     }
 
-    /**
-     * @notice Sets the fallback/global URI in ERC1155 (the _uri)
-     * @param tokenURI The new fallback URI
-     */
-    function setFallbackURI(string memory tokenURI)
-        external
-        override
-        onlyRole(ADMIN_ROLE)
-    {
-        _setURI(tokenURI);
+    function configUpdated() external override onlyConfigStorage {
+        _reconfigure();
     }
 
-    /**
-     * @notice Toggles the paused/unpaused state
-     */
-    function switchPaused() external override onlyRole(ADMIN_ROLE) {
-        paused = !paused;
-        emit PausedStateChanged(paused);
+    function updateTaxRate(uint256 newTaxRate) external override notPaused {
+        (address landlord, ) = _getMainAccountRequireRegistered(msg.sender);
+        if (newTaxRate < MIN_TAX_RATE || newTaxRate > MAX_TAX_RATE)
+            revert InvalidTaxRateError();
+        if (plotMetadata[landlord].lastUpdated == 0)
+            revert PlotMetadataNotUpdatedError();
+        uint256 oldTaxRate = plotMetadata[landlord].currentTaxRate;
+        plotMetadata[landlord].currentTaxRate = newTaxRate;
+        emit TaxRateChanged(landlord, oldTaxRate, newTaxRate);
     }
 
-    /**
-     * @notice Adds new metadata to a given pack ID
-     * @param packId The pack ID
-     * @param amount Number of metadata entries to add
-     */
-    function addMetadata(uint256 packId, uint256 amount)
-        external
-        override
-        onlyRole(ADMIN_ROLE)
-    {
-        if (packId == 0 || packId % metadataInterval != 0) {
-            revert InvalidPack(packId);
-        }
-        uint256 currentLen = metadataPool[packId].length;
-        uint256 targetLen = currentLen + amount;
-        if (targetLen > metadataInterval) {
-            revert ExceedsMaxMetadatas(packId, amount, currentLen, metadataInterval);
-        }
-        for (uint256 i = 0; i < amount; i++) {
-            metadataPool[packId].push(packId + currentLen + i);
-        }
-        emit MetadataAdded(packId, amount);
+    // Only to be triggered by msg sender if they had locked before the land manager was deployed
+    function triggerPlotMetadata() external override notPaused {
+        (address mainAccount, ) = _getMainAccountRequireRegistered(msg.sender);
+        if (plotMetadata[mainAccount].lastUpdated != 0)
+            revert PlotMetadataTriggeredError();
+        plotMetadata[mainAccount] = PlotMetadata({
+            lastUpdated: block.timestamp,
+            currentTaxRate: DEFAULT_TAX_RATE
+        });
+
+        emit UpdatePlotsMeta(mainAccount);
     }
 
-    /**
-     * @notice Mints `amount` copies of `packId` to `to`
-     * @param to Recipient
-     * @param packId The pack ID
-     * @param amount Number of copies
-     */
-    function mintPack(address to, uint256 packId, uint256 amount)
-        external
-        override
-        onlyRole(MINTER_ROLE)
-    {
-        if (packId == 0 || packId % metadataInterval != 0) {
-            revert InvalidPack(packId);
+    function updatePlotMetadata(
+        address landlord
+    ) external override onlyConfiguredContract(StorageKey.AccountManager) {
+        if (plotMetadata[landlord].lastUpdated == 0) {
+            plotMetadata[landlord] = PlotMetadata({
+                lastUpdated: block.timestamp,
+                currentTaxRate: DEFAULT_TAX_RATE
+            });
+        } else {
+            plotMetadata[landlord].lastUpdated = block.timestamp;
         }
-        _mint(to, packId, amount, "");
+
+        emit UpdatePlotsMeta(landlord);
     }
 
-    /**
-     * @notice Unseals one copy of `packId` for msg.sender
-     * @param packId The pack ID
-     */
-    function unseal(uint256 packId) external override onlyPackOwner(packId) {
-        if (paused) revert Paused();
-        if (packId == 0) {
-            revert InvalidPack(packId);
-        }
-        if (lastUnsealBlock[msg.sender] == block.number) {
-            revert AlreadyUnsealedThisBlock(msg.sender, block.number);
-        }
-        lastUnsealBlock[msg.sender] = block.number;
-        if (unsealBlocks[packId].length >= balanceOf(msg.sender, packId)) {
-            revert NoAvailablePacks(msg.sender, packId);
-        }
-        unsealBlocks[packId].push(block.number + unsealDelay);
-        emit Unsealed(msg.sender, packId, block.number);
+    function stakeMunchable(
+        address landlord,
+        uint256 tokenId,
+        uint256 plotId
+    ) external override forceFarmPlots(msg.sender) notPaused {
+        (address mainAccount, ) = _getMainAccountRequireRegistered(msg.sender);
+        if (landlord == mainAccount) revert CantStakeToSelfError();
+        if (plotOccupied[landlord][plotId].occupied)
+            revert OccupiedPlotError(landlord, plotId);
+        if (munchablesStaked[mainAccount].length > 10)
+            revert TooManyStakedMunchiesError();
+        if (munchNFT.ownerOf(tokenId) != mainAccount)
+            revert InvalidOwnerError();
+
+        uint256 totalPlotsAvail = _getNumPlots(landlord);
+        if (plotId >= totalPlotsAvail) revert PlotTooHighError();
+
+        if (
+            !munchNFT.isApprovedForAll(mainAccount, address(this)) &&
+            munchNFT.getApproved(tokenId) != address(this)
+        ) revert NotApprovedError();
+        munchNFT.transferFrom(mainAccount, address(this), tokenId);
+
+        plotOccupied[landlord][plotId] = Plot({
+            occupied: true,
+            tokenId: tokenId
+        });
+
+        munchablesStaked[mainAccount].push(tokenId);
+        munchableOwner[tokenId] = mainAccount;
+
+        toilerState[tokenId] = ToilerState({
+            lastToilDate: block.timestamp,
+            plotId: plotId,
+            landlord: landlord,
+            latestTaxRate: plotMetadata[landlord].currentTaxRate,
+            dirty: false
+        });
+
+        emit FarmPlotTaken(toilerState[tokenId], tokenId);
     }
 
-    /**
-     * @notice Reveals one unsealed copy of `packId`
-     * @param packId The pack ID
-     */
-    function reveal(uint256 packId) external override onlyPackOwner(packId) {
-        if (metadataPool[packId].length == 0) {
-            revert OutOfMetadata(packId);
-        }
-        if (paused) revert Paused();
-        if (packId == 0) {
-            revert InvalidPack(packId);
-        }
-        if (unsealBlocks[packId].length == 0) {
-            revert NoneUnsealed(packId);
-        }
-        uint256 idx = unsealBlocks[packId].length - 1;
-        uint256 unsealBlock = unsealBlocks[packId][idx];
-        unsealBlocks[packId].pop();
-        bytes32 bh = blockhash(unsealBlock);
-        if (bh == bytes32(0)) {
-            revert Sealed(packId);
-        }
-        uint256 index = uint256(bh) % metadataPool[packId].length;
-        uint256 id = metadataPool[packId][index];
-        metadataPool[packId][index] = metadataPool[packId][metadataPool[packId].length - 1];
-        metadataPool[packId].pop();
-        _burn(msg.sender, packId, 1);
-        _mint(msg.sender, 0, 1, "");
-        NFT(nft1).mint(msg.sender, id);
-        NFT(nft2).mint(msg.sender, id);
-        NFT(nft3).mint(msg.sender, id);
+    function unstakeMunchable(
+        uint256 tokenId
+    ) external override forceFarmPlots(msg.sender) notPaused {
+        (address mainAccount, ) = _getMainAccountRequireRegistered(msg.sender);
+        ToilerState memory _toiler = toilerState[tokenId];
+        if (_toiler.landlord == address(0)) revert NotStakedError();
+        if (munchableOwner[tokenId] != mainAccount) revert InvalidOwnerError();
+
+        plotOccupied[_toiler.landlord][_toiler.plotId] = Plot({
+            occupied: false,
+            tokenId: 0
+        });
+        toilerState[tokenId] = ToilerState({
+            lastToilDate: 0,
+            plotId: 0,
+            landlord: address(0),
+            latestTaxRate: 0,
+            dirty: false
+        });
+        munchableOwner[tokenId] = address(0);
+        _removeTokenIdFromStakedList(mainAccount, tokenId);
+
+        munchNFT.transferFrom(address(this), mainAccount, tokenId);
+        emit FarmPlotLeave(_toiler.landlord, tokenId, _toiler.plotId);
     }
 
-    /**
-     * @notice Supports ERC1155 + AccessControl + ERC165
-     * @param interfaceId The interface ID
-     */
-    function supportsInterface(bytes4 interfaceId)
-        public
-        view
-        virtual
-        override(ERC1155, AccessControl)
-        returns (bool)
-    {
-        return super.supportsInterface(interfaceId);
+    function transferToUnoccupiedPlot(
+        uint256 tokenId,
+        uint256 plotId
+    ) external override forceFarmPlots(msg.sender) notPaused {
+        (address mainAccount, ) = _getMainAccountRequireRegistered(msg.sender);
+        ToilerState memory _toiler = toilerState[tokenId];
+        uint256 oldPlotId = _toiler.plotId;
+        uint256 totalPlotsAvail = _getNumPlots(_toiler.landlord);
+        if (_toiler.landlord == address(0)) revert NotStakedError();
+        if (munchableOwner[tokenId] != mainAccount) revert InvalidOwnerError();
+        if (plotOccupied[_toiler.landlord][plotId].occupied)
+            revert OccupiedPlotError(_toiler.landlord, plotId);
+        if (plotId >= totalPlotsAvail) revert PlotTooHighError();
+
+        toilerState[tokenId].latestTaxRate = plotMetadata[_toiler.landlord]
+            .currentTaxRate;
+        plotOccupied[_toiler.landlord][oldPlotId] = Plot({
+            occupied: false,
+            tokenId: 0
+        });
+        plotOccupied[_toiler.landlord][plotId] = Plot({
+            occupied: true,
+            tokenId: tokenId
+        });
+
+        emit FarmPlotLeave(_toiler.landlord, tokenId, oldPlotId);
+        emit FarmPlotTaken(toilerState[tokenId], tokenId);
+    }
+
+    function farmPlots() external override notPaused {
+        _farmPlots(msg.sender);
+    }
+
+    function _farmPlots(address _sender) internal {
+        (
+            address mainAccount,
+            MunchablesCommonLib.Player memory renterMetadata
+        ) = _getMainAccountRequireRegistered(_sender);
+
+        uint256[] memory staked = munchablesStaked[mainAccount];
+        MunchablesCommonLib.NFTImmutableAttributes memory immutableAttributes;
+        ToilerState memory _toiler;
+        uint256 timestamp;
+        address landlord;
+        uint256 tokenId;
+        int256 finalBonus;
+        uint256 schnibblesTotal;
+        uint256 schnibblesLandlord;
+        for (uint8 i = 0; i < staked.length; i++) {
+            timestamp = block.timestamp;
+            tokenId = staked[i];
+            _toiler = toilerState[tokenId];
+            if (_toiler.dirty) continue;
+            landlord = _toiler.landlord;
+            // use last updated plot metadata time if the plot id doesn't fit
+            // track a dirty bool to signify this was done once
+            // the edge case where this doesnt work is if the user hasnt farmed in a while and the landlord
+            // updates their plots multiple times. then the last updated time will be the last time they updated their plot details
+            // instead of the first
+            if (_getNumPlots(landlord) < _toiler.plotId) {
+                timestamp = plotMetadata[landlord].lastUpdated;
+                toilerState[tokenId].dirty = true;
+            }
+            (
+                ,
+                MunchablesCommonLib.Player memory landlordMetadata
+            ) = _getMainAccountRequireRegistered(landlord);
+
+            immutableAttributes = nftAttributesManager.getImmutableAttributes(
+                tokenId
+            );
+            finalBonus =
+                int16(
+                    REALM_BONUSES[
+                        (uint256(immutableAttributes.realm) * 5) +
+                            uint256(landlordMetadata.snuggeryRealm)
+                    ]
+                ) +
+                int16(
+                    int8(RARITY_BONUSES[uint256(immutableAttributes.rarity)])
+                );
+            schnibblesTotal =
+                (timestamp - _toiler.lastToilDate) *
+                BASE_SCHNIBBLE_RATE;
+            schnibblesTotal = uint256(
+                (int256(schnibblesTotal) +
+                    (int256(schnibblesTotal) * finalBonus)) / 100
+            );
+            schnibblesLandlord =
+                (schnibblesTotal * _toiler.latestTaxRate) /
+                1e18;
+
+            toilerState[tokenId].lastToilDate = timestamp;
+            toilerState[tokenId].latestTaxRate = plotMetadata[_toiler.landlord]
+                .currentTaxRate;
+
+            renterMetadata.unfedSchnibbles += (schnibblesTotal -
+                schnibblesLandlord);
+
+            landlordMetadata.unfedSchnibbles += schnibblesLandlord;
+            landlordMetadata.lastPetMunchable = uint32(timestamp);
+            accountManager.updatePlayer(landlord, landlordMetadata);
+            emit FarmedSchnibbles(
+                _toiler.landlord,
+                tokenId,
+                _toiler.plotId,
+                schnibblesTotal - schnibblesLandlord,
+                schnibblesLandlord
+            );
+        }
+        accountManager.updatePlayer(mainAccount, renterMetadata);
+    }
+
+    function _removeTokenIdFromStakedList(
+        address mainAccount,
+        uint256 tokenId
+    ) internal {
+        uint256 stakedLength = munchablesStaked[mainAccount].length;
+        bool found = false;
+        for (uint256 i = 0; i < stakedLength; i++) {
+            if (munchablesStaked[mainAccount][i] == tokenId) {
+                munchablesStaked[mainAccount][i] = munchablesStaked[
+                    mainAccount
+                ][stakedLength - 1];
+                found = true;
+                munchablesStaked[mainAccount].pop();
+                break;
+            }
+        }
+
+        if (!found) revert InvalidTokenIdError();
+    }
+
+    function _getMainAccountRequireRegistered(
+        address _account
+    ) internal view returns (address, MunchablesCommonLib.Player memory) {
+        (
+            address _mainAccount,
+            MunchablesCommonLib.Player memory _player
+        ) = accountManager.getPlayer(_account);
+
+        if (_player.registrationDate == 0) revert PlayerNotRegisteredError();
+        return (_mainAccount, _player);
+    }
+
+    function _getNumPlots(address _account) internal view returns (uint256) {
+        return lockManager.getLockedWeightedValue(_account) / PRICE_PER_PLOT;
     }
 }

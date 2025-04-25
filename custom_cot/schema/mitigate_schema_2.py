@@ -14,7 +14,7 @@ class QA(BaseModel):
 
 class Adjustment(BaseModel):
     index: int
-    new_severity: Literal["high","medium","low","info","best practices","unchanged"]
+    severity: Literal["high","medium","low","info","best practices","unchanged"]
     should_be_removed: bool
     comments: str | None = None
 

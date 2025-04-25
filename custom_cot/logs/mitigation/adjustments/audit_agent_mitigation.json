@@ -1,0 +1,146 @@
+[
+    {
+        "index": 0,
+        "severity": "Low",
+        "should_be_removed": true,
+        "comments": "This is not a vulnerability in Solidity 0.8.25 as arithmetic overflow/underflow checks are automatically included by the compiler. The issue would only be valid if unchecked blocks were used, which is not the case here."
+    },
+    {
+        "index": 4,
+        "severity": "Medium",
+        "should_be_removed": false,
+        "comments": "The reentrancy risk is valid as external calls to accountManager.updatePlayer are made without any reentrancy protection. The CEI pattern is not followed, and state changes occur after external calls."
+    },
+    {
+        "index": 8,
+        "severity": "Low",
+        "should_be_removed": true,
+        "comments": "This is not a vulnerability in Solidity 0.8.25 as arithmetic overflow/underflow checks are automatically included by the compiler. The conversion between int256 and uint256 would revert if the result is negative, preventing any overflow."
+    },
+    {
+        "index": 15,
+        "severity": "Medium",
+        "should_be_removed": false,
+        "comments": "The reentrancy risk is valid as external calls are made without any reentrancy protection. The CEI pattern is not followed, and there are no nonReentrant modifiers."
+    },
+    {
+        "index": 16,
+        "severity": "Low",
+        "should_be_removed": false,
+        "comments": "This is a valid off-by-one error that allows staking 11 NFTs instead of the intended 10."
+    },
+    {
+        "index": 20,
+        "severity": "Medium",
+        "should_be_removed": false,
+        "comments": "This is not an overflow issue in Solidity 0.8.25 as arithmetic checks are automatically included. However, the issue with a large BASE_SCHNIBBLE_RATE causing reverts and DoS is valid."
+    },
+    {
+        "index": 22,
+        "severity": "Low",
+        "should_be_removed": false,
+        "comments": "This is a valid concern about using uint8 for the loop counter which could overflow if there are more than 255 staked tokens."
+    },
+    {
+        "index": 26,
+        "severity": "Medium",
+        "should_be_removed": false,
+        "comments": "This is not an underflow issue in Solidity 0.8.25 as it would revert on negative conversion. However, the revert would cause DoS, so the severity is appropriate."
+    },
+    {
+        "index": 38,
+        "severity": "High",
+        "should_be_removed": false,
+        "comments": "This is a valid issue where negative bonuses can cause the reward calculation to revert, blocking critical functionality."
+    },
+    {
+        "index": 39,
+        "severity": "Medium",
+        "should_be_removed": false,
+        "comments": "This is a valid reentrancy issue as external calls are made without protection, and the CEI pattern is not followed."
+    },
+    {
+        "index": 40,
+        "severity": "Low",
+        "should_be_removed": true,
+        "comments": "This is a duplicate of issue #16 regarding the off-by-one error in the staking limit."
+    },
+    {
+        "index": 43,
+        "severity": "High",
+        "should_be_removed": true,
+        "comments": "This is a duplicate of issue #38 regarding the potential underflow in reward calculation with negative bonuses."
+    },
+    {
+        "index": 45,
+        "severity": "Medium",
+        "should_be_removed": false,
+        "comments": "This is a valid reentrancy issue as external calls are made before state updates without protection."
+    },
+    {
+        "index": 52,
+        "severity": "High",
+        "should_be_removed": true,
+        "comments": "This is a duplicate of issue #38 regarding negative bonus calculation causing overflow."
+    },
+    {
+        "index": 53,
+        "severity": "Medium",
+        "should_be_removed": true,
+        "comments": "This is a duplicate of issue #3 regarding division by zero in _getNumPlots."
+    },
+    {
+        "index": 54,
+        "severity": "Low",
+        "should_be_removed": true,
+        "comments": "This is a duplicate of issue #5 regarding missing plotId update in transferToUnoccupiedPlot."
+    },
+    {
+        "index": 55,
+        "severity": "Low",
+        "should_be_removed": true,
+        "comments": "This is a duplicate of issue #16 regarding the off-by-one error in the staking limit."
+    },
+    {
+        "index": 58,
+        "severity": "High",
+        "should_be_removed": true,
+        "comments": "This is a duplicate of issue #38 regarding signed integer conversion in reward calculation."
+    },
+    {
+        "index": 60,
+        "severity": "High",
+        "should_be_removed": true,
+        "comments": "This is a duplicate of issue #39 regarding reentrancy vulnerability."
+    },
+    {
+        "index": 62,
+        "severity": "High",
+        "should_be_removed": true,
+        "comments": "This is a duplicate of issue #38 regarding arithmetic underflow in reward calculation."
+    },
+    {
+        "index": 65,
+        "severity": "Medium",
+        "should_be_removed": true,
+        "comments": "This is a duplicate of issue #16 regarding the off-by-one error in the staking limit."
+    },
+    {
+        "index": 67,
+        "severity": "Medium",
+        "should_be_removed": true,
+        "comments": "This is a duplicate of issue #16 regarding the off-by-one error in the staking limit."
+    },
+    {
+        "index": 68,
+        "severity": "Medium",
+        "should_be_removed": true,
+        "comments": "This is a duplicate of issue #5 regarding missing plotId update in transferToUnoccupiedPlot."
+    },
+    {
+        "index": 69,
+        "severity": "Medium",
+        "should_be_removed": true,
+        "comments": "This is a duplicate of issue #5 regarding missing plotId update in transferToUnoccupiedPlot."
+    }
+]

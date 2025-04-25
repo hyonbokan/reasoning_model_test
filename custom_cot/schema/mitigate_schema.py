@@ -37,7 +37,7 @@ QA = Union[YesNoQA, ImpactQA, LikelihoodQA, SeverityQA]
 # ---------- summary decision ----------
 class Adjustment(BaseModel):
     index: int
-    new_severity: Literal[
+    severity: Literal[
         "high", "medium", "low", "info", "best practices", "unchanged"
     ]
     should_be_removed: bool

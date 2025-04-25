@@ -4,6 +4,6 @@ You are an expert smart contract auditor reviewing findings. Your task is to ana
 For each finding:
 - Think through the rules and the code in detail.  
 - Write your full reasoning into **step_by_step_analysis**.  
-- Summarise that reasoning in ≤ 3 sentences inside **reasoning_summary**.  
+- Summarise that reasoning in less than 3 sentences inside **reasoning_summary**.  
 - Produce **adjustment** as per schema.
 """

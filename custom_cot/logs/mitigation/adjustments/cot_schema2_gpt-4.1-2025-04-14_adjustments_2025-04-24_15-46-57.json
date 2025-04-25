@@ -1,0 +1,518 @@
+[
+  {
+    "index": 0,
+    "severity": "high",
+    "should_be_removed": false,
+    "comments": "The overflow arises from a type-cast (negative int to uint256) not caught by Solidity's built-in protection. The finding is real and critical."
+  },
+  {
+    "index": 1,
+    "severity": "medium",
+    "should_be_removed": false,
+    "comments": "The finding is accurate: not updating plotId is a real logic bug that can be exploited to inflate rewards; severity remains medium."
+  },
+  {
+    "index": 2,
+    "severity": "high",
+    "should_be_removed": false,
+    "comments": "Severity increased to high: off-by-one error allows users to violate intended stake capacity, creating protocol invariant violations; issue is exploitable by any user."
+  },
+  {
+    "index": 3,
+    "severity": "medium",
+    "should_be_removed": false,
+    "comments": "Adjusted to medium due to high impact (potential protocol-wide DoS) but lower likelihood; recommend input validation to prevent zero value."
+  },
+  {
+    "index": 4,
+    "severity": "low",
+    "should_be_removed": false,
+    "comments": "Severity set to low: valid reentrancy risk exists if accountManager is ever set to untrusted code, but likelihood is low in sound deployments."
+  },
+  {
+    "index": 5,
+    "severity": "high",
+    "should_be_removed": false,
+    "comments": "The logical state desynchronization caused by not updating toilerState[tokenId].plotId can break farming and rewards, warranting high severity. Removal is not recommended as this is a true, practical issue."
+  },
+  {
+    "index": 6,
+    "severity": "high",
+    "should_be_removed": false,
+    "comments": "Permanent disabling of dirty plots has real user impact, has no natural recovery path within the protocol, and happens in routine use. Severity should be raised to 'high'."
+  },
+  {
+    "index": 7,
+    "severity": "medium",
+    "should_be_removed": false,
+    "comments": "Severity raised to Medium: the impact is minor but universally and easily exploitable."
+  },
+  {
+    "index": 8,
+    "severity": "low",
+    "should_be_removed": false,
+    "comments": "This issue is not classic arithmetic overflow/underflow but a signed/unsigned casting error legacy to Solidity; classification as a logic bug with low severity is warranted, not removal."
+  },
+  {
+    "index": 9,
+    "severity": "low",
+    "should_be_removed": false,
+    "comments": "Confirmed as a minor but genuine gas inefficiency; severity set to 'low' since it does not impact correctness or security."
+  },
+  {
+    "index": 10,
+    "severity": "low",
+    "should_be_removed": false,
+    "comments": "Adjusted to low severity due to possible but unproven risk from ambiguous config key usage. Not removed, as actual misconfiguration could have real impact."
+  },
+  {
+    "index": 11,
+    "severity": "low",
+    "should_be_removed": false,
+    "comments": "Severity adjusted to low\u2014describes a valid but minor logic/usability issue (missed schnibbles due to uninitialized metadata)."
+  },
+  {
+    "index": 12,
+    "severity": "best practices",
+    "should_be_removed": false,
+    "comments": "Not a security issue; maintaining as 'best practices' for future maintainability, since current business logic already caps the loop far before uint8's maximum."
+  },
+  {
+    "index": 13,
+    "severity": "high",
+    "should_be_removed": false,
+    "comments": "Finding is valid with high severity per severity matrix; no downgrade or removal warranted."
+  },
+  {
+    "index": 14,
+    "severity": "medium",
+    "should_be_removed": false,
+    "comments": "The division by zero misconfiguration risk is real and should be addressed; severity is medium (high impact, medium likelihood)."
+  },
+  {
+    "index": 15,
+    "severity": "high",
+    "should_be_removed": false,
+    "comments": "Severity increased to High under reentrancy rules due to unguarded external calls and possible risk if dependencies are untrusted."
+  },
+  {
+    "index": 16,
+    "severity": "medium",
+    "should_be_removed": false,
+    "comments": "Severity should be elevated to medium since the off-by-one error is readily exploitable by users and slightly exceeds intended limits."
+  },
+  {
+    "index": 17,
+    "severity": "low",
+    "should_be_removed": false,
+    "comments": "Upgraded to 'low' severity: missing ERC721Receiver means safeTransferFrom will irreversibly lock NFTs, representing practical user risk, not just 'best practices'."
+  },
+  {
+    "index": 18,
+    "severity": "high",
+    "should_be_removed": false,
+    "comments": "Original severity is accurate: this is a critical state synchronization bug that allows double plot occupation and reward inconsistencies."
+  },
+  {
+    "index": 19,
+    "severity": "high",
+    "should_be_removed": false,
+    "comments": "Severity should be raised to high because the bug allows the explicit staking limit to be circumvented, breaking a core contract invariant and potentially impacting other stateful functions."
+  },
+  {
+    "index": 20,
+    "severity": "unchanged",
+    "should_be_removed": true,
+    "comments": "False positive per overflow rules for Solidity >=0.8. No unchecked block; overflow reverts, does not lead to silent bug or exploit. Safe to remove."
+  },
+  {
+    "index": 21,
+    "severity": "medium",
+    "should_be_removed": false,
+    "comments": "Impact is protocol-wide and severe if misconfiguration occurs; severity raised to medium to reflect this real-world risk."
+  },
+  {
+    "index": 22,
+    "severity": "low",
+    "should_be_removed": false,
+    "comments": "Overflow on loop index is only possible if the cap is bypassed via a bug or protocol change; this would block a user's farming but does not directly risk loss of funds."
+  },
+  {
+    "index": 23,
+    "severity": "low",
+    "should_be_removed": false,
+    "comments": "Severity reduced to low. This is a minor but valid usability concern, with no significant security impact."
+  },
+  {
+    "index": 24,
+    "severity": "high",
+    "should_be_removed": false,
+    "comments": "Severity should remain high: loading economic/critical constants using contract address storage keys is a critical protocol flaw with high likelihood and impact."
+  },
+  {
+    "index": 25,
+    "severity": "medium",
+    "should_be_removed": false,
+    "comments": "The issue is real: users' staked NFTs can be stranded and stop earning rewards with no notification or easy visibility. It is a user-experience/communication flaw, not protocol-critical, so medium severity is justified."
+  },
+  {
+    "index": 26,
+    "severity": "unchanged",
+    "should_be_removed": true,
+    "comments": "False positive: Solidity 0.8+ always reverts on underflow in this context; not a vulnerability per overflow rules."
+  },
+  {
+    "index": 27,
+    "severity": "medium",
+    "should_be_removed": false,
+    "comments": "Confirmed off-by-one logic bug; impact is minor, but likely to manifest if users interact at the staking cap. Medium severity is appropriate."
+  },
+  {
+    "index": 28,
+    "severity": "unchanged",
+    "should_be_removed": true,
+    "comments": "False positive: The loop counter overflow is impossible under Solidity 0.8+ with explicit reverts on staked token count. No unchecked block or practical exploit path exists."
+  },
+  {
+    "index": 29,
+    "severity": "info",
+    "should_be_removed": false,
+    "comments": "'Swap and pop' is a well-known gas optimization pattern and not a security risk; potential for confusion should be addressed in documentation, thus 'info' is appropriate."
+  },
+  {
+    "index": 30,
+    "severity": "low",
+    "should_be_removed": false,
+    "comments": "Retain as 'low' severity: while array out-of-bounds is unlikely due to upstream validation, lack of local checks could lead to reverts if external contract logic changes. Not a false positive."
+  },
+  {
+    "index": 31,
+    "severity": "medium",
+    "should_be_removed": false,
+    "comments": "Raising severity to medium; the impact and likelihood are both moderate, as landlords may unintentionally lose all rewards if their plot metadata is uninitialized when others stake on their plots."
+  },
+  {
+    "index": 32,
+    "severity": "medium",
+    "should_be_removed": false,
+    "comments": "Reduce severity to Medium since CEI is followed for critical state, limiting damage from reentrancy, but risk remains due to lack of explicit guard."
+  },
+  {
+    "index": 33,
+    "severity": "high",
+    "should_be_removed": false,
+    "comments": "Severity should be raised to high: state mis-sync is guaranteed and can materially disrupt reward logic and internal consistency."
+  },
+  {
+    "index": 34,
+    "severity": "medium",
+    "should_be_removed": false,
+    "comments": "Unchecked indexing on REALM_BONUSES and RARITY_BONUSES can cause a revert and DoS farming under bad operator config or user attributes. Severity is appropriately medium."
+  },
+  {
+    "index": 35,
+    "severity": "low",
+    "should_be_removed": false,
+    "comments": "The issue is valid but should be downgraded to 'low': it is only possible due to admin misconfiguration, has a medium impact (DoS), and is easily remediable by correcting the config."
+  },
+  {
+    "index": 36,
+    "severity": "high",
+    "should_be_removed": false,
+    "comments": "Elevated to high: If _farmPlots or downstream logic fails (e.g., accountManager revert), staking/unstaking/transfer actions become permanently or intermittently unavailable, representing critical DoS risk."
+  },
+  {
+    "index": 37,
+    "severity": "medium",
+    "should_be_removed": false,
+    "comments": "This is a valid off-by-one bug in limit enforcement. Impact is minor (can stake one extra munchable), but exploitability is high: severity should be medium."
+  },
+  {
+    "index": 38,
+    "severity": "high",
+    "should_be_removed": false,
+    "comments": "Confirmed: this is a high-severity overflow vulnerability underpinned by improper math and type conversion. Auto-overflow checks cause a revert, but this exposes the protocol to an easy DoS vector, justifying the severity and need for remediation."
+  },
+  {
+    "index": 39,
+    "severity": "unchanged",
+    "should_be_removed": true,
+    "comments": "False positive: All state changes precede external calls, so the CEI pattern is properly followed, ruling out reentrancy risk per the master rulebook."
+  },
+  {
+    "index": 40,
+    "severity": "low",
+    "should_be_removed": false,
+    "comments": "Severity is correct: Low, as bug causes self-DOS but is not protocol-critical."
+  },
+  {
+    "index": 41,
+    "severity": "high",
+    "should_be_removed": false,
+    "comments": "Practical exploit allowing zero-tax farming by targeting landlords with uninitialized metadata. Severity raised to high given exploitability and impact on protocol economics."
+  },
+  {
+    "index": 42,
+    "severity": "high",
+    "should_be_removed": false,
+    "comments": "Severity remains high: the missing plotId update results in critically inconsistent state and reward logic, so this is not a false positive."
+  },
+  {
+    "index": 43,
+    "severity": "high",
+    "should_be_removed": false,
+    "comments": "The issue is real and severe: negative int256 values cast to uint256 produce dangerously large rewards. This is a logic error exploitable despite Solidity 0.8 checks."
+  },
+  {
+    "index": 44,
+    "severity": "medium",
+    "should_be_removed": false,
+    "comments": "Severity left at medium. The config keys are clearly not value-specific, the misassignment is real, and this can materially affect contract logic and protocol safety."
+  },
+  {
+    "index": 45,
+    "severity": "medium",
+    "should_be_removed": false,
+    "comments": "Genuine CEI/reentrancy problem; external call precedes effects, and no guard is present. Impact is user-localized, so medium severity applies."
+  },
+  {
+    "index": 46,
+    "severity": "low",
+    "should_be_removed": false,
+    "comments": "Downgrade to Low: The risk of out-of-bounds array access is present and could cause denial-of-service, but practical exploitability is limited owing to expected contract-side control of attribute values."
+  },
+  {
+    "index": 47,
+    "severity": "medium",
+    "should_be_removed": false,
+    "comments": "The division by zero if PRICE_PER_PLOT is misconfigured is a real and impactful risk. Severity adjusted to 'medium' per risk matrix."
+  },
+  {
+    "index": 48,
+    "severity": "medium",
+    "should_be_removed": false,
+    "comments": "Severity increased to medium since a zero address set for core dependencies via misconfiguration could brick protocol operations in an upgradeable system. Recommend adding explicit nonzero address checks after retrieval."
+  },
+  {
+    "index": 49,
+    "severity": "medium",
+    "should_be_removed": false,
+    "comments": "Severity increased to medium (from low) due to high likelihood of business-logic error, though impact remains low. Not a security issue, but should be fixed to enforce intended staking limits."
+  },
+  {
+    "index": 50,
+    "severity": "low",
+    "should_be_removed": false,
+    "comments": "Risk is real but of low impact; severity is appropriate, finding should not be removed."
+  },
+  {
+    "index": 51,
+    "severity": "low",
+    "should_be_removed": false,
+    "comments": "Adjusting to 'low' as this is a practical, if common, centralization risk not just documentation; users should be aware of admin powers."
+  },
+  {
+    "index": 52,
+    "severity": "high",
+    "should_be_removed": false,
+    "comments": "The bug is valid and severe: a negative bonus < -100 creates negative intermediate results, and unsafe int-to-uint casting can mint massive rewards; this demands urgent remediation."
+  },
+  {
+    "index": 53,
+    "severity": "low",
+    "should_be_removed": false,
+    "comments": "Severity reduced to low: issue is real but only possible via privileged misconfiguration; add input validation to protect against this class of admin error."
+  },
+  {
+    "index": 54,
+    "severity": "medium",
+    "should_be_removed": false,
+    "comments": "Severity should be raised to medium: the error is common and impacts data reliability, though not security critical."
+  },
+  {
+    "index": 55,
+    "severity": "medium",
+    "should_be_removed": false,
+    "comments": "Raise to medium: low impact but high certainty due to a logic bug that reliably allows exceeding the intended staking limit."
+  },
+  {
+    "index": 56,
+    "severity": "medium",
+    "should_be_removed": false,
+    "comments": "Reduce to medium: Issue is valid and exploitable due to exploit chain, but likelihood is medium. Not a false positive; should remain."
+  },
+  {
+    "index": 57,
+    "severity": "high",
+    "should_be_removed": false,
+    "comments": "The issue as stated is valid and severity remains High; user assets can become unrecoverable due to missing registration check on landlord."
+  },
+  {
+    "index": 58,
+    "severity": "high",
+    "should_be_removed": false,
+    "comments": "DoS scenario is real if config allows enough negative bonus, so severity High is warranted; not an overflow/underflow false positive."
+  },
+  {
+    "index": 59,
+    "severity": "high",
+    "should_be_removed": false,
+    "comments": "The finding is valid, has severe user-facing consequences (NFT lock-up), and matches high impact, medium likelihood. High severity is warranted."
+  },
+  {
+    "index": 60,
+    "severity": "medium",
+    "should_be_removed": false,
+    "comments": "Severity set to Medium per impact-likelihood matrix: real risk exists if a malicious ERC-721 or accountManager is configured, but this setup is somewhat unlikely in controlled deployments. Reentrancy issue is valid, but not universally 'high' severity."
+  },
+  {
+    "index": 61,
+    "severity": "high",
+    "should_be_removed": false,
+    "comments": "Confirmed: off-by-one bug enables continual reward farming from invalid plots. Severity should remain high."
+  },
+  {
+    "index": 62,
+    "severity": "high",
+    "should_be_removed": false,
+    "comments": "Critical underflow risk remains even under Solidity 0.8.25 due to a dangerous cast pattern in reward math; exploit could allow unbounded schnibbles minting if configuration or NFT attributes are not strictly constrained."
+  },
+  {
+    "index": 63,
+    "severity": "high",
+    "should_be_removed": false,
+    "comments": "The finding is not a false positive as there is a real exploit chain: misconfigured tax rates can DoS tenants and enable reward theft, justifying high severity."
+  },
+  {
+    "index": 64,
+    "severity": "medium",
+    "should_be_removed": false,
+    "comments": "Lowered to medium severity: Solidity \u22650.8 auto-reverts underflow so it's not a raw overflow/underflow bug, but denial-of-service due to misconfiguration is still a major functional risk."
+  },
+  {
+    "index": 65,
+    "severity": "medium",
+    "should_be_removed": false,
+    "comments": "Confirmed genuine off-by-one bug allowing users to stake 11 tokens instead of 10; impact is low but likelihood is high, so severity is medium."
+  },
+  {
+    "index": 66,
+    "severity": "high",
+    "should_be_removed": false,
+    "comments": "Severity should be upgraded to high due to feasible exploitation allowing renters to circumvent protocol revenue logic and drain landlord schnibbles on uninitialized metadata."
+  },
+  {
+    "index": 67,
+    "severity": "high",
+    "should_be_removed": false,
+    "comments": "Severity elevated to High: trivial off-by-one bug allows users to exceed staking cap and gain extra protocol rewards, violating design constraints."
+  },
+  {
+    "index": 68,
+    "severity": "high",
+    "should_be_removed": false,
+    "comments": "This is a real liveness/correctness bug that can cause denial of service for land slots; severity should be high."
+  },
+  {
+    "index": 69,
+    "severity": "high",
+    "should_be_removed": false,
+    "comments": "Severity should be raised to High as the finding allows a practical, impactful denial-of-service exploit with high likelihood."
+  },
+  {
+    "index": 70,
+    "severity": "unchanged",
+    "should_be_removed": true,
+    "comments": "The finding is a definite false positive; triggerPlotMetadata is intentionally limited, safe, and purely informational."
+  },
+  {
+    "index": 71,
+    "severity": "low",
+    "should_be_removed": false,
+    "comments": "Economic manipulation via rapid tax rate change is plausible and impacts fairness but not protocol security; severity should be 'low'."
+  },
+  {
+    "index": 72,
+    "severity": "low",
+    "should_be_removed": false,
+    "comments": "Impact is low as the only consequence is unclear error reporting for users, not a security or business logic failure."
+  },
+  {
+    "index": 73,
+    "severity": "low",
+    "should_be_removed": false,
+    "comments": "Downgraded to low since only the user's own array can grow and user can always unstake; impact remains local, but recommend noting for future gas optimization."
+  },
+  {
+    "index": 74,
+    "severity": "high",
+    "should_be_removed": false,
+    "comments": "Severity should be high, as not validating landlord != address(0) can irretrievably lock user assets."
+  },
+  {
+    "index": 75,
+    "severity": "unchanged",
+    "should_be_removed": true,
+    "comments": "Remove this as a false positive for overflow: the actual issue is out-of-bounds array indexing, not integer overflow or underflow. Consider instead a finding for missing array bounds validation (DoS risk), but not overflow."
+  },
+  {
+    "index": 76,
+    "severity": "medium",
+    "should_be_removed": false,
+    "comments": "The dirty flag logic may cause assets to become unfarmable and lose rewards if plot availability fluctuates; impact and likelihood are medium."
+  },
+  {
+    "index": 77,
+    "severity": "low",
+    "should_be_removed": false,
+    "comments": "Valid minor consistency issue; keep at low severity as it does not enable theft or major harm."
+  },
+  {
+    "index": 78,
+    "severity": "low",
+    "should_be_removed": false,
+    "comments": "The finding is valid as a low-severity UX/events/logging issue. No removal is warranted."
+  },
+  {
+    "index": 79,
+    "severity": "medium",
+    "should_be_removed": false,
+    "comments": "Severity remains medium; this is a valid business logic concern regarding user protection from landlord front-running tax rate changes."
+  },
+  {
+    "index": 80,
+    "severity": "low",
+    "should_be_removed": false,
+    "comments": "This is not a vulnerability, but a mild economic/design issue; severity lowered to 'low' as landlord timing is expected and impact is bounded."
+  },
+  {
+    "index": 81,
+    "severity": "medium",
+    "should_be_removed": false,
+    "comments": "The issue is real and may surprise users, though it does not result in protocol-level theft or security failure. Medium severity is appropriate."
+  },
+  {
+    "index": 82,
+    "severity": "medium",
+    "should_be_removed": false,
+    "comments": "Legitimate logic flaw: calculation mismatch is not documented, is practical, and may cause real downstream issues. Medium severity is justified."
+  },
+  {
+    "index": 83,
+    "severity": "unchanged",
+    "should_be_removed": true,
+    "comments": "No oracle implementation is intentional and not a security issue; recommend removal as false positive."
+  },
+  {
+    "index": 84,
+    "severity": "medium",
+    "should_be_removed": false,
+    "comments": "Imprecise reward math reliably underpays users, but not severely. Medium is the most appropriate severity."
+  },
+  {
+    "index": 85,
+    "severity": "low",
+    "should_be_removed": false,
+    "comments": "Adjust severity to 'low': only minor rounding-down results from integer division in schnibbles calculation, which is common in Solidity and not a critical loss."
+  }
+]
