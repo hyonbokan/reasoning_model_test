@@ -2,6 +2,66 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 
+
+import json, pathlib, pandas as pd
+
+severity_scale = ["high", "medium", "low", "info", "best practices"]
+
+def norm(s):
+    return s.lower().strip() if isinstance(s, str) else ""
+
+def delta(old, new):
+    old_l, new_l = norm(old), norm(new)
+
+    if old_l == new_l or new_l == "unchanged":
+        return "unchanged"
+    if old_l not in severity_scale or new_l not in severity_scale:
+        return "unclear"
+    if old_l in ["info", "best practices"] or new_l in ["info", "best practices"]:
+        return "info or best practices"
+    return "more_severe" if severity_scale.index(new_l) < severity_scale.index(old_l) else "less_severe"
+
+
+def generate_diff_report(orig_path, v1_path, cot_path, output_csv="diff_report_dynamic.csv"):
+    # ---------- load data ----------
+    original = {f["index"]: f for f in json.load(open(orig_path))}
+    mit_v1   = {f["index"]: f for f in json.load(open(v1_path))}
+    mit_cot  = {f["index"]: f for f in json.load(open(cot_path))}
+
+    # ---------- generate rows ----------
+    rows = []
+    for idx, base in original.items():
+        row = {
+            "index": idx,
+            "orig_severity": norm(base.get("Severity", "")),
+        }
+
+        # v1 critic
+        v1 = mit_v1.get(idx, {})
+        v1_sev = norm(v1.get("severity", row["orig_severity"]))
+        row.update({
+            "v1_severity": v1_sev,
+            "v1_false_positive": v1.get("should_be_removed", False),
+            "v1_severity_delta": delta(row["orig_severity"], v1_sev),
+        })
+
+        # CoT critic
+        cot = mit_cot.get(idx, {})
+        cot_sev = norm(cot.get("severity", row["orig_severity"]))
+        row.update({
+            "cot_severity": cot_sev,
+            "cot_false_positive": cot.get("should_be_removed", False),
+            "cot_severity_delta": delta(row["orig_severity"], cot_sev),
+        })
+
+        rows.append(row)
+
+    # ---------- export ----------
+    df = pd.DataFrame(rows)
+    df.to_csv(output_csv, index=False)
+    return df
+
+
 def plot_grouped_bar_counts(dfs, column, labels=None, title=None, colors=None, figsize=(10, 6)):
     """
     Plots side-by-side grouped bar chart comparing value counts for a column across DataFrames.

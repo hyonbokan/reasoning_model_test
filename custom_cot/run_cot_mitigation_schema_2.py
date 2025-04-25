@@ -10,9 +10,10 @@ GPT_4_1 = "gpt-4.1-2025-04-14"
 O4_MINI = "o4-mini"
 
 # ---------- artefacts ----------
-MODEL = GPT_4_1
+MODEL = O4_MINI
 TASK_PROMPT  = pathlib.Path("utils/mitigation/task_prompt_reasoning.py").read_text()
-RULEBOOK = pathlib.Path("utils/mitigation/mitigation_rulebook_1.md").read_text()
+# RULEBOOK = pathlib.Path("utils/mitigation/mitigation_rulebook_1.md").read_text()
+RULEBOOK = pathlib.Path("utils/mitigation/mitigation_rulebook_1.html").read_text()
 CHECKLIST = json.loads(pathlib.Path("utils/mitigation/mitigation_checklist_1_1.json").read_text())
 FINDINGS = json.loads(pathlib.Path("utils/mitigation/LandManager_findings.json").read_text())
 CONTRACT = pathlib.Path("utils/mitigation/contract_with_lines.sol").read_text()

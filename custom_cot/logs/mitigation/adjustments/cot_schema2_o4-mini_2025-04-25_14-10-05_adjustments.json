@@ -1,0 +1,518 @@
+[
+  {
+    "index": 0,
+    "severity": "medium",
+    "should_be_removed": false,
+    "comments": "True overflow exploitation via casting negative bonus to uint256 allows mint wrap-around; fix by validating bonus range or using unsigned math."
+  },
+  {
+    "index": 1,
+    "severity": "medium",
+    "should_be_removed": false,
+    "comments": "Plot ID is never updated on transfer, enabling stale plot state and retroactive earnings."
+  },
+  {
+    "index": 2,
+    "severity": "medium",
+    "should_be_removed": false,
+    "comments": "Change the check to `>= 10` to enforce the ten\u2010stake cap and consider adding a reentrancy guard or moving the state update before the external call."
+  },
+  {
+    "index": 3,
+    "severity": "low",
+    "should_be_removed": false,
+    "comments": "Validate PRICE_PER_PLOT to be non-zero to avoid division-by-zero DoS."
+  },
+  {
+    "index": 4,
+    "severity": "medium",
+    "should_be_removed": false,
+    "comments": "External unguarded calls to accountManager with state writes after allow re-entrancy. Add a guard or reorder to CEI."
+  },
+  {
+    "index": 5,
+    "severity": "medium",
+    "should_be_removed": false,
+    "comments": "Add `toilerState[tokenId].plotId = plotId;` after updating `latestTaxRate` to keep `toilerState` in sync with `plotOccupied`."
+  },
+  {
+    "index": 6,
+    "severity": "best practices",
+    "should_be_removed": false,
+    "comments": "This is an intentional edge-case design rather than a security vulnerability. Consider documenting the dirty-flag behavior clearly or adding a reset mechanism to improve user experience."
+  },
+  {
+    "index": 7,
+    "severity": "low",
+    "should_be_removed": false,
+    "comments": "Off-by-one logic bug allows staking one extra Munchable; low severity and valid finding."
+  },
+  {
+    "index": 8,
+    "severity": "best practices",
+    "should_be_removed": true,
+    "comments": "Solidity 0.8 auto-reverts on overflow outside unchecked blocks and this negative-to-uint wrap is theoretical with no practical exploit path. Removed as false positive."
+  },
+  {
+    "index": 9,
+    "severity": "best practices",
+    "should_be_removed": false,
+    "comments": "Performance/gas\u2010optimization suggestion; treat as best practices."
+  },
+  {
+    "index": 10,
+    "severity": "best practices",
+    "should_be_removed": false,
+    "comments": "The issue is a naming/clarity concern in configuration key usage; recommend addressing as a best practices improvement."
+  },
+  {
+    "index": 11,
+    "severity": "medium",
+    "should_be_removed": false,
+    "comments": "Require plotMetadata[landlord].lastUpdated != 0 in stakeMunchable to ensure landlord metadata is initialized before staking."
+  },
+  {
+    "index": 12,
+    "severity": "best practices",
+    "should_be_removed": false,
+    "comments": "Valid best practice recommendation; no removal."
+  },
+  {
+    "index": 13,
+    "severity": "high",
+    "should_be_removed": false,
+    "comments": "Missing update of toilerState[tokenId].plotId leads to stale state and locked plots; state update required."
+  },
+  {
+    "index": 14,
+    "severity": "low",
+    "should_be_removed": false,
+    "comments": "Add a require or validation to ensure PRICE_PER_PLOT is non-zero to prevent division-by-zero DoS."
+  },
+  {
+    "index": 15,
+    "severity": "low",
+    "should_be_removed": false,
+    "comments": "Missing reentrancy guard with state updates after external calls; add nonReentrant or reorder to CEI."
+  },
+  {
+    "index": 16,
+    "severity": "medium",
+    "should_be_removed": false,
+    "comments": "Off-by-one bug allows staking 11 munchables; change condition to `>= 10` to enforce the intended limit."
+  },
+  {
+    "index": 17,
+    "severity": "low",
+    "should_be_removed": false,
+    "comments": "Implement IERC721Receiver to support safeTransferFrom and improve interoperability."
+  },
+  {
+    "index": 18,
+    "severity": "medium",
+    "should_be_removed": false,
+    "comments": "Confirmed: missing update of plotId allows duplicate occupancy and corrupts reward accounting."
+  },
+  {
+    "index": 19,
+    "severity": "medium",
+    "should_be_removed": false,
+    "comments": "Off-by-one bug is valid; check should be `>= 10`. Severity medium per low impact/high likelihood."
+  },
+  {
+    "index": 20,
+    "severity": "unchanged",
+    "should_be_removed": true,
+    "comments": "False positive: Solidity \u22650.8 auto-checks prevent overflow. Removal recommended."
+  },
+  {
+    "index": 21,
+    "severity": "medium",
+    "should_be_removed": false,
+    "comments": "Misconfiguration leads to a DoS by treating addresses as constants; assign medium severity."
+  },
+  {
+    "index": 22,
+    "severity": "low",
+    "should_be_removed": true,
+    "comments": "Overflow on uint8 is auto-checked by Solidity 0.8 and the 10-token stake limit prevents reaching 255 iterations, so this is a false positive."
+  },
+  {
+    "index": 23,
+    "severity": "info",
+    "should_be_removed": true,
+    "comments": "Purely a UX/logic quirk with no security impact or exploit path; remove as false positive."
+  },
+  {
+    "index": 24,
+    "severity": "high",
+    "should_be_removed": false,
+    "comments": "Mis-used storage keys will load incorrect values; fix key usage to restore correct parameters."
+  },
+  {
+    "index": 25,
+    "severity": "medium",
+    "should_be_removed": false,
+    "comments": "Valid UX/design issue; medium severity."
+  },
+  {
+    "index": 26,
+    "severity": "low",
+    "should_be_removed": true,
+    "comments": "Underflow in uint conversion is automatically reverted by Solidity \u22650.8 with no `unchecked` block, making this a false positive."
+  },
+  {
+    "index": 27,
+    "severity": "medium",
+    "should_be_removed": false,
+    "comments": "Off-by-one allows an 11th Munchable to be staked; minor logical flaw."
+  },
+  {
+    "index": 28,
+    "severity": "info",
+    "should_be_removed": true,
+    "comments": "False positive: uint8 loop counter cannot exceed 11 iterations due to enforced staking limit; no overflow is possible under Solidity \u22650.8."
+  },
+  {
+    "index": 29,
+    "severity": "best practices",
+    "should_be_removed": false,
+    "comments": "Valid best-practice suggestion about gas optimization vs. array ordering; not a security issue."
+  },
+  {
+    "index": 30,
+    "severity": "medium",
+    "should_be_removed": false,
+    "comments": "Add explicit bounds checks for REALM_BONUSES and RARITY_BONUSES to prevent out-of-bounds reverts."
+  },
+  {
+    "index": 31,
+    "severity": "medium",
+    "should_be_removed": false,
+    "comments": "Require `plotMetadata[landlord].lastUpdated != 0` before staking to ensure a nonzero tax rate."
+  },
+  {
+    "index": 32,
+    "severity": "unchanged",
+    "should_be_removed": true,
+    "comments": "CEI pattern is followed: state changes precede external calls, eliminating reentrancy risk."
+  },
+  {
+    "index": 33,
+    "severity": "medium",
+    "should_be_removed": false,
+    "comments": "The function must set toilerState[tokenId].plotId to the new plotId to keep internal state and reward allocations consistent."
+  },
+  {
+    "index": 34,
+    "severity": "low",
+    "should_be_removed": false,
+    "comments": "Add explicit bounds checks for computed indices into REALM_BONUSES and RARITY_BONUSES to prevent out-of-bounds reverts causing DoS."
+  },
+  {
+    "index": 35,
+    "severity": "low",
+    "should_be_removed": false,
+    "comments": "Validate that PRICE_PER_PLOT is non-zero during initialization or config updates to prevent division-by-zero DoS."
+  },
+  {
+    "index": 36,
+    "severity": "medium",
+    "should_be_removed": false,
+    "comments": "Valid design concern about a DoS risk due to modifier coupling; treat as best practices and keep at medium severity."
+  },
+  {
+    "index": 37,
+    "severity": "medium",
+    "should_be_removed": false,
+    "comments": "Off-by-one logic error in staking limit is valid; increased to medium severity due to high likelihood of bypassing the cap."
+  },
+  {
+    "index": 38,
+    "severity": "high",
+    "should_be_removed": false,
+    "comments": "The overflow creates a Denial-of-Service via wraparound and multiplication overflow; valid high-severity issue."
+  },
+  {
+    "index": 39,
+    "severity": "high",
+    "should_be_removed": false,
+    "comments": "Add a re-entrancy guard (e.g., `nonReentrant`) or refactor to follow CEI around external calls to prevent exploit."
+  },
+  {
+    "index": 40,
+    "severity": "low",
+    "should_be_removed": false,
+    "comments": "Off\u2010by\u2010one in staking limit can self\u2010DOS via uint8 overflow; recommend fixing the condition and using a wider counter type."
+  },
+  {
+    "index": 41,
+    "severity": "high",
+    "should_be_removed": false,
+    "comments": "Uninitialized metadata allows zero-tax farming, exploit is practical and undermines protocol economics; raising severity to high."
+  },
+  {
+    "index": 42,
+    "severity": "medium",
+    "should_be_removed": false,
+    "comments": "The function never updates `toilerState[tokenId].plotId`, causing inconsistent state and faulty reward logic; add `toilerState[tokenId].plotId = plotId;`."
+  },
+  {
+    "index": 43,
+    "severity": "medium",
+    "should_be_removed": true,
+    "comments": "False positive: Solidity \u22650.8 reverts on overflow/underflow and no unchecked block is used."
+  },
+  {
+    "index": 44,
+    "severity": "high",
+    "should_be_removed": false,
+    "comments": "Incorrect StorageKey references lead to wrong config values and break tax-rate logic; update keys to the correct enums."
+  },
+  {
+    "index": 45,
+    "severity": "low",
+    "should_be_removed": false,
+    "comments": "Missing reentrancy guard and CEI violation; low risk given trusted NFT contract but recommend adding guard or moving state updates before transfer."
+  },
+  {
+    "index": 46,
+    "severity": "unchanged",
+    "should_be_removed": true,
+    "comments": "This issue is theoretical: indices come from controlled on-chain attribute and player metadata, so no realistic OOB exploit path exists."
+  },
+  {
+    "index": 47,
+    "severity": "low",
+    "should_be_removed": false,
+    "comments": "Ensure PRICE_PER_PLOT is initialized non-zero in configuration to avoid division-by-zero reverts."
+  },
+  {
+    "index": 48,
+    "severity": "best practices",
+    "should_be_removed": false,
+    "comments": "Add non-zero address validation after retrieving each external contract address to prevent misconfiguration failures."
+  },
+  {
+    "index": 49,
+    "severity": "best practices",
+    "should_be_removed": false,
+    "comments": "Off-by-one business-logic bug; low security impact but correctable as a best-practices recommendation."
+  },
+  {
+    "index": 50,
+    "severity": "low",
+    "should_be_removed": false,
+    "comments": "Loop may run out of gas or wrap the uint8 counter; consider refactoring into smaller batches or using dynamic counters to avoid DoS."
+  },
+  {
+    "index": 51,
+    "severity": "info",
+    "should_be_removed": false,
+    "comments": "Centralization risk is a known design choice; keep as informational."
+  },
+  {
+    "index": 52,
+    "severity": "unchanged",
+    "should_be_removed": true,
+    "comments": "Per overflow rules, Solidity \u22650.8 auto-reverts without `unchecked`, so this is a false positive and should be removed."
+  },
+  {
+    "index": 53,
+    "severity": "low",
+    "should_be_removed": false,
+    "comments": "Add a require check that PRICE_PER_PLOT > 0 to prevent division by zero; severity set to low."
+  },
+  {
+    "index": 54,
+    "severity": "high",
+    "should_be_removed": false,
+    "comments": "Missing update of `toilerState.plotId` causes incorrect occupancy and can permanently lock plots; this logic error should be fixed."
+  },
+  {
+    "index": 55,
+    "severity": "medium",
+    "should_be_removed": false,
+    "comments": "Off-by-one allows an 11th munchable; adjust to medium severity due to low impact but high exploit likelihood."
+  },
+  {
+    "index": 56,
+    "severity": "medium",
+    "should_be_removed": false,
+    "comments": "Underflow in reward calc causes DoS locking NFTs; adjust severity to medium."
+  },
+  {
+    "index": 57,
+    "severity": "medium",
+    "should_be_removed": false,
+    "comments": "Add a check that `landlord` is registered via `accountManager.getPlayer` before transferring the NFT to prevent permanent lock."
+  },
+  {
+    "index": 58,
+    "severity": "medium",
+    "should_be_removed": false,
+    "comments": "Negative signed-to-unsigned conversion under 0.8 causes DoS and NFT lock; valid risk."
+  },
+  {
+    "index": 59,
+    "severity": "medium",
+    "should_be_removed": false,
+    "comments": "Add a check in `stakeMunchable` that the `landlord` is registered (e.g. `accountManager.getPlayer(landlord).registrationDate != 0`) or that `plotMetadata[landlord].lastUpdated != 0` to prevent lock\u2010up."
+  },
+  {
+    "index": 60,
+    "severity": "low",
+    "should_be_removed": false,
+    "comments": "External calls precede state updates without a guard or CEI, enabling a reentrancy vulnerability."
+  },
+  {
+    "index": 61,
+    "severity": "medium",
+    "should_be_removed": false,
+    "comments": "Valid off-by-one logic bug enabling perpetual reward farming; severity adjusted to medium due to high impact and medium likelihood."
+  },
+  {
+    "index": 62,
+    "severity": "medium",
+    "should_be_removed": false,
+    "comments": "Signed underflow in int256\u2192uint256 cast allows extreme reward inflation; adjust to medium severity."
+  },
+  {
+    "index": 63,
+    "severity": "medium",
+    "should_be_removed": false,
+    "comments": "Misconfigured tax bounds allow rates >100%, causing underflow revert, DOS of tenants, and landlord reward theft."
+  },
+  {
+    "index": 64,
+    "severity": "medium",
+    "should_be_removed": false,
+    "comments": "Validate DEFAULT_TAX_RATE against MIN_TAX_RATE and MAX_TAX_RATE to prevent underflow and DoS."
+  },
+  {
+    "index": 65,
+    "severity": "medium",
+    "should_be_removed": false,
+    "comments": "Off-by-one logic allows an 11th munchable, valid medium-severity bug"
+  },
+  {
+    "index": 66,
+    "severity": "high",
+    "should_be_removed": false,
+    "comments": "Valid vulnerability: missing plotMetadata initialization allows zero-tax exploit."
+  },
+  {
+    "index": 67,
+    "severity": "high",
+    "should_be_removed": false,
+    "comments": "Off-by-one allows an 11th token; update comparison to `>= 10` to enforce the 10-token cap."
+  },
+  {
+    "index": 68,
+    "severity": "high",
+    "should_be_removed": false,
+    "comments": "This is a genuine state\u2010update bug; add `toilerState[tokenId].plotId = plotId` to prevent ghost occupancy."
+  },
+  {
+    "index": 69,
+    "severity": "high",
+    "should_be_removed": false,
+    "comments": "Add `toilerState[tokenId].plotId = plotId` in `transferToUnoccupiedPlot` to prevent ghost occupancy and denial-of-service."
+  },
+  {
+    "index": 70,
+    "severity": "info",
+    "should_be_removed": true,
+    "comments": "False positive: triggerPlotMetadata contains only safe state writes under Solidity 0.8 with no external calls or overflow risk."
+  },
+  {
+    "index": 71,
+    "severity": "medium",
+    "should_be_removed": false,
+    "comments": "Consider adding a cooldown or timelock to tax rate updates to prevent front-running and ensure predictable economic outcomes."
+  },
+  {
+    "index": 72,
+    "severity": "best practices",
+    "should_be_removed": false,
+    "comments": "Use an explicit existence check (e.g., call `exists` or catch `ownerOf` revert) and revert with a clear error message for non-existent tokenIds."
+  },
+  {
+    "index": 73,
+    "severity": "unchanged",
+    "should_be_removed": true,
+    "comments": "Each unstake uses pop(), keeping the array length \u2264 10. No unbounded growth occurs, so this finding is a false positive."
+  },
+  {
+    "index": 74,
+    "severity": "low",
+    "should_be_removed": false,
+    "comments": "Validate `landlord != address(0)` at the start of `stakeMunchable` to prevent permanent token lock."
+  },
+  {
+    "index": 75,
+    "severity": "low",
+    "should_be_removed": true,
+    "comments": "False positive: solidity \u22650.8 auto-reverts on overflow, no unchecked block, and no realistic exploit path."
+  },
+  {
+    "index": 76,
+    "severity": "medium",
+    "should_be_removed": false,
+    "comments": "Dirty flag isn\u2019t reset, causing permanent skip of affected munchables; consider clearing dirty when plots become available or adjusting the logic."
+  },
+  {
+    "index": 77,
+    "severity": "best practices",
+    "should_be_removed": false,
+    "comments": "This is an intended design choice around when tax rates apply. Recommend documenting the behavior as a best practice rather than flagging a security issue."
+  },
+  {
+    "index": 78,
+    "severity": "low",
+    "should_be_removed": false,
+    "comments": "Add a check to require the new plotId differs from the current one to prevent misleading events."
+  },
+  {
+    "index": 79,
+    "severity": "high",
+    "should_be_removed": false,
+    "comments": "Recommend recording the tax rate at the start of farming or allowing users to set a minimum expected reward to prevent last-minute rate manipulation."
+  },
+  {
+    "index": 80,
+    "severity": "best practices",
+    "should_be_removed": false,
+    "comments": "This is a front-running/time-of-use design suggestion without a concrete exploit path; treat as a best-practices note rather than a security flaw."
+  },
+  {
+    "index": 81,
+    "severity": "low",
+    "should_be_removed": false,
+    "comments": "Valid logic issue: landlord\u2019s tax share uses a stale rate one epoch late. Recommend applying the current rate before distribution."
+  },
+  {
+    "index": 82,
+    "severity": "low",
+    "should_be_removed": false,
+    "comments": "Precision mismatch is minor and intentional; recommend unifying scaling for clarity but severity is low."
+  },
+  {
+    "index": 83,
+    "severity": "info",
+    "should_be_removed": true,
+    "comments": "No oracle usage is intended; this finding is informational and not a security issue."
+  },
+  {
+    "index": 84,
+    "severity": "medium",
+    "should_be_removed": false,
+    "comments": "This precision loss is a valid issue; consider reordering operations or using fixed-point arithmetic to minimize truncation."
+  },
+  {
+    "index": 85,
+    "severity": "medium",
+    "should_be_removed": false,
+    "comments": "Integer division causes small schnibble shares to round down to zero; consider using a high-precision mulDiv or reorder operations to reduce rounding error."
+  }
+]
