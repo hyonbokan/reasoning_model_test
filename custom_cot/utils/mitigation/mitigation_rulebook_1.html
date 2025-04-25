@@ -87,15 +87,3 @@
   </tbody>
 </table>
 <!-- END -->
-
-<!-- RULE:final -->
-<h3>[final] Final Response Rules</h3>
-<ul>
-  <li>Output must follow the <strong>AuditResponse</strong> JSON schema.</li>
-  <li>Use lowercase field name <code>"severity"</code>.</li>
-  <li>Return <code>index</code>, adjusted <code>"severity"</code>, and optional <code>"comments"</code>.</li>
-  <li><strong>Do not</strong> modify unrelated description/code in the finding.</li>
-  <li>Only set <code>"should_be_removed": true</code> when <strong>certain</strong> it is a false positive.</li>
-  <li>Be concise but clear in <code>"comments"</code>.</li>
-</ul>
-<!-- END -->

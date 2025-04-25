@@ -1,3 +1,6 @@
+Schema 2:
 cot_schema2_2_gpt-4.1-2025-04-14_dynamicRB_html: Script completed in 2305.87 seconds
 cot_schema2_2_o4-mini_dynamicRB_html: Script completed in 2100.41 seconds
 cot_schema2_o4-mini_2025-04-25_14-10-05: Script completed in 2048.40 seconds
+
+Schema 3:

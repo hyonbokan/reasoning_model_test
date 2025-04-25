@@ -1,6 +1,6 @@
 [
   { "id": "O-1", "rule": "overflow", "text": "Is the finding explicitly about arithmetic overflow / underflow?" },
-  { "id": "O-2", "rule": "overflow", "text": "Is the contract compiled with Solidity ≥ 0.8.0 (auto‑checks enabled)?" },
+  { "id": "O-2", "rule": "overflow", "text": "Is the contract compiled with Solidity ≥ 0.8.0 (auto-checks enabled)?" },
   { "id": "O-3", "rule": "overflow", "text": "Does the arithmetic lie inside an `unchecked {}` block?" },
   { "id": "O-4", "rule": "overflow", "text": "Is there a documented business requirement to handle overflow differently than revert?" },
   { "id": "O-5", "rule": "overflow", "text": "Is the overflow part of a larger exploit chain?" },
@@ -8,22 +8,21 @@
   { "id": "R-1", "rule": "reentrancy", "text": "Does the function call an external *untrusted* contract?" },
   { "id": "R-2", "rule": "reentrancy", "text": "Are state changes executed *after* that external call?" },
   { "id": "R-3", "rule": "reentrancy", "text": "Is *no* reentrancy guard (`nonReentrant`, etc.) present?" },
-  { "id": "R-4", "rule": "reentrancy", "text": "Is the CEI (Checks‑Effects‑Interactions) pattern **NOT** followed?" },
+  { "id": "R-4", "rule": "reentrancy", "text": "Is the CEI (Checks-Effects-Interactions) pattern **NOT** followed?" },
   { "id": "R-5", "rule": "reentrancy", "text": "Is the call internal (same contract) rather than external?" },
 
-  { "id": "A-1", "rule": "access", "text": "Can an un‑privileged user call the privileged function?" },
+  { "id": "A-1", "rule": "access", "text": "Can an un-privileged user call the privileged function?" },
   { "id": "A-2", "rule": "access", "text": "Does this violate decentralisation / timelock assumptions?" },
   { "id": "A-3", "rule": "access", "text": "Does the issue enable critical protocol manipulation?" },
 
   { "id": "F-1", "rule": "fp", "text": "Is the finding duplicated elsewhere in the report?" },
   { "id": "F-2", "rule": "fp", "text": "Is the behaviour clearly documented or intended by design?" },
   { "id": "F-3", "rule": "fp", "text": "Is the issue purely theoretical with no practical exploit path?" },
-  { "id": "F-4", "rule": "fp", "text": "Overflow case: Solidity ≥ 0.8 **and** no `unchecked` block present?" },
+  { "id": "F-4", "rule": "fp", "text": "Overflow case: Solidity ≥ 0.8 **and** no `unchecked` block present?" },
   { "id": "F-5", "rule": "fp", "text": "Reentrancy case: Are proper guards or CEI pattern present?" },
+  { "id": "F-6", "rule": "fp", "text": "Final decision: should this finding be marked as a false positive and removed from the report?" },
 
   { "id": "S-1", "rule": "severity", "text": "Select **impact**: high / medium / low." },
   { "id": "S-2", "rule": "severity", "text": "Select **likelihood**: high / medium / low." },
-  { "id": "S-3", "rule": "severity", "text": "Using the matrix, choose adjusted severity: high / medium / low / info / best practices." },
-
-  { "id": "X-1", "rule": "final", "text": "Should the finding be removed as a definite false positive?" }
+  { "id": "S-3", "rule": "severity", "text": "Using the matrix, choose adjusted severity: high / medium / low / info / best practices." }
 ]
