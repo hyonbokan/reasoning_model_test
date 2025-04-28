@@ -1,0 +1,518 @@
+[
+  {
+    "index": 0,
+    "new_severity": "high",
+    "should_be_removed": false,
+    "comments": "Severity is correctly classified as high due to protocol collapse risk if the admin sets a malicious config. Not a false positive; recommend strict validation on config and strong safe-casting of bonus values."
+  },
+  {
+    "index": 1,
+    "new_severity": "high",
+    "should_be_removed": false,
+    "comments": "Severity raised from medium to high, as the combination of medium impact (integrity of rewards and protocol logic) and high likelihood (routine plot moves) fits the severity matrix. The risk directly translates into user-visible mis-accounting and can be exploited in normal use. The finding is real and should not be removed."
+  },
+  {
+    "index": 2,
+    "new_severity": "low",
+    "should_be_removed": false,
+    "comments": "Accurately classified as low severity: the bug does break an invariant but does not escalate to a more critical financial or protocol control issue."
+  },
+  {
+    "index": 3,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 4,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Severity raised from low to medium to reflect that the entry point aligns with classic re-entrancy risk patterns (untrusted external call, post-call state changes, no guard). Impact is non-trivial given the potential for exploiting business logic. If future changes use a trusted AccountManager or add proper re-entrancy guards, this finding could be re-evaluated."
+  },
+  {
+    "index": 5,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "The issue can cause disruption in farming and state consistency, but it does not pose a direct critical security threat or global fund loss. Downgraded to medium severity as per guidelines."
+  },
+  {
+    "index": 6,
+    "new_severity": "low",
+    "should_be_removed": false,
+    "comments": "Downgraded from Medium to Low. Root cause is a protocol UX bug rather than a true security vulnerability; workaround (unstake/restake) is always possible, limiting severity. Users do not lose access to funds, only experience a temporary loss of farming efficiency that is reversible with explicit action."
+  },
+  {
+    "index": 7,
+    "new_severity": "unchanged",
+    "should_be_removed": false,
+    "comments": "Severity of 'low' is appropriate given the minimal business impact and likelihood. Not a false positive."
+  },
+  {
+    "index": 8,
+    "new_severity": "low",
+    "should_be_removed": false,
+    "comments": "The contract does not use unchecked blocks and runs on Solidity 0.8.25, so overflows/underflows are generally reverted. However, this is a cast logic issue when converting a possible negative int256 value to uint256, resulting in large values if not controlled. While this is a bug, it's not an overflow/underflow according to how Solidity defines those issues since the actual arithmetic does not overflow. Classification as low severity is appropriate unless configuration ranges for bonuses are shown to allow this in the wild."
+  },
+  {
+    "index": 9,
+    "new_severity": "best practices",
+    "should_be_removed": false,
+    "comments": "Downgraded from 'low' to 'best practices' as this is a non-security, non-correctness-related efficiency issue that does not enable user harm or unintended protocol manipulation. Recommend optimizing for gas savings, but this is not a bug or exploit."
+  },
+  {
+    "index": 10,
+    "new_severity": "info",
+    "should_be_removed": false,
+    "comments": "Clarity issues around configuration keys merit a note for maintainers and reviewers but do not generally impact functional security, rendering this mostly informational unless a concrete bug is shown."
+  },
+  {
+    "index": 11,
+    "new_severity": "unchanged",
+    "should_be_removed": true,
+    "comments": "This is a non-exploitable, low-impact protocol integrity gap, not a security or manipulation risk. It stems from omission of defensive checks and, at worst, causes landlord rewards to be zero unless they have initialized metadata\u2014which protocol flows are expected to enforce. No exploit path exists, so it may be omitted as a false positive."
+  },
+  {
+    "index": 12,
+    "new_severity": "best practices",
+    "should_be_removed": false,
+    "comments": "Maintain as 'best practices' since it is neither impactful nor likely, and the logic is intentionally safe given system constraints."
+  },
+  {
+    "index": 13,
+    "new_severity": "high",
+    "should_be_removed": false,
+    "comments": "This is a valid and critical logic bug. The severity is correctly marked as 'high' since exploitation leads to denial of service for assets and incorrect contract state. No adjustment is necessary."
+  },
+  {
+    "index": 14,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Severity 'medium' is appropriate: denial-of-service risk if PRICE_PER_PLOT misconfiguration occurs halts core protocol actions, but cannot directly be exploited for value extraction. Consider validating config values to prevent similar denial-of-service vectors."
+  },
+  {
+    "index": 15,
+    "new_severity": "unchanged",
+    "should_be_removed": true,
+    "comments": "CEI is respected in the relevant functions and the contract is not vulnerable to classic reentrancy. Remove this finding as a false positive."
+  },
+  {
+    "index": 16,
+    "new_severity": "low",
+    "should_be_removed": false,
+    "comments": "This is a minor logic bug with negligible impact. The 'low' severity is justified as per the matrix (low impact, low likelihood)."
+  },
+  {
+    "index": 17,
+    "new_severity": "best practices",
+    "should_be_removed": false,
+    "comments": "Leaving at best practices. While supporting `onERC721Received` improves interoperability, this contract does not require it for its intended interactions. No direct exploit path exists."
+  },
+  {
+    "index": 18,
+    "new_severity": "high",
+    "should_be_removed": false,
+    "comments": "The severity is justified as 'high'. The bug results in broken invariants, possible duplicated plot occupancy, and corrupting reward calculation and internal accounting, which can be exploited or result in persistent state inconsistencies. The issue is not theoretical and could be triggered by users through normal usage."
+  },
+  {
+    "index": 19,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Proper fix would require a change from `> 10` to `>= 10` in the limit check; the finding is valid and severity is justified according to the rules."
+  },
+  {
+    "index": 20,
+    "new_severity": "unchanged",
+    "should_be_removed": true,
+    "comments": "Solidity >=0.8.0 auto-reverts on overflow; no unchecked block present. This is not a true overflow vulnerability but a privileged configuration DoS vector. False positive per policy."
+  },
+  {
+    "index": 21,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Severity raised to 'medium' because the impact is high (bricks core protocol functions), even if likelihood is not high due to detection in reasonable deployment practices. This is a serious configuration risk, though not a contract code flaw per se."
+  },
+  {
+    "index": 22,
+    "new_severity": "low",
+    "should_be_removed": false,
+    "comments": "Low severity is appropriate given the internal stake limit of 10. The issue is theoretical unless contract logic changes in the future."
+  },
+  {
+    "index": 23,
+    "new_severity": "info",
+    "should_be_removed": false,
+    "comments": "This is indeed a very minor information/UX-related matter. It does not create a material risk or exploit, but leaving at 'info' is reasonable for clarity. No adjustment needed."
+  },
+  {
+    "index": 24,
+    "new_severity": "high",
+    "should_be_removed": false,
+    "comments": "Severity is correctly marked as High given the likely system-wide impact and likelihood. If keys are confirmed to be mismatched, the economic and operational function of the protocol will be severely impaired."
+  },
+  {
+    "index": 25,
+    "new_severity": "low",
+    "should_be_removed": false,
+    "comments": "Severity lowered to 'low'. The issue does not put user funds at risk, nor does it involve a workflow-breaking bug or access control problem; it is primarily a user feedback/communication issue."
+  },
+  {
+    "index": 26,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "The calculation's revert on negative results is standard and not an unchecked arithmetic bug, but the overall protocol availability risk makes this a legitimate logical vulnerability. Severity as 'medium' is justified per the rules."
+  },
+  {
+    "index": 27,
+    "new_severity": "low",
+    "should_be_removed": false,
+    "comments": "This logic issue is a boundary off-by-one error with limited practical consequences, as it only marginally increases a user's staked Munchables beyond the expected cap. It should not be classified as medium severity; 'low' is appropriate."
+  },
+  {
+    "index": 28,
+    "new_severity": "info",
+    "should_be_removed": false,
+    "comments": "Demote severity to 'info'. While it is generally good practice to align variable types, the explicit staking limit ensures no exploit, and this cannot cause a real-world issue. This is a best-practice/code quality concern, not a vulnerability."
+  },
+  {
+    "index": 29,
+    "new_severity": "unchanged",
+    "should_be_removed": true,
+    "comments": "This is a false positive. The 'swap and pop' removal pattern is intentionally used for gas efficiency and does not compromise contract safety or correctness. Issues with UI/integration expecting a specific order should be handled off-chain. The behavior is both standard and expected in Solidity. No changes to contract severity or code are required."
+  },
+  {
+    "index": 30,
+    "new_severity": "info",
+    "should_be_removed": false,
+    "comments": "Recommend downgrading this to 'info'. While explicit bounds checking is a best practice for safety and robustness, any out-of-bounds access would simply revert the transaction, and the NFT attribute indices should already be trusted within protocol constraints. No critical impact or exploit arises, so this does not reach the 'low' security vulnerability bar."
+  },
+  {
+    "index": 31,
+    "new_severity": "low",
+    "should_be_removed": false,
+    "comments": "Severity is appropriately classified as 'low' because impact is limited to missing tax for the landlord, not a critical loss. Likelihood is 'medium'\u2014landlords can easily initialize metadata, and the account manager contract can as well. No justification for escalation or removal under fp or business rules."
+  },
+  {
+    "index": 32,
+    "new_severity": "high",
+    "should_be_removed": false,
+    "comments": "All reentrancy criteria are met: (1) call to an untrusted external contract, (2) no reentrancy guard is present, and (3) state changes follow the external call. This is a true positive. Given the possible impact and likelihood, severity is accurately classified as High."
+  },
+  {
+    "index": 33,
+    "new_severity": "high",
+    "should_be_removed": false,
+    "comments": "Severity escalated from Medium to High. This omission causes a persistent and reproducible corrupt state, affecting all users and undermining the correctness of subsequent operations and event emissions. As the likelihood is high and impact is medium, matrix severity is 'high' per the rules."
+  },
+  {
+    "index": 34,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Issue is valid. Risk is denial-of-service from misconfiguration or malicious data state. No need to adjust severity; medium is appropriate."
+  },
+  {
+    "index": 35,
+    "new_severity": "high",
+    "should_be_removed": false,
+    "comments": "Upgrade severity from Medium to High based on impact/likelihood severity matrix: DoS of protocol via division by zero config error. Not a false positive."
+  },
+  {
+    "index": 36,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Severity remains 'medium' as per impact-likelihood matrix: critical plot management is blocked if _farmPlots reverts, but exploitability depends on upstream/internal logic failures rather than direct attacker control. The issue is valid and should be kept."
+  },
+  {
+    "index": 37,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Severity should be upgraded to medium due to high likelihood and direct exploitability, despite limited impact."
+  },
+  {
+    "index": 38,
+    "new_severity": "high",
+    "should_be_removed": false,
+    "comments": "Severity is justified as high due to ease of exploit, lack of privilege required, and significant disruption to protocol operations. Not a false positive."
+  },
+  {
+    "index": 39,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "The finding matches all reentrancy retention conditions: no guard, external call to untrusted contract, and state changes after the call. The described exploit path is valid. Severity is correctly classified as 'medium' by the impact/likelihood matrix."
+  },
+  {
+    "index": 40,
+    "new_severity": "unchanged",
+    "should_be_removed": false,
+    "comments": "Assessment matches original severity. Although the bug is valid and can break account functionality, the impact is contained and not systemic. Recommend fixing defensive coding and considering array bounds checks."
+  },
+  {
+    "index": 41,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Adjusted severity from 'low' to 'medium' due to high likelihood paired with moderate economic impact. Exploit is practical and aligns with the definition of meaningful protocol deviation, but not full system compromise."
+  },
+  {
+    "index": 42,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Downgraded from 'high' to 'medium'. While state inconsistency can lead to reward errors and confusion, there is no direct theft, privilege escalation, or protocol compromise. However, maintaining correct accounting/state is important; so this should be fixed promptly."
+  },
+  {
+    "index": 43,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Severity downgraded from 'high' to 'medium'. Although the impact is high (loss of protocol funds), the likelihood depends on the configuration of the bonus arrays (REALM_BONUSES, RARITY_BONUSES) and whether a negative bonus large enough to trigger the problem can be set. This non-trivial precondition makes the exploitability medium rather than high."
+  },
+  {
+    "index": 44,
+    "new_severity": "unchanged",
+    "should_be_removed": false,
+    "comments": "The use of storage keys meant for contract addresses rather than value-specific configuration keys presents a legitimate risk to correct contract behavior. Medium severity is justified according to the provided matrix."
+  },
+  {
+    "index": 45,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 46,
+    "new_severity": "low",
+    "should_be_removed": false,
+    "comments": "Recommend adding explicit input validation or array bounds checks on NFT attributes if external control is possible. However, the exploit impact is limited to transaction revert (DoS) with no fund loss or asset theft possible, hence reduced from medium to low severity as per guidelines."
+  },
+  {
+    "index": 47,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Finding is accurate, correctly ranks as 'medium' under the severity matrix given the impact on usability and potential fund lock. Recommend requiring PRICE_PER_PLOT > 0 at initialization or whenever updated."
+  },
+  {
+    "index": 48,
+    "new_severity": "low",
+    "should_be_removed": false,
+    "comments": "The risk manifests as denial of service via reverted calls, but does not enable a direct exploit or loss. This is best categorized as a reliability/configuration robustness issue, not a vulnerability."
+  },
+  {
+    "index": 49,
+    "new_severity": "low",
+    "should_be_removed": false,
+    "comments": "This is a minor business logic bug that does not offer an exploit path or have security repercussions. The categorization as 'low' is appropriate, and the finding should not be removed."
+  },
+  {
+    "index": 50,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "The DoS via gas limits is real but capped by uint8, and impacts only high-volume harvesters. Not protocol-critical, but deserves emphasis for usability and liveness. Keep as Medium."
+  },
+  {
+    "index": 51,
+    "new_severity": "info",
+    "should_be_removed": false,
+    "comments": "The severity should remain 'info' because centralisation risks, absent violation of protocol assumptions or technical bugs, are design and governance issues only. The finding serves as a user warning, not a security vulnerability."
+  },
+  {
+    "index": 52,
+    "new_severity": "high",
+    "should_be_removed": false,
+    "comments": "This is a genuine, high-risk business logic arithmetic flaw that can cause massive over-rewarding via unchecked negative bonus. Remediation should involve input sanitization or capping the allowed downward adjustment."
+  },
+  {
+    "index": 53,
+    "new_severity": "low",
+    "should_be_removed": false,
+    "comments": "The impact is limited to a DoS condition from misconfiguration, with low exploit likelihood; thus severity should be 'low'."
+  },
+  {
+    "index": 54,
+    "new_severity": "unchanged",
+    "should_be_removed": false,
+    "comments": "The finding is valid: storage inconsistency may cause application bugs or monitoring issues, but does not threaten core protocol security or user assets. The original severity of 'low' is appropriate."
+  },
+  {
+    "index": 55,
+    "new_severity": "low",
+    "should_be_removed": false,
+    "comments": "This is a minor business logic issue due to an off-by-one error. The deviation permits an additional staked Munchable over the intended cap, but the risk and potential for abuse is minimal. The initial 'low' severity is appropriate."
+  },
+  {
+    "index": 56,
+    "new_severity": "unchanged",
+    "should_be_removed": true,
+    "comments": "This underflow does not present a vulnerability because Solidity 0.8.25 automatically reverts on under/overflow, unless inside `unchecked{}`. Per audit rules, such findings are false positives and should be removed."
+  },
+  {
+    "index": 57,
+    "new_severity": "high",
+    "should_be_removed": false,
+    "comments": "Finding is accurate and severe: missing landlord registration check can cause loss of user assets. Severity should remain high."
+  },
+  {
+    "index": 58,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Impact is high (permanent loss of NFT without upgrade/emergency recovery), but likelihood is only medium since it depends on negative values in bonuses configuration and user interaction. Therefore, per matrix, severity is downgraded to 'medium'."
+  },
+  {
+    "index": 59,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Severity downgraded to medium due to moderate likelihood: a user generally would not intentionally stake to an unregistered landlord, and this scenario is avoidable with improved UI checks. Nevertheless, asset loss is possible and warrants remediation."
+  },
+  {
+    "index": 60,
+    "new_severity": "high",
+    "should_be_removed": false,
+    "comments": "All mitigation checklist criteria for reentrancy retention and high severity are clearly met: unguarded external calls precede state changes, and untrusted ERC-721/tokenManager contracts can exploit the vulnerability."
+  },
+  {
+    "index": 61,
+    "new_severity": "high",
+    "should_be_removed": false,
+    "comments": "This is a true logic error with operational and economic impact. The high severity is justified as the exploitation can lead to perpetual illicit farming of rewards, directly undermining the economic integrity of the protocol."
+  },
+  {
+    "index": 62,
+    "new_severity": "high",
+    "should_be_removed": false,
+    "comments": "Severity high is confirmed because the exploit allows an attacker to mint unbounded schnibbles, breaking protocol economics. The calculation is not protected by overflow/underflow checks because it relies on manual int-to-uint256 casting."
+  },
+  {
+    "index": 63,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "According to the provided matrix and assessment rubric, the issue's impact is high (protocol/funds at risk) but the likelihood drops to medium because configuration errors stem from central mismanagement, not a standard exploit vector for unprivileged users. Per the matrix, this results in a 'medium' severity classification."
+  },
+  {
+    "index": 64,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Severity is reduced from high to medium per matrix (High impact, Medium likelihood). The configuration must be intentionally or accidentally set out of bounds for exploitability."
+  },
+  {
+    "index": 65,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Leave severity as 'medium' based on high likelihood and low-moderate impact, as per the severity matrix. This is a legitimate bug with user-facing implications but is not a critical security issue."
+  },
+  {
+    "index": 66,
+    "new_severity": "unchanged",
+    "should_be_removed": false,
+    "comments": "Severity is appropriately set at 'medium' as the issue allows bypass of landlord tax revenue but does not permit critical protocol compromise or permission escalation."
+  },
+  {
+    "index": 67,
+    "new_severity": "high",
+    "should_be_removed": false,
+    "comments": "Confirmed: The off-by-one bug allows execution of 11 staked tokens when the system invariant requires max 10. The check should be changed from \"> 10\" to \">= 10\" to enforce the limit. The severity per matrix is 'high' (Impact: medium, Likelihood: high)."
+  },
+  {
+    "index": 68,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "The finding is valid and not a false positive. The severity should remain medium based on impact (DoS of plots, but no asset loss) and likelihood (bug is easily hit in routine operations)."
+  },
+  {
+    "index": 69,
+    "new_severity": "high",
+    "should_be_removed": false,
+    "comments": "Severity increased from medium to high: Exploiting this bug would trivially enable a single account to block all available plots by repeated transfers. This is a protocol-blocking DoS for other users and thus qualifies as 'high' impact with 'high' likelihood according to the severity matrix."
+  },
+  {
+    "index": 70,
+    "new_severity": "info",
+    "should_be_removed": false,
+    "comments": "Risk analysis confirms this is informational only, with no path to high/medium impact and no likelihood of exploit."
+  },
+  {
+    "index": 71,
+    "new_severity": "low",
+    "should_be_removed": false,
+    "comments": "Adjusting from 'best practices' to 'low' as per severity guidelines, since there is a potential but minor economic impact with limited likelihood."
+  },
+  {
+    "index": 72,
+    "new_severity": "unchanged",
+    "should_be_removed": true,
+    "comments": "This is not a security risk nor an integrity violation; at worst, it is a UX improvement. The revert occurs as required by the ERC721 standard and signals the invalidity immediately. No increased likelihood or impact of exploit\u2014false positive and should be removed."
+  },
+  {
+    "index": 73,
+    "new_severity": "low",
+    "should_be_removed": false,
+    "comments": "The risk of unbounded growth is mitigated by the fact that the code removes the tokenId on unstake by swapping and popping, ensuring the array does not grow on legitimate stake/unstake cycles. No evidence of true unbounded growth or exploitable DoS, but good to note and explicitly check for future upgrades."
+  },
+  {
+    "index": 74,
+    "new_severity": "low",
+    "should_be_removed": false,
+    "comments": "Downgraded severity to 'low' as this is a user-level input error with straightforward mitigation on front-end and no direct adversarial gain. Not a protocol-level vulnerability or critical exploit."
+  },
+  {
+    "index": 75,
+    "new_severity": "info",
+    "should_be_removed": false,
+    "comments": "This is not an integer overflow/underflow but a possible out-of-bounds revert. There is no unchecked arithmetic in a >=0.8 contract. The issue can be classified as 'info' since it could only lead to denial-of-service by invalid data and not to fund loss or actual exploitation."
+  },
+  {
+    "index": 76,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Severity is left unchanged at medium. This is a genuine business logic flaw that can result in permanent loss of rewards for some users' assets if the landlord's locked value temporarily dips. The scenario is not extremely likely nor rare, and the impact is notable but not catastrophic. There is no grounds for marking this as a false positive or reducing severity further."
+  },
+  {
+    "index": 77,
+    "new_severity": "info",
+    "should_be_removed": false,
+    "comments": "This is a minor UX edge case inherent to the contract's lazy update pattern. No loss or exploit is possible, and the intent is clear. Consider reducing to 'info' level only, as this is not a meaningful bug."
+  },
+  {
+    "index": 78,
+    "new_severity": "unchanged",
+    "should_be_removed": true,
+    "comments": "This finding should be removed as a false positive. The impact is limited to misleading events, which does not have a practical exploit path or security consequence. According to the rules, such purely theoretical issues (with no ability to exploit) may be safely ignored."
+  },
+  {
+    "index": 79,
+    "new_severity": "low",
+    "should_be_removed": false,
+    "comments": "Severity lowered to 'low': This scenario presents minimal security risk and is largely a game logic and user experience concern, not a technical exploit. Pattern does not conform to typical slippage vulnerabilities found in DeFi swaps."
+  },
+  {
+    "index": 80,
+    "new_severity": "low",
+    "should_be_removed": false,
+    "comments": "Downgrading severity from medium to low. The lack of a deadline only enables minor timing advantage for landlords in updating tax parameters. There is no direct financial exploit, and the impact is primarily on reward expectation, not protocol security. This is best categorized as a low-severity fairness issue rather than a protocol-level vulnerability."
+  },
+  {
+    "index": 81,
+    "new_severity": "low",
+    "should_be_removed": false,
+    "comments": "Given that the behavior is consistent with the design comments and doesn't pose a real exploit or loss beyond temporary tax calculation delay, this is a 'low' severity/impact, not 'medium'."
+  },
+  {
+    "index": 82,
+    "new_severity": "low",
+    "should_be_removed": false,
+    "comments": "Precision discrepancies in schnibbles calculations may affect user rewards by a small margin but do not introduce an exploit or critical failure. Recommend documenting the precision behavior or standardizing units for maintainability."
+  },
+  {
+    "index": 83,
+    "new_severity": "unchanged",
+    "should_be_removed": true,
+    "comments": "Informational absence of oracle usage is not a security issue and does not merit a finding in audit results. Recommend removal."
+  },
+  {
+    "index": 84,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Precision loss in calculation can cause minor under-reward, but this is an economic accuracy issue, not a critical vulnerability. Severity 'medium' fits the provided matrix (low impact, high likelihood)."
+  },
+  {
+    "index": 85,
+    "new_severity": "low",
+    "should_be_removed": false,
+    "comments": "This is a minor, widely-understood precision loss due to Solidity's lack of decimals, not a security flaw. The result is correct for integer math; consider marking as 'low' severity or 'info' unless business requirements demand exact micro-unit distribution."
+  }
+]

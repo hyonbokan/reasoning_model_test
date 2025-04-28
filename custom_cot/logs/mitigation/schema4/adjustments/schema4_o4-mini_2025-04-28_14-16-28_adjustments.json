@@ -1,0 +1,518 @@
+[
+  {
+    "index": 0,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 1,
+    "new_severity": "unchanged",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 2,
+    "new_severity": "high",
+    "should_be_removed": false,
+    "comments": "Adjust conditional to `length >= 10` to enforce the intended cap; raising severity to high per matrix."
+  },
+  {
+    "index": 3,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Recommend validating that PRICE_PER_PLOT is non-zero during configuration or initialization to prevent a division-by-zero DoS."
+  },
+  {
+    "index": 4,
+    "new_severity": "unchanged",
+    "should_be_removed": true,
+    "comments": null
+  },
+  {
+    "index": 5,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Add an assignment toilerState[tokenId].plotId = plotId in transferToUnoccupiedPlot to keep state mappings in sync."
+  },
+  {
+    "index": 6,
+    "new_severity": "low",
+    "should_be_removed": false,
+    "comments": "This is a logic/UX best-practices issue, not a security vulnerability. Lower severity to low."
+  },
+  {
+    "index": 7,
+    "new_severity": "unchanged",
+    "should_be_removed": false,
+    "comments": "Valid off-by-one logic issue; severity remains low."
+  },
+  {
+    "index": 8,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Valid issue in reward calculation due to type conversion; severity adjusted to medium to reflect high impact and low likelihood."
+  },
+  {
+    "index": 9,
+    "new_severity": "best practices",
+    "should_be_removed": false,
+    "comments": "This is a gas optimization suggestion, not a security vulnerability. Recommend addressing for improved efficiency."
+  },
+  {
+    "index": 10,
+    "new_severity": "unchanged",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 11,
+    "new_severity": "high",
+    "should_be_removed": false,
+    "comments": "Validate that plotMetadata[landlord].lastUpdated != 0 (or initialize metadata) before staking, to ensure a nonzero tax rate and prevent full reward bypass."
+  },
+  {
+    "index": 12,
+    "new_severity": "unchanged",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 13,
+    "new_severity": "unchanged",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 14,
+    "new_severity": "low",
+    "should_be_removed": false,
+    "comments": "Adjusted to Low severity per matrix; retains finding since it represents a valid misconfiguration risk."
+  },
+  {
+    "index": 15,
+    "new_severity": "unchanged",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 16,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Change the condition to `>= 10` or `> 9` to enforce the intended 10-NFT limit."
+  },
+  {
+    "index": 17,
+    "new_severity": "unchanged",
+    "should_be_removed": false,
+    "comments": "Retain as a best practices recommendation. Implement `onERC721Received` to support `safeTransferFrom` and improve interoperability."
+  },
+  {
+    "index": 18,
+    "new_severity": "high",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 19,
+    "new_severity": "high",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 20,
+    "new_severity": "unchanged",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 21,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 22,
+    "new_severity": "unchanged",
+    "should_be_removed": true,
+    "comments": "Remove as false positive: overflow check on uint8 in Solidity \u22650.8 is expected behavior, not a vulnerability."
+  },
+  {
+    "index": 23,
+    "new_severity": "best practices",
+    "should_be_removed": false,
+    "comments": "Valid usability improvement; not a security risk, adjust to best practices severity."
+  },
+  {
+    "index": 24,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Severity lowered to medium per the impact/likelihood matrix (high impact, low likelihood of config misuse). Issue retained as a valid logic bug."
+  },
+  {
+    "index": 25,
+    "new_severity": "low",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 26,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 27,
+    "new_severity": "low",
+    "should_be_removed": false,
+    "comments": "Adjust severity to low. This is a best-practice logic fix but not a security vulnerability."
+  },
+  {
+    "index": 28,
+    "new_severity": "unchanged",
+    "should_be_removed": true,
+    "comments": "False positive: automatic overflow checks and the 11-item cap prevent any practical overflow; remove this finding."
+  },
+  {
+    "index": 29,
+    "new_severity": "best practices",
+    "should_be_removed": false,
+    "comments": "Reclassified as a best-practices note rather than a vulnerability; no removal."
+  },
+  {
+    "index": 30,
+    "new_severity": "best practices",
+    "should_be_removed": false,
+    "comments": "Recommend adding explicit bounds checks before indexing REALM_BONUSES and RARITY_BONUSES to prevent out-of-bounds reverts."
+  },
+  {
+    "index": 31,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Enforce `plotMetadata[landlord].lastUpdated != 0` before staking to prevent zero tax rates."
+  },
+  {
+    "index": 32,
+    "new_severity": "unchanged",
+    "should_be_removed": true,
+    "comments": "False positive: proper CEI pattern respected, no post-call state changes, reentrancy risk mitigated."
+  },
+  {
+    "index": 33,
+    "new_severity": "unchanged",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 34,
+    "new_severity": "unchanged",
+    "should_be_removed": false,
+    "comments": "Valid DoS finding: recommend adding explicit array bounds checks for realm and rarity indices."
+  },
+  {
+    "index": 35,
+    "new_severity": "unchanged",
+    "should_be_removed": false,
+    "comments": "Validate that PRICE_PER_PLOT is non-zero during initialization or configuration to prevent division-by-zero errors."
+  },
+  {
+    "index": 36,
+    "new_severity": "unchanged",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 37,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Off-by-one error allows staking an 11th munchable; change the condition to `>= 10` to enforce the limit."
+  },
+  {
+    "index": 38,
+    "new_severity": "unchanged",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 39,
+    "new_severity": "unchanged",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 40,
+    "new_severity": "unchanged",
+    "should_be_removed": false,
+    "comments": "Adjust the cap check to `>= 10` (or `> 9`) and/or use a larger loop counter (e.g., uint256) to prevent overflow."
+  },
+  {
+    "index": 41,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 42,
+    "new_severity": "unchanged",
+    "should_be_removed": false,
+    "comments": "This is a valid logic vulnerability; severity remains High."
+  },
+  {
+    "index": 43,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Severity adjusted from high to medium based on high impact and low likelihood per the severity matrix"
+  },
+  {
+    "index": 44,
+    "new_severity": "unchanged",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 45,
+    "new_severity": "low",
+    "should_be_removed": false,
+    "comments": "Apply the CEI pattern by moving state updates before the external call or add a nonReentrant guard to prevent reentrancy."
+  },
+  {
+    "index": 46,
+    "new_severity": "unchanged",
+    "should_be_removed": true,
+    "comments": "Array bounds are controlled by internal attributes and config; no external actor can cause an out\u2010of\u2010bounds access. Marking as false positive."
+  },
+  {
+    "index": 47,
+    "new_severity": "unchanged",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 48,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Add require checks to ensure each retrieved address is non-zero to prevent misconfiguration and DoS."
+  },
+  {
+    "index": 49,
+    "new_severity": "best practices",
+    "should_be_removed": false,
+    "comments": "Off-by-one logic bug affecting business rules; not a security flaw. Recommend classifying as best practices."
+  },
+  {
+    "index": 50,
+    "new_severity": "unchanged",
+    "should_be_removed": true,
+    "comments": "False positive: loop bounded to 10, no untrusted external calls, gas-DoS not practical"
+  },
+  {
+    "index": 51,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Elevated from Info to Medium due to high impact of unrestricted configuration control and violation of decentralization assumptions"
+  },
+  {
+    "index": 52,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Adjusted to medium severity (high impact, medium likelihood) per matrix."
+  },
+  {
+    "index": 53,
+    "new_severity": "low",
+    "should_be_removed": false,
+    "comments": "Adjusted from Medium to Low severity per matrix: medium impact + low likelihood = low. Recommend validating PRICE_PER_PLOT \u2260 0."
+  },
+  {
+    "index": 54,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 55,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Adjusted severity from Low to Medium based on impact vs. likelihood matrix."
+  },
+  {
+    "index": 56,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Valid vulnerability as part of a larger exploit chain. Adjusted to medium severity based on high impact (permanent NFT lock) and medium likelihood (requires malicious landlord action)."
+  },
+  {
+    "index": 57,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Add validation to ensure the landlord is registered in accountManager before staking to prevent NFT lock."
+  },
+  {
+    "index": 58,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Keep this finding. Recommend clamping the intermediate result or handling negative `finalBonus` to avoid revert on int256\u2192uint256 conversion."
+  },
+  {
+    "index": 59,
+    "new_severity": "high",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 60,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Recommend adding a nonReentrant guard (e.g., OpenZeppelin ReentrancyGuard) or moving state changes before external calls to enforce the CEI pattern."
+  },
+  {
+    "index": 61,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Adjusted severity to medium based on high impact of unlimited rewards and medium likelihood; valid vulnerability requiring an off-by-one fix."
+  },
+  {
+    "index": 62,
+    "new_severity": "unchanged",
+    "should_be_removed": true,
+    "comments": "False positive: negative-to-uint cast reverts in Solidity \u22650.8; no unchecked block present."
+  },
+  {
+    "index": 63,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 64,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Reclassified from High to Medium: enforce DEFAULT_TAX_RATE within MIN/MAX to prevent DoS; this is a config validation issue rather than an unchecked overflow."
+  },
+  {
+    "index": 65,
+    "new_severity": "unchanged",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 66,
+    "new_severity": "high",
+    "should_be_removed": false,
+    "comments": "Add a require(check plotMetadata[landlord].lastUpdated != 0) or initialize metadata before staking to prevent zero tax rate."
+  },
+  {
+    "index": 67,
+    "new_severity": "unchanged",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 68,
+    "new_severity": "unchanged",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 69,
+    "new_severity": "high",
+    "should_be_removed": false,
+    "comments": "Confirmed real logic vulnerability. Severity raised to high due to denial-of-service impact and ease of exploitation."
+  },
+  {
+    "index": 70,
+    "new_severity": "unchanged",
+    "should_be_removed": true,
+    "comments": "No real vulnerability; marking as false positive and recommending removal."
+  },
+  {
+    "index": 71,
+    "new_severity": "high",
+    "should_be_removed": false,
+    "comments": "Recommend adding a minimum cooldown or timelock on tax rate changes to prevent front-running and protect renter economics."
+  },
+  {
+    "index": 72,
+    "new_severity": "best practices",
+    "should_be_removed": false,
+    "comments": "This is a UX improvement suggestion with no security impact. Classify as best practices."
+  },
+  {
+    "index": 73,
+    "new_severity": "unchanged",
+    "should_be_removed": false,
+    "comments": "Adjust the length check to `>= 10` (or enforce a fixed cap) to prevent array growth beyond the intended limit and ensure bounded iteration in `_farmPlots`."
+  },
+  {
+    "index": 74,
+    "new_severity": "unchanged",
+    "should_be_removed": false,
+    "comments": "Add a require(landlord != address(0)) check to prevent staking to the zero address."
+  },
+  {
+    "index": 75,
+    "new_severity": "unchanged",
+    "should_be_removed": true,
+    "comments": "Solidity 0.8+ reverts on overflow without needing explicit checks; no real vulnerability here."
+  },
+  {
+    "index": 76,
+    "new_severity": "unchanged",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 77,
+    "new_severity": "unchanged",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 78,
+    "new_severity": "best practices",
+    "should_be_removed": false,
+    "comments": "This is a best practices recommendation to improve event accuracy; no security impact."
+  },
+  {
+    "index": 79,
+    "new_severity": "unchanged",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 80,
+    "new_severity": "high",
+    "should_be_removed": false,
+    "comments": "Recommend adding an expiration/deadline parameter to updateTaxRate to mitigate front\u2010running risk."
+  },
+  {
+    "index": 81,
+    "new_severity": "low",
+    "should_be_removed": false,
+    "comments": "Valid logic inconsistency; severity lowered to low based on low impact and medium likelihood."
+  },
+  {
+    "index": 82,
+    "new_severity": "unchanged",
+    "should_be_removed": true,
+    "comments": null
+  },
+  {
+    "index": 83,
+    "new_severity": "unchanged",
+    "should_be_removed": true,
+    "comments": "Oracle integration is not required for this contract; mark as false positive and remove."
+  },
+  {
+    "index": 84,
+    "new_severity": "unchanged",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 85,
+    "new_severity": "unchanged",
+    "should_be_removed": true,
+    "comments": "Expected integer truncation; no security impact."
+  }
+]

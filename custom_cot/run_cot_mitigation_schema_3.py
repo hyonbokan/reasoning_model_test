@@ -84,10 +84,10 @@ for idx, finding in enumerate(FINDINGS):
     all_adjustments.append(fr.adjustment.model_dump())
 
 # ------------ wrap up --------------------------------------------------------
-# final_report = AuditResponse(
-#     document_id="audit_run_003",
-#     finding_reviews=all_reviews
-# )
+final_report = AuditResponse(
+    document_id="audit_run_003",
+    finding_reviews=all_reviews
+)
 
 now = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
 out_dir = pathlib.Path("logs/mitigation")

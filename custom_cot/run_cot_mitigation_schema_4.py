@@ -12,9 +12,9 @@ GPT_4_1  = "gpt-4.1-2025-04-14"
 O4_MINI  = "o4-mini"
 
 # ---------- artefacts ----------
-MODEL = O4_MINI
+MODEL = GPT_4_1
 TASK_PROMPT = pathlib.Path(
-    "utils/mitigation/task_prompt_base.py"
+    "utils/mitigation/task_prompt_reasoning.py"
 ).read_text()
 
 RULE_CHUNKS = load_rulebook_html("utils/mitigation/mitigation_rulebook_1.html")
