@@ -1,0 +1,518 @@
+[
+    {
+      "index": 0,
+      "severity": "high",
+      "should_be_removed": false,
+      "comments": null
+    },
+    {
+      "index": 1,
+      "severity": "unchanged",
+      "should_be_removed": false,
+      "comments": null
+    },
+    {
+      "index": 2,
+      "severity": "medium",
+      "should_be_removed": false,
+      "comments": "Off-by-one allows an 11th stake, violating intended limit; high likelihood and low impact warrants medium severity"
+    },
+    {
+      "index": 3,
+      "severity": "medium",
+      "should_be_removed": false,
+      "comments": "Potential division-by-zero DoS if PRICE_PER_PLOT is zero, freezing core functions. Impact medium."
+    },
+    {
+      "index": 4,
+      "severity": "high",
+      "should_be_removed": false,
+      "comments": "No reentrancy guard and state changes occur after external calls, enabling double-stake or NFT theft."
+    },
+    {
+      "index": 5,
+      "severity": "medium",
+      "should_be_removed": false,
+      "comments": "Valid logic bug causing inconsistent staking state; moderate impact on rewards and medium likelihood of occurrence."
+    },
+    {
+      "index": 6,
+      "severity": "medium",
+      "should_be_removed": false,
+      "comments": null
+    },
+    {
+      "index": 7,
+      "severity": "low",
+      "should_be_removed": false,
+      "comments": null
+    },
+    {
+      "index": 8,
+      "severity": "unchanged",
+      "should_be_removed": true,
+      "comments": "False positive: solidity 0.8+ includes overflow checks and no unchecked blocks are used. The int256-to-uint256 conversion wrapping is expected behavior and not an overflow vulnerability."
+    },
+    {
+      "index": 9,
+      "severity": "best practices",
+      "should_be_removed": false,
+      "comments": "This is a gas optimization recommendation, categorized as a best practices issue rather than a security vulnerability."
+    },
+    {
+      "index": 10,
+      "severity": "info",
+      "should_be_removed": false,
+      "comments": null
+    },
+    {
+      "index": 11,
+      "severity": "medium",
+      "should_be_removed": false,
+      "comments": "Missing initialization check can result in a default 0 tax rate and revenue loss for landlords, posing medium impact and likelihood."
+    },
+    {
+      "index": 12,
+      "severity": "unchanged",
+      "should_be_removed": false,
+      "comments": null
+    },
+    {
+      "index": 13,
+      "severity": "medium",
+      "should_be_removed": false,
+      "comments": "The missing update causes incorrect plot occupancy and potential denial-of-service on new plots. Impact is significant but not catastrophic, likelihood is moderate, resulting in a medium severity."
+    },
+    {
+      "index": 14,
+      "severity": "unchanged",
+      "should_be_removed": false,
+      "comments": null
+    },
+    {
+      "index": 15,
+      "severity": "unchanged",
+      "should_be_removed": true,
+      "comments": "External calls follow CEI pattern and there are no state changes after the calls to trusted contracts, so reentrancy risk is not present."
+    },
+    {
+      "index": 16,
+      "severity": "medium",
+      "should_be_removed": false,
+      "comments": null
+    },
+    {
+      "index": 17,
+      "severity": "best practices",
+      "should_be_removed": false,
+      "comments": null
+    },
+    {
+      "index": 18,
+      "severity": "high",
+      "should_be_removed": false,
+      "comments": null
+    },
+    {
+      "index": 19,
+      "severity": "unchanged",
+      "should_be_removed": false,
+      "comments": null
+    },
+    {
+      "index": 20,
+      "severity": "unchanged",
+      "should_be_removed": true,
+      "comments": null
+    },
+    {
+      "index": 21,
+      "severity": "medium",
+      "should_be_removed": false,
+      "comments": "High impact if misconfigured can brick protocol; likelihood is low; adjusted to medium per severity matrix"
+    },
+    {
+      "index": 22,
+      "severity": "unchanged",
+      "should_be_removed": true,
+      "comments": "Stake limit capped at 10 munchables; loop cannot exceed 255 iterations, false positive"
+    },
+    {
+      "index": 23,
+      "severity": "unchanged",
+      "should_be_removed": false,
+      "comments": null
+    },
+    {
+      "index": 24,
+      "severity": "unchanged",
+      "should_be_removed": false,
+      "comments": null
+    },
+    {
+      "index": 25,
+      "severity": "best practices",
+      "should_be_removed": false,
+      "comments": "This is a user experience issue due to lack of notification when a toiler becomes dirty; recommend emitting an event when marking dirty."
+    },
+    {
+      "index": 26,
+      "severity": "high",
+      "should_be_removed": false,
+      "comments": "Casting a negative int256 result to uint256 will revert under Solidity 0.8, causing a DoS that blocks critical operations like unstaking via forceFarmPlots."
+    },
+    {
+      "index": 27,
+      "severity": "low",
+      "should_be_removed": false,
+      "comments": "Off-by-one error allows 11 munchables instead of intended 10; minor impact and low likelihood."
+    },
+    {
+      "index": 28,
+      "severity": "best practices",
+      "should_be_removed": false,
+      "comments": null
+    },
+    {
+      "index": 29,
+      "severity": "best practices",
+      "should_be_removed": false,
+      "comments": null
+    },
+    {
+      "index": 30,
+      "severity": "unchanged",
+      "should_be_removed": false,
+      "comments": null
+    },
+    {
+      "index": 31,
+      "severity": "medium",
+      "should_be_removed": false,
+      "comments": "Missing initialization check can lead to landlords receiving a 0% tax rate, causing financial loss. Impact medium, likelihood high."
+    },
+    {
+      "index": 32,
+      "severity": "unchanged",
+      "should_be_removed": true,
+      "comments": "False positive: CEI pattern followed (state changes occur before external calls, no state changes after), so no reentrancy risk."
+    },
+    {
+      "index": 33,
+      "severity": "unchanged",
+      "should_be_removed": false,
+      "comments": null
+    },
+    {
+      "index": 34,
+      "severity": "medium",
+      "should_be_removed": false,
+      "comments": "Array accesses are unchecked and can cause out-of-bounds reverts, leading to DoS. Add explicit bounds checks on REALM_BONUSES and RARITY_BONUSES indices."
+    },
+    {
+      "index": 35,
+      "severity": "medium",
+      "should_be_removed": false,
+      "comments": "Genuine misconfiguration risk: PRICE_PER_PLOT can be zero causing division by zero and DoS; add validation to prevent zero value."
+    },
+    {
+      "index": 36,
+      "severity": "best practices",
+      "should_be_removed": false,
+      "comments": "The tight coupling of farming logic and staking is a design concern; decoupling is a best practice suggestion rather than a security vulnerability."
+    },
+    {
+      "index": 37,
+      "severity": "medium",
+      "should_be_removed": false,
+      "comments": null
+    },
+    {
+      "index": 38,
+      "severity": "high",
+      "should_be_removed": false,
+      "comments": null
+    },
+    {
+      "index": 39,
+      "severity": "unchanged",
+      "should_be_removed": true,
+      "comments": "Reentrancy false positive: no state changes occur after the external calls (CEI pattern applies)."
+    },
+    {
+      "index": 40,
+      "severity": "unchanged",
+      "should_be_removed": false,
+      "comments": null
+    },
+    {
+      "index": 41,
+      "severity": "medium",
+      "should_be_removed": false,
+      "comments": "Uninitialized landlord metadata leads to 0% tax, providing an unintended economic advantage. Impact and likelihood are medium."
+    },
+    {
+      "index": 42,
+      "severity": "medium",
+      "should_be_removed": false,
+      "comments": null
+    },
+    {
+      "index": 43,
+      "severity": "medium",
+      "should_be_removed": false,
+      "comments": "Signed-to-unsigned conversion of a negative reward value can wrap around, creating large unintended rewards. Impact is high but likelihood is low, resulting in medium severity."
+    },
+    {
+      "index": 44,
+      "severity": "high",
+      "should_be_removed": false,
+      "comments": null
+    },
+    {
+      "index": 45,
+      "severity": "unchanged",
+      "should_be_removed": true,
+      "comments": "False positive: calling transferFrom on a trusted ERC-721 contract that does not invoke callbacks, so no reentrancy risk."
+    },
+    {
+      "index": 46,
+      "severity": "unchanged",
+      "should_be_removed": true,
+      "comments": "Array indices derive from vetted NFT attributes and config arrays; users cannot influence out-of-bounds values. Solidity 0.8 will revert on any out-of-bounds, so there is no practical exploit path."
+    },
+    {
+      "index": 47,
+      "severity": "medium",
+      "should_be_removed": false,
+      "comments": "PRICE_PER_PLOT may be zero due to misconfiguration, causing division by zero and locking core functionality; add a non-zero check for PRICE_PER_PLOT."
+    },
+    {
+      "index": 48,
+      "severity": "best practices",
+      "should_be_removed": false,
+      "comments": null
+    },
+    {
+      "index": 49,
+      "severity": "unchanged",
+      "should_be_removed": false,
+      "comments": null
+    },
+    {
+      "index": 50,
+      "severity": "unchanged",
+      "should_be_removed": true,
+      "comments": "False positive: staked tokens limited to 10, loop is bounded and cannot hit gas limits for DoS"
+    },
+    {
+      "index": 51,
+      "severity": "info",
+      "should_be_removed": false,
+      "comments": null
+    },
+    {
+      "index": 52,
+      "severity": "medium",
+      "should_be_removed": false,
+      "comments": "High-impact inflation possible but depends on unlikely config values; lower to medium severity."
+    },
+    {
+      "index": 53,
+      "severity": "unchanged",
+      "should_be_removed": false,
+      "comments": null
+    },
+    {
+      "index": 54,
+      "severity": "unchanged",
+      "should_be_removed": false,
+      "comments": null
+    },
+    {
+      "index": 55,
+      "severity": "unchanged",
+      "should_be_removed": false,
+      "comments": null
+    },
+    {
+      "index": 56,
+      "severity": "unchanged",
+      "should_be_removed": false,
+      "comments": null
+    },
+    {
+      "index": 57,
+      "severity": "unchanged",
+      "should_be_removed": false,
+      "comments": null
+    },
+    {
+      "index": 58,
+      "severity": "high",
+      "should_be_removed": false,
+      "comments": "Negative finalBonus can make the signed computation negative, causing a revert when converting to uint256 and trapping NFTs. High impact and plausible likelihood."
+    },
+    {
+      "index": 59,
+      "severity": "high",
+      "should_be_removed": false,
+      "comments": null
+    },
+    {
+      "index": 60,
+      "severity": "high",
+      "should_be_removed": false,
+      "comments": null
+    },
+    {
+      "index": 61,
+      "severity": "unchanged",
+      "should_be_removed": false,
+      "comments": null
+    },
+    {
+      "index": 62,
+      "severity": "medium",
+      "should_be_removed": false,
+      "comments": "Casting a negative int256 to uint256 wraps without revert, enabling huge rewards; high impact but low likelihood, so medium severity"
+    },
+    {
+      "index": 63,
+      "severity": "high",
+      "should_be_removed": false,
+      "comments": null
+    },
+    {
+      "index": 64,
+      "severity": "medium",
+      "should_be_removed": false,
+      "comments": "Bounds on DEFAULT_TAX_RATE missing can cause a denial-of-service; impact high but likelihood medium"
+    },
+    {
+      "index": 65,
+      "severity": "medium",
+      "should_be_removed": false,
+      "comments": null
+    },
+    {
+      "index": 66,
+      "severity": "medium",
+      "should_be_removed": false,
+      "comments": "Missing check allows zero tax rate leading to landlords losing all revenue. Impact medium, likelihood high."
+    },
+    {
+      "index": 67,
+      "severity": "medium",
+      "should_be_removed": false,
+      "comments": null
+    },
+    {
+      "index": 68,
+      "severity": "medium",
+      "should_be_removed": false,
+      "comments": null
+    },
+    {
+      "index": 69,
+      "severity": "medium",
+      "should_be_removed": false,
+      "comments": null
+    },
+    {
+      "index": 70,
+      "severity": "info",
+      "should_be_removed": true,
+      "comments": "Informational finding confirming no vulnerabilities; remove as noise."
+    },
+    {
+      "index": 71,
+      "severity": "unchanged",
+      "should_be_removed": false,
+      "comments": null
+    },
+    {
+      "index": 72,
+      "severity": "unchanged",
+      "should_be_removed": true,
+      "comments": null
+    },
+    {
+      "index": 73,
+      "severity": "unchanged",
+      "should_be_removed": true,
+      "comments": "False positive: munchablesStaked length remains bounded due to pop in _removeTokenIdFromStakedList and max push limit"
+    },
+    {
+      "index": 74,
+      "severity": "medium",
+      "should_be_removed": false,
+      "comments": null
+    },
+    {
+      "index": 75,
+      "severity": "low",
+      "should_be_removed": false,
+      "comments": "Bounds check revert is possible but inputs are from trusted small-range sources, making exploitation unlikely; severity lowered to low."
+    },
+    {
+      "index": 76,
+      "severity": "unchanged",
+      "should_be_removed": false,
+      "comments": null
+    },
+    {
+      "index": 77,
+      "severity": "medium",
+      "should_be_removed": false,
+      "comments": "Stale tax rate logic is a valid business issue that can misallocate schnibbles; moderate impact and likelihood warrant medium severity."
+    },
+    {
+      "index": 78,
+      "severity": "best practices",
+      "should_be_removed": false,
+      "comments": "The missing check leads to misleading events but poses no security risk; this is a best practices recommendation."
+    },
+    {
+      "index": 79,
+      "severity": "best practices",
+      "should_be_removed": false,
+      "comments": "Missing slippage protection is an economic risk better captured as a best practices recommendation."
+    },
+    {
+      "index": 80,
+      "severity": "best practices",
+      "should_be_removed": false,
+      "comments": "Front-running/time-lock risk is inherent to this design; classify as a best practice recommendation rather than a security flaw."
+    },
+    {
+      "index": 81,
+      "severity": "unchanged",
+      "should_be_removed": false,
+      "comments": null
+    },
+    {
+      "index": 82,
+      "severity": "unchanged",
+      "should_be_removed": true,
+      "comments": null
+    },
+    {
+      "index": 83,
+      "severity": "info",
+      "should_be_removed": true,
+      "comments": "No oracle required by design; this is not a vulnerability."
+    },
+    {
+      "index": 84,
+      "severity": "low",
+      "should_be_removed": false,
+      "comments": null
+    },
+    {
+      "index": 85,
+      "severity": "low",
+      "should_be_removed": false,
+      "comments": "Precision loss from integer division leads to minor truncation errors over time; impact and likelihood are low."
+    }
+]

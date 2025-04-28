@@ -51,19 +51,6 @@ for idx, finding in enumerate(FINDINGS):
         response_format=AuditResponse,
         messages=messages,
     )
-    
-    # Struct from doc:
-    # result = client.chat.completions.create(
-    #     model=MODEL,
-    #     messages=messages,
-    #     text={
-    #         "format": {
-    #             "type": "json_schema",
-    #             "schema": AuditResponse.model_json_schema(),
-    #             "strict": True
-    #         }
-    #     }
-    # )
 
     message = result.choices[0].message
 

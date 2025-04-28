@@ -1,0 +1,518 @@
+[
+  {
+    "index": 0,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 1,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 2,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Off-by-one in upper bound check allows eleventh stake, adjust severity to medium"
+  },
+  {
+    "index": 3,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 4,
+    "new_severity": "unchanged",
+    "should_be_removed": true,
+    "comments": null
+  },
+  {
+    "index": 5,
+    "new_severity": "high",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 6,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 7,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Fix the conditional to `>= 10` to enforce the intended limit."
+  },
+  {
+    "index": 8,
+    "new_severity": "low",
+    "should_be_removed": true,
+    "comments": "Solidity \u22650.8 auto-checks prevent overflow and no `unchecked` block is used."
+  },
+  {
+    "index": 9,
+    "new_severity": "best practices",
+    "should_be_removed": false,
+    "comments": "Gas optimization recommendation; no security impact."
+  },
+  {
+    "index": 10,
+    "new_severity": "unchanged",
+    "should_be_removed": true,
+    "comments": "Purely theoretical config naming issue with no evidence of mismatch."
+  },
+  {
+    "index": 11,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 12,
+    "new_severity": "unchanged",
+    "should_be_removed": true,
+    "comments": "Counter width is safe given 10-item limit; this finding is purely stylistic."
+  },
+  {
+    "index": 13,
+    "new_severity": "high",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 14,
+    "new_severity": "low",
+    "should_be_removed": false,
+    "comments": "Add a check to ensure PRICE_PER_PLOT is non-zero to prevent division-by-zero"
+  },
+  {
+    "index": 15,
+    "new_severity": "low",
+    "should_be_removed": false,
+    "comments": "Consider adding nonReentrant modifiers or reordering state changes before external calls."
+  },
+  {
+    "index": 16,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Use `>= 10` instead of `> 10` to enforce the intended limit."
+  },
+  {
+    "index": 17,
+    "new_severity": "best practices",
+    "should_be_removed": false,
+    "comments": "Implement IERC721Receiver to support safeTransferFrom and improve interoperability"
+  },
+  {
+    "index": 18,
+    "new_severity": "high",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 19,
+    "new_severity": "high",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 20,
+    "new_severity": "unchanged",
+    "should_be_removed": true,
+    "comments": "Overflow is auto-checked in Solidity\u2009\u22650.8; no unchecked block present"
+  },
+  {
+    "index": 21,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 22,
+    "new_severity": "unchanged",
+    "should_be_removed": true,
+    "comments": "Solidity 0.8 auto-checks and max 10 stakes prevent any overflow"
+  },
+  {
+    "index": 23,
+    "new_severity": "unchanged",
+    "should_be_removed": true,
+    "comments": "Purely UX suggestion with no security impact"
+  },
+  {
+    "index": 24,
+    "new_severity": "high",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 25,
+    "new_severity": "best practices",
+    "should_be_removed": false,
+    "comments": "UX/design improvement; no security impact"
+  },
+  {
+    "index": 26,
+    "new_severity": "unchanged",
+    "should_be_removed": true,
+    "comments": "Underflow automatically reverted by Solidity \u22650.8; no unchecked present"
+  },
+  {
+    "index": 27,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Off-by-one check allows 11th stake; adjust to >=10"
+  },
+  {
+    "index": 28,
+    "new_severity": "unchanged",
+    "should_be_removed": true,
+    "comments": null
+  },
+  {
+    "index": 29,
+    "new_severity": "best practices",
+    "should_be_removed": false,
+    "comments": "Swap-and-pop is intended for gas efficiency; ordering is a UX consideration, not a vulnerability."
+  },
+  {
+    "index": 30,
+    "new_severity": "low",
+    "should_be_removed": false,
+    "comments": "Add explicit bounds checks for array accesses."
+  },
+  {
+    "index": 31,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 32,
+    "new_severity": "unchanged",
+    "should_be_removed": true,
+    "comments": "CEI pattern blocks reentrancy; no issue present"
+  },
+  {
+    "index": 33,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 34,
+    "new_severity": "low",
+    "should_be_removed": false,
+    "comments": "Add bounds checks or validate config and attribute values to prevent out-of-bounds indexing."
+  },
+  {
+    "index": 35,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 36,
+    "new_severity": "unchanged",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 37,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 38,
+    "new_severity": "info",
+    "should_be_removed": true,
+    "comments": "Solidity \u22650.8 reverts on overflow without unchecked, so this is a false positive"
+  },
+  {
+    "index": 39,
+    "new_severity": "unchanged",
+    "should_be_removed": true,
+    "comments": "CEI pattern respected; no reentrancy risk"
+  },
+  {
+    "index": 40,
+    "new_severity": "low",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 41,
+    "new_severity": "high",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 42,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Missing plotId update causes inconsistent state and reward miscalculations."
+  },
+  {
+    "index": 43,
+    "new_severity": "unchanged",
+    "should_be_removed": true,
+    "comments": "False positive: Solidity 0.8 prevents underflow without unchecked"
+  },
+  {
+    "index": 44,
+    "new_severity": "low",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 45,
+    "new_severity": "low",
+    "should_be_removed": false,
+    "comments": "Ownership changes in transferFrom break reentrant path, making exploit impractical."
+  },
+  {
+    "index": 46,
+    "new_severity": "low",
+    "should_be_removed": false,
+    "comments": "Unchecked array access can panic and DoS farmers; valid bounds check needed"
+  },
+  {
+    "index": 47,
+    "new_severity": "low",
+    "should_be_removed": false,
+    "comments": "Recommend validating PRICE_PER_PLOT > 0 during initialization to avoid division-by-zero."
+  },
+  {
+    "index": 48,
+    "new_severity": "best practices",
+    "should_be_removed": false,
+    "comments": "Add require checks to ensure config addresses are non-zero to avoid misconfiguration"
+  },
+  {
+    "index": 49,
+    "new_severity": "best practices",
+    "should_be_removed": false,
+    "comments": "Use `>=` instead of `>` to enforce the 10-item limit correctly."
+  },
+  {
+    "index": 50,
+    "new_severity": "unchanged",
+    "should_be_removed": true,
+    "comments": "Loop bounded to 10 tokens prevents gas DoS; intended behavior."
+  },
+  {
+    "index": 51,
+    "new_severity": "unchanged",
+    "should_be_removed": true,
+    "comments": "Centralization is an intended design choice, not a vulnerability"
+  },
+  {
+    "index": 52,
+    "new_severity": "unchanged",
+    "should_be_removed": true,
+    "comments": "False positive: arithmetic overflow auto-checked in Solidity \u22650.8 outside unchecked block"
+  },
+  {
+    "index": 53,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 54,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Missing state update bug; genuine issue."
+  },
+  {
+    "index": 55,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Off-by-one allows one extra stake; increase to medium severity"
+  },
+  {
+    "index": 56,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 57,
+    "new_severity": "high",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 58,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 59,
+    "new_severity": "high",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 60,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 61,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Off-by-one in plot detection allows infinite farming; update `<` to `<=` to fix."
+  },
+  {
+    "index": 62,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 63,
+    "new_severity": "high",
+    "should_be_removed": false,
+    "comments": "Valid misconfiguration allows tax rates >100% causing denial-of-service and underflow"
+  },
+  {
+    "index": 64,
+    "new_severity": "unchanged",
+    "should_be_removed": true,
+    "comments": "Overflow false positive: Solidity \u22650.8 auto-checks without unchecked blocks."
+  },
+  {
+    "index": 65,
+    "new_severity": "high",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 66,
+    "new_severity": "unchanged",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 67,
+    "new_severity": "high",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 68,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 69,
+    "new_severity": "unchanged",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 70,
+    "new_severity": "unchanged",
+    "should_be_removed": true,
+    "comments": "False positive: function logic is safe and intentional"
+  },
+  {
+    "index": 71,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Landlord can front-run renters by changing tax rate immediately before farmPlots; add cooldown."
+  },
+  {
+    "index": 72,
+    "new_severity": "low",
+    "should_be_removed": false,
+    "comments": "Add explicit existence check and custom revert for tokenId"
+  },
+  {
+    "index": 73,
+    "new_severity": "unchanged",
+    "should_be_removed": true,
+    "comments": "Array length is properly bounded by push/pop logic; no unbounded growth"
+  },
+  {
+    "index": 74,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 75,
+    "new_severity": "low",
+    "should_be_removed": true,
+    "comments": "Overflow auto-checks prevent exploit"
+  },
+  {
+    "index": 76,
+    "new_severity": "unchanged",
+    "should_be_removed": false,
+    "comments": "Valid bug; user rewards can be permanently lost."
+  },
+  {
+    "index": 77,
+    "new_severity": "low",
+    "should_be_removed": true,
+    "comments": "Design decision causes noncritical inconsistency; no security impact."
+  },
+  {
+    "index": 78,
+    "new_severity": "unchanged",
+    "should_be_removed": true,
+    "comments": "Minor issue causing misleading events but no security impact"
+  },
+  {
+    "index": 79,
+    "new_severity": "best practices",
+    "should_be_removed": false,
+    "comments": "Add minimum reward parameter or lock tax rate before farming"
+  },
+  {
+    "index": 80,
+    "new_severity": "high",
+    "should_be_removed": false,
+    "comments": "Recommend adding expiration or timelock to tax rate updates to prevent front-running."
+  },
+  {
+    "index": 81,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 82,
+    "new_severity": "high",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 83,
+    "new_severity": "unchanged",
+    "should_be_removed": true,
+    "comments": "Not a security issue; intended absence of oracle use."
+  },
+  {
+    "index": 84,
+    "new_severity": "best practices",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 85,
+    "new_severity": "best practices",
+    "should_be_removed": false,
+    "comments": "Precision loss due to integer division is expected; consider using rounding or higher precision"
+  }
+]

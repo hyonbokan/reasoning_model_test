@@ -3,7 +3,7 @@ from __future__ import annotations
 import json, pathlib, os, time, datetime
 from dotenv import load_dotenv
 from openai import OpenAI
-from schema.mitigate_schema_3 import AuditResponse          # <- new schema
+from schema.mitigate_schema_4 import AuditResponse          # <- new schema
 from utils.mitigation.load_rulebook import load_rulebook_html
 
 # ------------ models & paths -------------------------------------------------
@@ -12,9 +12,9 @@ GPT_4_1  = "gpt-4.1-2025-04-14"
 O4_MINI  = "o4-mini"
 
 # ---------- artefacts ----------
-MODEL = GPT_4_1
+MODEL = O4_MINI
 TASK_PROMPT = pathlib.Path(
-    "utils/mitigation/task_prompt_reasoning.py"
+    "utils/mitigation/task_prompt_base.py"
 ).read_text()
 
 RULE_CHUNKS = load_rulebook_html("utils/mitigation/mitigation_rulebook_1.html")
@@ -51,14 +51,16 @@ all_adjustments, refusals = [], []
 start_ts = time.time()
 
 for idx, finding in enumerate(FINDINGS):
+    print(RULE_CONTEXT)
     messages = [
         {"role": "system", "content": TASK_PROMPT},
         {"role": "user",   "content": RULE_CONTEXT},
         {"role": "user",   "content": CONTRACT},
         {"role": "user",   "content": f"Finding {idx}: {json.dumps(finding)}"},
         {"role": "user",   "content":
-            "Answer the checklist **in order** using the AuditResponse schema."},
-        {"role": "user",   "content": checklist_bullets(CHECKLIST)},
+            "Return JSON that matches the AuditResponse schema exactly. "
+            "Populate `strategy` first, then `reasoning_summary`, then `adjustment`."
+        }
     ]
 
     # --------- official Structured-Output call -----------------------
@@ -78,22 +80,23 @@ for idx, finding in enumerate(FINDINGS):
         continue
 
     # ------------- success branch -----------------------------------
-    fr = raw.parsed.finding_reviews[0]     # validated object
+    fr = raw.parsed.findings[0]     # validated object
 
     all_reviews.append(fr)
     all_adjustments.append(fr.adjustment.model_dump())
 
 # ------------ wrap up --------------------------------------------------------
-# final_report = AuditResponse(
-#     document_id="audit_run_003",
-#     finding_reviews=all_reviews
-# )
+final_report = AuditResponse(
+    document_id="audit_run_004",
+    findings=all_reviews
+)
 
 now = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
 out_dir = pathlib.Path("logs/mitigation")
 out_dir.mkdir(parents=True, exist_ok=True)
 
-base = f"schema3_{MODEL}_{now}"
+base = f"schema4_{MODEL}_{now}"
+(out_dir / f"{base}.json").write_text(final_report.model_dump_json(indent=2))
 (out_dir / f"{base}_adjustments.json").write_text(json.dumps(all_adjustments, indent=2))
 if refusals:
     (out_dir / f"{base}_refusals.json").write_text(json.dumps(refusals, indent=2))

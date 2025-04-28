@@ -41,10 +41,6 @@ for idx, finding in enumerate(FINDINGS):
     
     rule_context = build_rule_context(CHECKLIST)
     
-    print("--" * 10, "Rule", "--" * 10)
-    print(rule_context)
-    print("--" * 10, "End", "--" * 10)
-    
     messages = [
         # static context (identical for all iterations) -----------------
         {"role": "system", "content": TASK_PROMPT},

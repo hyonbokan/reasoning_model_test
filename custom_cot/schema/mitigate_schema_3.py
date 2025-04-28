@@ -1,12 +1,6 @@
 from typing import List, Literal
 from pydantic import BaseModel, Field
 
-# -------------------- Evidence reference --------------------
-class CodeRef(BaseModel):
-    file: str = Field(..., description="Source file, e.g. 'Packs.sol'")
-    lines: List[int] = Field(..., description="1‑based line numbers that justify this answer")
-    why: str = Field(..., description="Short rationale (≤ 40 words)")
-
 # -------------------- Final decision ------------------------
 class Adjustment(BaseModel):
     index: int = Field(..., description="Original finding index")

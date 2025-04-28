@@ -1,0 +1,518 @@
+[
+  {
+    "index": 0,
+    "new_severity": "unchanged",
+    "should_be_removed": false,
+    "comments": "Compiler checks do not prevent this overflow due to explicit type conversion after signed math."
+  },
+  {
+    "index": 1,
+    "new_severity": "unchanged",
+    "should_be_removed": false,
+    "comments": "Impact and likelihood are both moderate; the finding is valid."
+  },
+  {
+    "index": 2,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Limit violation is likely but low impact; severity is 'medium'."
+  },
+  {
+    "index": 3,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Severity raised: DoS is fatal but configuration error is unlikely."
+  },
+  {
+    "index": 4,
+    "new_severity": "low",
+    "should_be_removed": false,
+    "comments": "CEI is followed, so reentrancy risk is much lower than claimed."
+  },
+  {
+    "index": 5,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Adjusted to Medium per matrix: critical but unlikely to trigger frequently."
+  },
+  {
+    "index": 6,
+    "new_severity": "low",
+    "should_be_removed": false,
+    "comments": "User friction, but not critical or exploitable. Lower to low."
+  },
+  {
+    "index": 7,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Minor impact, but high frequency if widely encountered."
+  },
+  {
+    "index": 8,
+    "new_severity": "unchanged",
+    "should_be_removed": true,
+    "comments": "Solidity 0.8+ reverts on arithmetic error and no `unchecked` usage."
+  },
+  {
+    "index": 9,
+    "new_severity": "low",
+    "should_be_removed": false,
+    "comments": "Gas inefficiency; not security-critical, correct as 'low' severity."
+  },
+  {
+    "index": 10,
+    "new_severity": "low",
+    "should_be_removed": false,
+    "comments": "Potential misconfig risk, but not a direct exploit."
+  },
+  {
+    "index": 11,
+    "new_severity": "low",
+    "should_be_removed": false,
+    "comments": "Adjust severity to low; risk is limited to reward distribution inconsistency."
+  },
+  {
+    "index": 12,
+    "new_severity": "best practices",
+    "should_be_removed": false,
+    "comments": "Loop counter type is only a minor best-practice concern."
+  },
+  {
+    "index": 13,
+    "new_severity": "unchanged",
+    "should_be_removed": false,
+    "comments": "Critical bug with real, practical impact; High severity is correct."
+  },
+  {
+    "index": 14,
+    "new_severity": "high",
+    "should_be_removed": false,
+    "comments": "Division by zero causes DoS if misconfigured; high severity"
+  },
+  {
+    "index": 15,
+    "new_severity": "unchanged",
+    "should_be_removed": true,
+    "comments": "CEI followed: state changes precede all external calls, making reentrancy not exploitable."
+  },
+  {
+    "index": 16,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Limit bypass is trivial and likely to be exploited, but only slightly increases resource usage."
+  },
+  {
+    "index": 17,
+    "new_severity": "best practices",
+    "should_be_removed": false,
+    "comments": "Retain as best practices; no direct risk, mainly UX."
+  },
+  {
+    "index": 18,
+    "new_severity": "unchanged",
+    "should_be_removed": false,
+    "comments": "Finding is real; severity is high as in original."
+  },
+  {
+    "index": 19,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Confirmed: off-by-one enables >10 staked, risking invariant/loop errors."
+  },
+  {
+    "index": 20,
+    "new_severity": "unchanged",
+    "should_be_removed": true,
+    "comments": "Solidity 0.8+ auto-reverts; not an exploitable overflow."
+  },
+  {
+    "index": 21,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Adjusted severity: critical config mistake can brick core protocol functions."
+  },
+  {
+    "index": 22,
+    "new_severity": "unchanged",
+    "should_be_removed": true,
+    "comments": "Overflow is protected; removal per rules."
+  },
+  {
+    "index": 23,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Non-critical state update/UX concern; medium per severity matrix."
+  },
+  {
+    "index": 24,
+    "new_severity": "unchanged",
+    "should_be_removed": false,
+    "comments": "Finding accurately describes a critical misconfiguration risk; leave as High."
+  },
+  {
+    "index": 25,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Medium fits by matrix: moderate user harm, not an outright vulnerability."
+  },
+  {
+    "index": 26,
+    "new_severity": "unchanged",
+    "should_be_removed": true,
+    "comments": "Solidity 0.8+ makes this underflow impossible except inside unchecked, so this is a FP."
+  },
+  {
+    "index": 27,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Low impact, high likelihood; severity downgraded to medium per matrix."
+  },
+  {
+    "index": 28,
+    "new_severity": "unchanged",
+    "should_be_removed": true,
+    "comments": "False positive: Solidity >= 0.8.0 auto-reverts, limit enforced."
+  },
+  {
+    "index": 29,
+    "new_severity": "low",
+    "should_be_removed": false,
+    "comments": "Pattern is intentional/trivial; kept as Low for transparency."
+  },
+  {
+    "index": 30,
+    "new_severity": "low",
+    "should_be_removed": false,
+    "comments": "Revert risk is minor, with no protocol-level exploit."
+  },
+  {
+    "index": 31,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Direct protocol incentive risk for landlords if metadata is uninitialized."
+  },
+  {
+    "index": 32,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "External call is unsafe but exploitability is not maximal; downgrade to Medium."
+  },
+  {
+    "index": 33,
+    "new_severity": "unchanged",
+    "should_be_removed": false,
+    "comments": "Bug can cause misallocation or block further logic. Severity appropriate."
+  },
+  {
+    "index": 34,
+    "new_severity": "unchanged",
+    "should_be_removed": false,
+    "comments": "Unchecked array access could lead to DoS. Severity correctly set to medium."
+  },
+  {
+    "index": 35,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Config risk is real, severity medium per impact/likelihood."
+  },
+  {
+    "index": 36,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Risk of DoS is real but depends on farming logic reliability; medium severity is appropriate."
+  },
+  {
+    "index": 37,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Off-by-one is low-impact but likely to affect staking UX; medium severity per matrix."
+  },
+  {
+    "index": 38,
+    "new_severity": "high",
+    "should_be_removed": false,
+    "comments": "High: overflow enables full protocol lockout via an accessible exploit chain."
+  },
+  {
+    "index": 39,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Confirmed: genuine medium-severity re-entrancy risk."
+  },
+  {
+    "index": 40,
+    "new_severity": "low",
+    "should_be_removed": false,
+    "comments": "Confirmed self-DOS risk from off-by-one and uint8 overflow; proper severity."
+  },
+  {
+    "index": 41,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Exploit enables systematic tax avoidance; medium severity fits risk."
+  },
+  {
+    "index": 42,
+    "new_severity": "high",
+    "should_be_removed": false,
+    "comments": "Critical state sync bug; impact and likelihood both high."
+  },
+  {
+    "index": 43,
+    "new_severity": "unchanged",
+    "should_be_removed": true,
+    "comments": "Solidity >=0.8 auto-reverts on underflow/overflow; not exploitable here."
+  },
+  {
+    "index": 44,
+    "new_severity": "high",
+    "should_be_removed": false,
+    "comments": "Misused config keys break core protocol logic (taxes): impact is high."
+  },
+  {
+    "index": 45,
+    "new_severity": "low",
+    "should_be_removed": false,
+    "comments": "No practical exploit; severity reduced to low for CEI best-practice violation."
+  },
+  {
+    "index": 46,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Confirmed: Out-of-bounds revert possible, not overflow. Medium severity retained."
+  },
+  {
+    "index": 47,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Admin/config error can render core functions unusable; add guard on PRICE_PER_PLOT."
+  },
+  {
+    "index": 48,
+    "new_severity": "low",
+    "should_be_removed": false,
+    "comments": "Could halt core operations if misconfigured, but only by admin error."
+  },
+  {
+    "index": 49,
+    "new_severity": "low",
+    "should_be_removed": false,
+    "comments": "Business logic bug, not a security flaw; severity unchanged."
+  },
+  {
+    "index": 50,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Severity raised to medium for potential DoS if stake approaches the limit."
+  },
+  {
+    "index": 51,
+    "new_severity": "low",
+    "should_be_removed": false,
+    "comments": "Documented design choice; downgrade to low severity."
+  },
+  {
+    "index": 52,
+    "new_severity": "high",
+    "should_be_removed": false,
+    "comments": "Severity confirmed: it enables unchecked inflation; logic not caught by compiler."
+  },
+  {
+    "index": 53,
+    "new_severity": "low",
+    "should_be_removed": false,
+    "comments": "Config DoS risk, but only if misconfigured\u2014lower severity to 'low'."
+  },
+  {
+    "index": 54,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "State inconsistency can confuse users and off-chain logic."
+  },
+  {
+    "index": 55,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Severity raised to medium due to high likelihood, minor impact."
+  },
+  {
+    "index": 56,
+    "new_severity": "unchanged",
+    "should_be_removed": true,
+    "comments": "Solidity >=0.8 auto-reverts on underflow; recommend FP removal."
+  },
+  {
+    "index": 57,
+    "new_severity": "high",
+    "should_be_removed": false,
+    "comments": "Confirmed high-impact, high-likelihood bug\u2014NFTs can be permanently locked."
+  },
+  {
+    "index": 58,
+    "new_severity": "high",
+    "should_be_removed": false,
+    "comments": "Conversion of negative int to uint reverts, causing DoS; severity remains high."
+  },
+  {
+    "index": 59,
+    "new_severity": "unchanged",
+    "should_be_removed": false,
+    "comments": "Confirmed: high impact due to possible permanent NFT loss."
+  },
+  {
+    "index": 60,
+    "new_severity": "unchanged",
+    "should_be_removed": false,
+    "comments": "Reentrancy risk is real: external call before state update, no guard."
+  },
+  {
+    "index": 61,
+    "new_severity": "high",
+    "should_be_removed": false,
+    "comments": "True high-severity: allows unbounded inflation of rewards."
+  },
+  {
+    "index": 62,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Severity reduced to 'medium': attack needs configuration or attribute control."
+  },
+  {
+    "index": 63,
+    "new_severity": "high",
+    "should_be_removed": false,
+    "comments": "True severe bug: config misuse causes DoS/stealing, not just overflow."
+  },
+  {
+    "index": 64,
+    "new_severity": "unchanged",
+    "should_be_removed": true,
+    "comments": "Compiler auto-reverts on underflow; no exploit, only revert, so remove as false-positive."
+  },
+  {
+    "index": 65,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Matches checklist matrix; true bug, not a false positive."
+  },
+  {
+    "index": 66,
+    "new_severity": "high",
+    "should_be_removed": false,
+    "comments": "Severity escalated: high likelihood, breaks core revenue assumptions."
+  },
+  {
+    "index": 67,
+    "new_severity": "high",
+    "should_be_removed": false,
+    "comments": "Off-by-one logic lets anyone exceed intended cap; high severity per access-control guidelines."
+  },
+  {
+    "index": 68,
+    "new_severity": "high",
+    "should_be_removed": false,
+    "comments": "Confirmed logic flaw causing DOS on plot assignment; raising to high severity."
+  },
+  {
+    "index": 69,
+    "new_severity": "high",
+    "should_be_removed": false,
+    "comments": "Severity increased to high; genuine and impactful exploit."
+  },
+  {
+    "index": 70,
+    "new_severity": "unchanged",
+    "should_be_removed": true,
+    "comments": "No risk or exploit; function behavior is fully intended and safe."
+  },
+  {
+    "index": 71,
+    "new_severity": "low",
+    "should_be_removed": false,
+    "comments": "Downgraded to low: an economic fairness issue, not critical security."
+  },
+  {
+    "index": 72,
+    "new_severity": "info",
+    "should_be_removed": false,
+    "comments": "Not a vulnerability, only suboptimal UX due to generic revert."
+  },
+  {
+    "index": 73,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Array bloat possible, but severity is not high due to required active abuse."
+  },
+  {
+    "index": 74,
+    "new_severity": "unchanged",
+    "should_be_removed": false,
+    "comments": "Medium severity is appropriate due to risk of unrecoverable asset lock."
+  },
+  {
+    "index": 75,
+    "new_severity": "unchanged",
+    "should_be_removed": true,
+    "comments": "Solidity 0.8+ auto-reverts; DOS if present is not overflow"
+  },
+  {
+    "index": 76,
+    "new_severity": "unchanged",
+    "should_be_removed": false,
+    "comments": "Medium severity is appropriate due to risk of lost NFT yield."
+  },
+  {
+    "index": 77,
+    "new_severity": "unchanged",
+    "should_be_removed": true,
+    "comments": "Intended state sync pattern; not practical vulnerability."
+  },
+  {
+    "index": 78,
+    "new_severity": "low",
+    "should_be_removed": false,
+    "comments": "Event/UX issue only; not a security risk."
+  },
+  {
+    "index": 79,
+    "new_severity": "low",
+    "should_be_removed": false,
+    "comments": "Economic parameter risk; yields may be reduced, but no critical manipulation."
+  },
+  {
+    "index": 80,
+    "new_severity": "low",
+    "should_be_removed": false,
+    "comments": "Low practical impact; timing issue is minor and expected in protocol design."
+  },
+  {
+    "index": 81,
+    "new_severity": "unchanged",
+    "should_be_removed": true,
+    "comments": "Intentional design; not exploitable\u2014mark as false positive."
+  },
+  {
+    "index": 82,
+    "new_severity": "low",
+    "should_be_removed": false,
+    "comments": "Precision mismatch is real, but impact is low (accounting only)."
+  },
+  {
+    "index": 83,
+    "new_severity": "unchanged",
+    "should_be_removed": true,
+    "comments": "This is a non-issue; no oracle required by design."
+  },
+  {
+    "index": 84,
+    "new_severity": "low",
+    "should_be_removed": false,
+    "comments": "Precision loss is minor and non-exploitable; severity reduced to low."
+  },
+  {
+    "index": 85,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Adjusted to medium; not a false positive but not a major bug."
+  }
+]

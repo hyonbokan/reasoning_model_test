@@ -1,0 +1,5 @@
+o4 per finding: 14
+
+v1: 15
+
+schema3_o4 - best: FP - 23
