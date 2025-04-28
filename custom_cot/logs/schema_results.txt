@@ -2,10 +2,13 @@ o4 per finding: 14
 
 v1: 15
 
-schema3_o4 - best: FP - 23
 
+schema3_o4 - best: FP - 23
 schema3_gpt4.1 : FP - 14
 
 
 schema4_o4 : FP - 12
 schema4_gpt4.1: FP - 8
+
+schema5_o4 : FP - 
+schema5_gpt4.1: FP - 5 and 1052.6 s

@@ -12,7 +12,7 @@ GPT_4_1  = "gpt-4.1-2025-04-14"
 O4_MINI  = "o4-mini"
 
 # ───────────────────────── configuration ─────────────────────────
-MODEL = GPT_4_1
+MODEL = O4_MINI
 PROMPT_FILE = "utils/mitigation/task_prompt_reasoning_2.py"
 CONTRACT_FILE = "utils/mitigation/contract_with_lines.sol"
 FINDINGS_FILE = "utils/mitigation/LandManager_findings.json"
@@ -71,7 +71,7 @@ report = AuditResponse(
 )
 
 ts = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-out_dir = pathlib.Path("logs/schema5")
+out_dir = pathlib.Path("logs/mitigation")
 out_dir.mkdir(parents=True, exist_ok=True)
 
 (out_dir / f"audit_{MODEL}_{ts}.json").write_text(report.model_dump_json(indent=2))

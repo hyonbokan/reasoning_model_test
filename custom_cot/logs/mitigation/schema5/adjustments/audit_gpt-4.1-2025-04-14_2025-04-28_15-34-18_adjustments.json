@@ -1,0 +1,518 @@
+[
+  {
+    "index": 0,
+    "new_severity": "unchanged",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 1,
+    "new_severity": "unchanged",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 2,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 3,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 4,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 5,
+    "new_severity": "high",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 6,
+    "new_severity": "unchanged",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 7,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 8,
+    "new_severity": "unchanged",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 9,
+    "new_severity": "low",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 10,
+    "new_severity": "low",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 11,
+    "new_severity": "low",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 12,
+    "new_severity": "low",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 13,
+    "new_severity": "unchanged",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 14,
+    "new_severity": "high",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 15,
+    "new_severity": "high",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 16,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 17,
+    "new_severity": "low",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 18,
+    "new_severity": "unchanged",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 19,
+    "new_severity": "unchanged",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 20,
+    "new_severity": "high",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 21,
+    "new_severity": "unchanged",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 22,
+    "new_severity": "unchanged",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 23,
+    "new_severity": "low",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 24,
+    "new_severity": "unchanged",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 25,
+    "new_severity": "unchanged",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 26,
+    "new_severity": "low",
+    "should_be_removed": true,
+    "comments": "Solidity 0.8+ auto-reverts on this conversion, making this a denial-of-service (DoS) concern only, not an exploitable underflow."
+  },
+  {
+    "index": 27,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 28,
+    "new_severity": "low",
+    "should_be_removed": true,
+    "comments": "This finding is mitigated by explicit contract logic limiting iterations, and any severity downgrade is justified due to design intent."
+  },
+  {
+    "index": 29,
+    "new_severity": "unchanged",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 30,
+    "new_severity": "unchanged",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 31,
+    "new_severity": "unchanged",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 32,
+    "new_severity": "unchanged",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 33,
+    "new_severity": "high",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 34,
+    "new_severity": "high",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 35,
+    "new_severity": "high",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 36,
+    "new_severity": "high",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 37,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 38,
+    "new_severity": "unchanged",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 39,
+    "new_severity": "high",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 40,
+    "new_severity": "unchanged",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 41,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 42,
+    "new_severity": "unchanged",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 43,
+    "new_severity": "unchanged",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 44,
+    "new_severity": "high",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 45,
+    "new_severity": "unchanged",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 46,
+    "new_severity": "low",
+    "should_be_removed": true,
+    "comments": "Should be removed as Solidity 0.8+ auto-reverts on out-of-bounds access; DoS is handled by core semantics."
+  },
+  {
+    "index": 47,
+    "new_severity": "high",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 48,
+    "new_severity": "unchanged",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 49,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 50,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 51,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 52,
+    "new_severity": "unchanged",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 53,
+    "new_severity": "unchanged",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 54,
+    "new_severity": "unchanged",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 55,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 56,
+    "new_severity": "unchanged",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 57,
+    "new_severity": "unchanged",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 58,
+    "new_severity": "unchanged",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 59,
+    "new_severity": "unchanged",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 60,
+    "new_severity": "unchanged",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 61,
+    "new_severity": "unchanged",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 62,
+    "new_severity": "unchanged",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 63,
+    "new_severity": "unchanged",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 64,
+    "new_severity": "unchanged",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 65,
+    "new_severity": "high",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 66,
+    "new_severity": "high",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 67,
+    "new_severity": "high",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 68,
+    "new_severity": "high",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 69,
+    "new_severity": "high",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 70,
+    "new_severity": "low",
+    "should_be_removed": true,
+    "comments": "Finding describes intended and innocuous behavior, matching design intent."
+  },
+  {
+    "index": 71,
+    "new_severity": "low",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 72,
+    "new_severity": "low",
+    "should_be_removed": false,
+    "comments": "The finding is correct in highlighting poor UX, but the security risk is negligible since the ERC721 implementation already prevents further processing for non-existent tokens."
+  },
+  {
+    "index": 73,
+    "new_severity": "unchanged",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 74,
+    "new_severity": "high",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 75,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 76,
+    "new_severity": "unchanged",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 77,
+    "new_severity": "unchanged",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 78,
+    "new_severity": "unchanged",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 79,
+    "new_severity": "high",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 80,
+    "new_severity": "unchanged",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 81,
+    "new_severity": "unchanged",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 82,
+    "new_severity": "unchanged",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 83,
+    "new_severity": "low",
+    "should_be_removed": true,
+    "comments": "The report simply notes an intentional design choice unrelated to any vulnerability."
+  },
+  {
+    "index": 84,
+    "new_severity": "high",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 85,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": null
+  }
+]

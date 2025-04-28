@@ -56,7 +56,11 @@ class MitigationChecklist(BaseModel):
     )
     R_2: CheckedYN = Field(
         ...,
-        description="Are state changes executed *after* that external call?",
+        description=(
+            "Are there ANY contract-storage writes that execute **after** “the” external call?\n"
+            "- yes : at least one write is below the call in the same execution path\n"
+            "- no  : ALL writes happen before the call (CEI respected)"
+        ),
     )
     R_3: CheckedYN = Field(
         ...,
@@ -64,7 +68,10 @@ class MitigationChecklist(BaseModel):
     )
     R_4: CheckedYN = Field(
         ...,
-        description="Is the CEI (Checks-Effects-Interactions) pattern **NOT** followed?",
+        description=(
+            "Is the CEI (Checks-Effects-Interactions) pattern **NOT** followed?\n"
+            "Rule: CEI is **broken** iff R_1 = yes *and* R_2 = yes.  In other cases answer 'no'."
+        ),
     )
     R_5: CheckedYN = Field(
         ...,

@@ -1,0 +1,518 @@
+[
+  {
+    "index": 0,
+    "new_severity": "unchanged",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 1,
+    "new_severity": "unchanged",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 2,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Severity upgraded to medium per impact-likelihood matrix."
+  },
+  {
+    "index": 3,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Validate PRICE_PER_PLOT > 0 during initialization or configuration updates to prevent division-by-zero."
+  },
+  {
+    "index": 4,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Implement nonReentrant or move external calls to the end of functions following the CEI pattern to prevent re-entrancy."
+  },
+  {
+    "index": 5,
+    "new_severity": "high",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 6,
+    "new_severity": "unchanged",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 7,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Severity raised based on impact/likelihood matrix"
+  },
+  {
+    "index": 8,
+    "new_severity": "unchanged",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 9,
+    "new_severity": "unchanged",
+    "should_be_removed": false,
+    "comments": "Consider batching or aggregating landlord updates outside the loop to reduce external calls per landlord."
+  },
+  {
+    "index": 10,
+    "new_severity": "low",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 11,
+    "new_severity": "low",
+    "should_be_removed": false,
+    "comments": "Add a require(plotMetadata[landlord].lastUpdated != 0) check in stakeMunchable to ensure landlord metadata is initialized before staking."
+  },
+  {
+    "index": 12,
+    "new_severity": "low",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 13,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Insert `toilerState[tokenId].plotId = plotId;` in transferToUnoccupiedPlot after updating plotOccupied to ensure state consistency."
+  },
+  {
+    "index": 14,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Add a require or configuration check to ensure PRICE_PER_PLOT is non-zero before performing the division to prevent a division-by-zero revert."
+  },
+  {
+    "index": 15,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Add ReentrancyGuard (nonReentrant) to external-facing functions or refactor to follow the Checks-Effects-Interactions pattern."
+  },
+  {
+    "index": 16,
+    "new_severity": "low",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 17,
+    "new_severity": "low",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 18,
+    "new_severity": "unchanged",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 19,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 20,
+    "new_severity": "medium",
+    "should_be_removed": true,
+    "comments": "Overflow auto-reverts under Solidity \u22650.8 (no unchecked block), so no runtime vulnerability exists."
+  },
+  {
+    "index": 21,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Use the proper StorageKey values for numeric parameters or add dedicated config entries for these constants."
+  },
+  {
+    "index": 22,
+    "new_severity": "unchanged",
+    "should_be_removed": true,
+    "comments": null
+  },
+  {
+    "index": 23,
+    "new_severity": "low",
+    "should_be_removed": false,
+    "comments": "Consider updating lastToilDate in transferToUnoccupiedPlot to reset the farming timer for intuitive behavior."
+  },
+  {
+    "index": 24,
+    "new_severity": "unchanged",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 25,
+    "new_severity": "unchanged",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 26,
+    "new_severity": "unchanged",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 27,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Change comparison to '>= 10' to correctly limit to 10 staked Munchables."
+  },
+  {
+    "index": 28,
+    "new_severity": "low",
+    "should_be_removed": true,
+    "comments": "Loop counter overflow is impossible given the 11-item cap and auto-checked overflow in Solidity 0.8."
+  },
+  {
+    "index": 29,
+    "new_severity": "unchanged",
+    "should_be_removed": false,
+    "comments": "Consider documenting the unordered behavior or, if order matters for external integrations, implement an order-preserving removal method."
+  },
+  {
+    "index": 30,
+    "new_severity": "unchanged",
+    "should_be_removed": false,
+    "comments": "Consider validating array bounds to prevent out-of-range reverts."
+  },
+  {
+    "index": 31,
+    "new_severity": "low",
+    "should_be_removed": false,
+    "comments": "Require `plotMetadata[landlord].lastUpdated != 0` before allowing stakeMunchable to proceed."
+  },
+  {
+    "index": 32,
+    "new_severity": "high",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 33,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 34,
+    "new_severity": "unchanged",
+    "should_be_removed": false,
+    "comments": "Add explicit bounds checks for REALM_BONUSES and RARITY_BONUSES accesses to prevent out-of-bounds reverts."
+  },
+  {
+    "index": 35,
+    "new_severity": "unchanged",
+    "should_be_removed": false,
+    "comments": "Validate that PRICE_PER_PLOT is non-zero or guard _getNumPlots with a require statement."
+  },
+  {
+    "index": 36,
+    "new_severity": "unchanged",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 37,
+    "new_severity": "unchanged",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 38,
+    "new_severity": "high",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 39,
+    "new_severity": "high",
+    "should_be_removed": false,
+    "comments": "Add a reentrancy guard (e.g. `nonReentrant`) or refactor to follow checks-effects-interactions for external calls in `_farmPlots`."
+  },
+  {
+    "index": 40,
+    "new_severity": "low",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 41,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Increase severity to medium; ensure `plotMetadata` is initialized or defaulted before use to enforce MIN_TAX_RATE."
+  },
+  {
+    "index": 42,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 43,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Severity adjusted to medium per matrix"
+  },
+  {
+    "index": 44,
+    "new_severity": "unchanged",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 45,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Reorder transferFrom after all state updates or add a nonReentrant guard to prevent reentrancy."
+  },
+  {
+    "index": 46,
+    "new_severity": "low",
+    "should_be_removed": false,
+    "comments": "Add explicit bounds checks for computed indices to prevent out-of-bounds panics."
+  },
+  {
+    "index": 47,
+    "new_severity": "low",
+    "should_be_removed": false,
+    "comments": "Add a check or enforce in configuration that PRICE_PER_PLOT must be non-zero to prevent division-by-zero reverts."
+  },
+  {
+    "index": 48,
+    "new_severity": "low",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 49,
+    "new_severity": "unchanged",
+    "should_be_removed": false,
+    "comments": "Change the check to `if (munchablesStaked[mainAccount].length >= 10)` to enforce the 10-item limit correctly."
+  },
+  {
+    "index": 50,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Consider capping batch sizes, using pagination or off-chain indexing to limit gas per call and replacing the uint8 counter with a larger type."
+  },
+  {
+    "index": 51,
+    "new_severity": "low",
+    "should_be_removed": true,
+    "comments": "Design intent; intentional centralization"
+  },
+  {
+    "index": 52,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 53,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Add a check (e.g. require) during initialization or before division to ensure `PRICE_PER_PLOT` is non-zero to prevent division by zero errors."
+  },
+  {
+    "index": 54,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Add `toilerState[tokenId].plotId = plotId;` after occupancy mappings update and before emitting FarmPlotTaken."
+  },
+  {
+    "index": 55,
+    "new_severity": "unchanged",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 56,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Validate that timestamp \u2265 _toiler.lastToilDate or clamp timestamp to avoid underflow before subtraction; add a require or early return to prevent revert and potential DoS."
+  },
+  {
+    "index": 57,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Add a check that the landlord address is registered before allowing staking to prevent locking."
+  },
+  {
+    "index": 58,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Clamp negative bonus values or handle negative intermediate before uint256 conversion to prevent revert."
+  },
+  {
+    "index": 59,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 60,
+    "new_severity": "high",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 61,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Adjust severity to medium per impact/high and likelihood/medium. Fix off-by-one by using `<=` in invalid plot detection."
+  },
+  {
+    "index": 62,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 63,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Use correct config keys or enforce tax rate clamping within the [0,1e18] range to prevent underflow."
+  },
+  {
+    "index": 64,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Add validation in _reconfigure or triggerPlotMetadata to ensure DEFAULT_TAX_RATE is within [MIN_TAX_RATE, MAX_TAX_RATE] before assignment."
+  },
+  {
+    "index": 65,
+    "new_severity": "high",
+    "should_be_removed": false,
+    "comments": "Change the condition to `if (munchablesStaked[mainAccount].length >= 10) revert TooManyStakedMunchiesError();` to enforce the intended limit of 10."
+  },
+  {
+    "index": 66,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 67,
+    "new_severity": "high",
+    "should_be_removed": false,
+    "comments": "Change comparison to use '>=' instead of '>' to enforce the maximum of 10 staked tokens."
+  },
+  {
+    "index": 68,
+    "new_severity": "unchanged",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 69,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 70,
+    "new_severity": "low",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 71,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 72,
+    "new_severity": "low",
+    "should_be_removed": false,
+    "comments": "Consider adding an explicit token existence check (e.g. IERC721.exists or try ownerOf) and revert with a custom error for non-existent tokens to improve clarity."
+  },
+  {
+    "index": 73,
+    "new_severity": "low",
+    "should_be_removed": false,
+    "comments": "Array size remains bounded (\u226411) due to push/pop logic; this issue is theoretical only."
+  },
+  {
+    "index": 74,
+    "new_severity": "unchanged",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 75,
+    "new_severity": "low",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 76,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 77,
+    "new_severity": "unchanged",
+    "should_be_removed": true,
+    "comments": "Behavior is an intentional design choice (design_intent)."
+  },
+  {
+    "index": 78,
+    "new_severity": "unchanged",
+    "should_be_removed": false,
+    "comments": "Add a require(plotId != oldPlotId, \"New plot must differ from current plot\"); to prevent misleading events."
+  },
+  {
+    "index": 79,
+    "new_severity": "unchanged",
+    "should_be_removed": false,
+    "comments": "Consider adding a minimum expected reward parameter or snapshotting the tax rate at transaction initiation to prevent front-running."
+  },
+  {
+    "index": 80,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Consider adding a deadline parameter or timelock mechanism for tax rate changes to prevent MEV manipulation."
+  },
+  {
+    "index": 81,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 82,
+    "new_severity": "low",
+    "should_be_removed": false,
+    "comments": "Precision mismatch yields minor rounding errors; classify as low severity."
+  },
+  {
+    "index": 83,
+    "new_severity": "low",
+    "should_be_removed": true,
+    "comments": null
+  },
+  {
+    "index": 84,
+    "new_severity": "unchanged",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 85,
+    "new_severity": "low",
+    "should_be_removed": false,
+    "comments": "Consider using a precision-preserving function (e.g., FullMath.mulDiv) or a fixed-point math library to perform (schnibblesTotal * latestTaxRate) with proper rounding or track and accumulate remainders to avoid truncated fractional shares."
+  }
+]
