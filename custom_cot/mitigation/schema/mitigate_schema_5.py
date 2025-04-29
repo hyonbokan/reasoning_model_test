@@ -149,9 +149,18 @@ class Adjustment(BaseModel):
     comments: str | None = None
 
 class FindingResponse(BaseModel):
-    strategy: MitigationChecklist
-    reasoning_summary: str
-    adjustment: Adjustment
+    strategy: MitigationChecklist = Field(
+        ...,
+        description="Fill every checklist field first; this is the structured chain-of-thought."
+    )
+    reasoning_summary: str = Field(
+        ...,
+        description="≤ 3-sentence human-readable rationale that stitches strategy to adjustment."
+    )
+    adjustment: Adjustment = Field(
+        ...,
+        description="Final decision (index, final_severity, should_be_removed, comments)."
+    )
 
 class AuditResponse(BaseModel):
     document_id: str

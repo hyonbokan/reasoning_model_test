@@ -9,7 +9,7 @@ TASK_PROMPT = dedent("""
        in the JSON schema.
     4. Write a ≤3-sentence `reasoning_summary`.
     5. Fill `adjustment`.  
-       • `final_severity` **must** equal the matrix result  
+       • `final_severity` **must** equal the matrix result
        • If `strategy.removal_reason != "none"`, set `should_be_removed = true`.
     6. Return JSON that matches the AuditResponse schema exactly—no extra keys,
        no commentary outside the JSON.

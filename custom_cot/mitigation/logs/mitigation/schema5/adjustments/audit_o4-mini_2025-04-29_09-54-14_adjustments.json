@@ -1,0 +1,518 @@
+[
+  {
+    "index": 0,
+    "new_severity": "high",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 1,
+    "new_severity": "high",
+    "should_be_removed": false,
+    "comments": "Add an assignment to toilerState[tokenId].plotId = plotId in transferToUnoccupiedPlot to keep state consistent."
+  },
+  {
+    "index": 2,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Change the boundary check to `>= 10` to enforce the ten-stake cap and restore CEI order to prevent potential reentrancy."
+  },
+  {
+    "index": 3,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Validate that PRICE_PER_PLOT is non-zero on configuration to prevent division-by-zero."
+  },
+  {
+    "index": 4,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Add a nonReentrant guard or restructure to perform all external calls after completing internal state updates to prevent re-entrancy."
+  },
+  {
+    "index": 5,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Update `toilerState[tokenId].plotId = plotId` in `transferToUnoccupiedPlot` to keep mappings consistent."
+  },
+  {
+    "index": 6,
+    "new_severity": "high",
+    "should_be_removed": false,
+    "comments": "Add logic to clear `dirty` when plot count is sufficient again, or provide an explicit reset function."
+  },
+  {
+    "index": 7,
+    "new_severity": "low",
+    "should_be_removed": false,
+    "comments": "Change the limit check from `munchablesStaked[mainAccount].length > 10` to `>= 10` to enforce the intended maximum of 10 staked Munchables."
+  },
+  {
+    "index": 8,
+    "new_severity": "unchanged",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 9,
+    "new_severity": "unchanged",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 10,
+    "new_severity": "low",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 11,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 12,
+    "new_severity": "low",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 13,
+    "new_severity": "high",
+    "should_be_removed": false,
+    "comments": "Add `toilerState[tokenId].plotId = plotId;` after updating plotOccupied to keep state in sync."
+  },
+  {
+    "index": 14,
+    "new_severity": "unchanged",
+    "should_be_removed": false,
+    "comments": "Add a require(PRICE_PER_PLOT > 0) check during initialization or before division to prevent division by zero."
+  },
+  {
+    "index": 15,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Apply nonReentrant guard or adhere to CEI pattern to prevent reentrancy"
+  },
+  {
+    "index": 16,
+    "new_severity": "low",
+    "should_be_removed": false,
+    "comments": "Change the check to `>= 10` to enforce the 10-NFT limit."
+  },
+  {
+    "index": 17,
+    "new_severity": "low",
+    "should_be_removed": false,
+    "comments": "Implement IERC721Receiver.onERC721Received to support safeTransferFrom and improve interoperability."
+  },
+  {
+    "index": 18,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 19,
+    "new_severity": "high",
+    "should_be_removed": false,
+    "comments": "Change the pre-push check to `>= 10` (or `> 9`) to enforce the 10-token limit."
+  },
+  {
+    "index": 20,
+    "new_severity": "high",
+    "should_be_removed": false,
+    "comments": "Enforce an upper bound on BASE_SCHNIBBLE_RATE or clamp the time delta before multiplication to prevent overflow and DoS."
+  },
+  {
+    "index": 21,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 22,
+    "new_severity": "unchanged",
+    "should_be_removed": true,
+    "comments": "Overflow is auto-checked by Solidity 0.8 and staked list is limited to 10, so the issue cannot occur in practice."
+  },
+  {
+    "index": 23,
+    "new_severity": "low",
+    "should_be_removed": false,
+    "comments": "Consider refreshing lastToilDate in transferToUnoccupiedPlot to avoid zero-yield on immediate farming."
+  },
+  {
+    "index": 24,
+    "new_severity": "high",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 25,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Consider emitting a specific event when marking a toiler dirty and updating UI/docs to notify users that their Munchables have stopped earning rewards."
+  },
+  {
+    "index": 26,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 27,
+    "new_severity": "unchanged",
+    "should_be_removed": false,
+    "comments": "Replace `if (munchablesStaked[mainAccount].length > 10)` with `>= 10` to enforce a maximum of 10 staked Munchables."
+  },
+  {
+    "index": 28,
+    "new_severity": "low",
+    "should_be_removed": true,
+    "comments": "Overflow is auto-reverted in Solidity \u22650.8.0 and staked count is limited to 11, so this is a theoretical issue."
+  },
+  {
+    "index": 29,
+    "new_severity": "low",
+    "should_be_removed": true,
+    "comments": "Swap-and-pop ordering change is an intentional gas optimization, not a functional flaw."
+  },
+  {
+    "index": 30,
+    "new_severity": "low",
+    "should_be_removed": false,
+    "comments": "Consider adding explicit bounds checks for REALM_BONUSES and RARITY_BONUSES indices to prevent potential out-of-bounds reverts."
+  },
+  {
+    "index": 31,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 32,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 33,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Add `toilerState[tokenId].plotId = plotId;` before emitting `FarmPlotTaken` to keep state consistent."
+  },
+  {
+    "index": 34,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 35,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Add a require check ensuring `PRICE_PER_PLOT > 0` during configuration or within `_getNumPlots` to prevent division by zero."
+  },
+  {
+    "index": 36,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 37,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Change the staking limit check to `>= 10` to correctly enforce the maximum of 10 munchables."
+  },
+  {
+    "index": 38,
+    "new_severity": "high",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 39,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Recommend adding a nonReentrant guard or refactoring to follow CEI pattern around the external calls to accountManager."
+  },
+  {
+    "index": 40,
+    "new_severity": "low",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 41,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Enforce MIN_TAX_RATE on uninitialized metadata (e.g., default to DEFAULT_TAX_RATE) or require metadata initialization before allowing farming."
+  },
+  {
+    "index": 42,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Add `toilerState[tokenId].plotId = plotId;` before emitting FarmPlotTaken to keep state consistent."
+  },
+  {
+    "index": 43,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Add bounds checking or clamp finalBonus to prevent negative multipliers below \u2212100, or adjust reward formula to avoid casting negative values to uint256."
+  },
+  {
+    "index": 44,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 45,
+    "new_severity": "unchanged",
+    "should_be_removed": false,
+    "comments": "Add a nonReentrant guard or reorder state updates to occur before the external `transferFrom` call to restore CEI."
+  },
+  {
+    "index": 46,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Validate array indices against REALM_BONUSES.length and RARITY_BONUSES.length before access to prevent DoS."
+  },
+  {
+    "index": 47,
+    "new_severity": "unchanged",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 48,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Add require(addr != address(0)) after fetching each external contract address in _reconfigure to prevent misconfiguration breakage."
+  },
+  {
+    "index": 49,
+    "new_severity": "low",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 50,
+    "new_severity": "low",
+    "should_be_removed": true,
+    "comments": null
+  },
+  {
+    "index": 51,
+    "new_severity": "medium",
+    "should_be_removed": true,
+    "comments": "Configuration centralization is a deliberate design choice; consider decentralized governance for enhancements."
+  },
+  {
+    "index": 52,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Clamp finalBonus to a valid range or revert on negative multipliers to avoid negative-to-unsigned wrap."
+  },
+  {
+    "index": 53,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Add a require statement to ensure PRICE_PER_PLOT != 0 before division."
+  },
+  {
+    "index": 54,
+    "new_severity": "low",
+    "should_be_removed": false,
+    "comments": "Add `toilerState[tokenId].plotId = plotId;` after updating `plotOccupied` to keep stored state in sync."
+  },
+  {
+    "index": 55,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Change the limit check to `>= 10` (or `length >= 10`) to enforce a maximum of 10 staked munchables."
+  },
+  {
+    "index": 56,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Validate that `plotMetadata[landlord].lastUpdated >= _toiler.lastToilDate` before subtraction or clamp the timestamp to avoid underflow; alternatively update `lastToilDate` when adjusting `lastUpdated`."
+  },
+  {
+    "index": 57,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Add a check that the landlord is registered via accountManager before proceeding with the NFT transfer."
+  },
+  {
+    "index": 58,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 59,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 60,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Introduce a nonReentrant guard and reorder logic to perform all state updates before external calls (CEI pattern)."
+  },
+  {
+    "index": 61,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 62,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 63,
+    "new_severity": "high",
+    "should_be_removed": false,
+    "comments": "Validate MIN_TAX_RATE and MAX_TAX_RATE against expected rate bounds (0 to 1e18) and correct the config key sources."
+  },
+  {
+    "index": 64,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Validate DEFAULT_TAX_RATE against MIN_TAX_RATE and MAX_TAX_RATE in _reconfigure to prevent underflow"
+  },
+  {
+    "index": 65,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 66,
+    "new_severity": "high",
+    "should_be_removed": false,
+    "comments": "Require plotMetadata[landlord].lastUpdated != 0 or initialize metadata before staking, and reorder transferFrom after state updates or add a reentrancy guard."
+  },
+  {
+    "index": 67,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Change `if (length > 10)` to `if (length >= 10)` to enforce the intended cap."
+  },
+  {
+    "index": 68,
+    "new_severity": "unchanged",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 69,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 70,
+    "new_severity": "low",
+    "should_be_removed": true,
+    "comments": null
+  },
+  {
+    "index": 71,
+    "new_severity": "high",
+    "should_be_removed": false,
+    "comments": "Recommend adding a timelock or cooldown period for updateTaxRate to prevent front-running economic manipulation."
+  },
+  {
+    "index": 72,
+    "new_severity": "low",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 73,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Consider enforcing a cap on the total lifetime entries or periodically compacting the munchablesStaked array to prevent unbounded growth and gas exhaustion."
+  },
+  {
+    "index": 74,
+    "new_severity": "low",
+    "should_be_removed": false,
+    "comments": "Add a require(landlord != address(0), \"Invalid landlord\"); at the start of stakeMunchable to prevent zero-address locking."
+  },
+  {
+    "index": 75,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Validate realm and rarity indices against the lengths of REALM_BONUSES and RARITY_BONUSES before accessing to avoid out-of-bounds errors."
+  },
+  {
+    "index": 76,
+    "new_severity": "unchanged",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 77,
+    "new_severity": "low",
+    "should_be_removed": false,
+    "comments": "Consider reading `currentTaxRate` from `plotMetadata` on each farm run or updating all `toilerState.latestTaxRate` entries when the landlord changes their rate to avoid stale data."
+  },
+  {
+    "index": 78,
+    "new_severity": "low",
+    "should_be_removed": false,
+    "comments": "Add a require(plotId != oldPlotId, \"New plot must differ from current plot\"); to prevent no-op transfers and misleading events."
+  },
+  {
+    "index": 79,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Consider adding a minimum reward (slippage) parameter to farmPlots to guard against last-minute tax rate changes."
+  },
+  {
+    "index": 80,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Consider adding a deadline parameter or timelock mechanism to updateTaxRate to limit mempool manipulation and protect toilers."
+  },
+  {
+    "index": 81,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 82,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 83,
+    "new_severity": "low",
+    "should_be_removed": true,
+    "comments": "Removal: no oracle needed by design"
+  },
+  {
+    "index": 84,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Refactor to perform multiplication before division or use fixed-point math to avoid precision loss."
+  },
+  {
+    "index": 85,
+    "new_severity": "unchanged",
+    "should_be_removed": false,
+    "comments": "Consider using a full\u2010precision `mulDiv` or accumulating fractional schnibbles to avoid precision loss."
+  }
+]

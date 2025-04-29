@@ -1,11 +1,8 @@
 o4 per finding: 14
-
-v1: 15
-
+munchables AuditAgent: 15 (11 dubs)
 
 schema3_o4 - best: FP - 23
 schema3_gpt4.1 : FP - 14
-
 
 schema4_o4 : FP - 12
 schema4_gpt4.1: FP - 8

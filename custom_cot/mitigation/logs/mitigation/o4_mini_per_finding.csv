@@ -1,0 +1,87 @@
+index,orig_severity,v1_severity,v1_false_positive,v1_severity_delta,cot_severity,cot_false_positive,cot_severity_delta
+0,high,low,True,less_severe,high,False,unchanged
+1,medium,medium,False,unchanged,unchanged,False,unchanged
+2,low,low,False,unchanged,medium,False,more_severe
+3,low,low,False,unchanged,medium,False,more_severe
+4,low,medium,False,more_severe,high,False,more_severe
+5,high,high,False,unchanged,medium,False,less_severe
+6,medium,medium,False,unchanged,medium,False,unchanged
+7,low,low,False,unchanged,low,False,unchanged
+8,low,low,True,unchanged,unchanged,True,unchanged
+9,low,low,False,unchanged,best practices,False,info or best practices
+10,info,info,False,unchanged,info,False,unchanged
+11,info,info,False,unchanged,medium,False,info or best practices
+12,best practices,best practices,False,unchanged,unchanged,False,unchanged
+13,high,high,False,unchanged,medium,False,less_severe
+14,medium,medium,False,unchanged,unchanged,False,unchanged
+15,medium,medium,False,unchanged,unchanged,True,unchanged
+16,low,low,False,unchanged,medium,False,more_severe
+17,best practices,best practices,False,unchanged,best practices,False,unchanged
+18,high,high,False,unchanged,high,False,unchanged
+19,medium,medium,False,unchanged,unchanged,False,unchanged
+20,medium,medium,False,unchanged,unchanged,True,unchanged
+21,low,low,False,unchanged,medium,False,more_severe
+22,low,low,False,unchanged,unchanged,True,unchanged
+23,info,info,False,unchanged,unchanged,False,unchanged
+24,high,high,False,unchanged,unchanged,False,unchanged
+25,medium,medium,False,unchanged,best practices,False,info or best practices
+26,medium,medium,False,unchanged,high,False,more_severe
+27,medium,medium,False,unchanged,low,False,less_severe
+28,low,low,False,unchanged,best practices,False,info or best practices
+29,low,low,False,unchanged,best practices,False,info or best practices
+30,low,low,False,unchanged,unchanged,False,unchanged
+31,low,low,False,unchanged,medium,False,more_severe
+32,high,high,False,unchanged,unchanged,True,unchanged
+33,medium,medium,False,unchanged,unchanged,False,unchanged
+34,medium,medium,False,unchanged,medium,False,unchanged
+35,medium,medium,False,unchanged,medium,False,unchanged
+36,medium,medium,False,unchanged,best practices,False,info or best practices
+37,low,low,False,unchanged,medium,False,more_severe
+38,high,high,False,unchanged,high,False,unchanged
+39,medium,medium,False,unchanged,unchanged,True,unchanged
+40,low,low,True,unchanged,unchanged,False,unchanged
+41,low,low,False,unchanged,medium,False,more_severe
+42,high,high,False,unchanged,medium,False,less_severe
+43,high,high,True,unchanged,medium,False,less_severe
+44,medium,medium,False,unchanged,high,False,more_severe
+45,medium,medium,False,unchanged,unchanged,True,unchanged
+46,medium,medium,False,unchanged,unchanged,True,unchanged
+47,medium,medium,False,unchanged,medium,False,unchanged
+48,low,low,False,unchanged,best practices,False,info or best practices
+49,low,low,False,unchanged,unchanged,False,unchanged
+50,low,low,False,unchanged,unchanged,True,unchanged
+51,info,info,False,unchanged,info,False,unchanged
+52,high,high,True,unchanged,medium,False,less_severe
+53,medium,medium,True,unchanged,unchanged,False,unchanged
+54,low,low,True,unchanged,unchanged,False,unchanged
+55,low,low,True,unchanged,unchanged,False,unchanged
+56,high,high,False,unchanged,unchanged,False,unchanged
+57,high,high,False,unchanged,unchanged,False,unchanged
+58,high,high,True,unchanged,high,False,unchanged
+59,high,high,False,unchanged,high,False,unchanged
+60,high,high,True,unchanged,high,False,unchanged
+61,high,high,False,unchanged,unchanged,False,unchanged
+62,high,high,True,unchanged,medium,False,less_severe
+63,high,high,False,unchanged,high,False,unchanged
+64,high,high,False,unchanged,medium,False,less_severe
+65,medium,medium,True,unchanged,medium,False,unchanged
+66,medium,medium,False,unchanged,medium,False,unchanged
+67,medium,medium,True,unchanged,medium,False,unchanged
+68,medium,medium,True,unchanged,medium,False,unchanged
+69,medium,medium,True,unchanged,medium,False,unchanged
+70,info,info,False,unchanged,info,True,unchanged
+71,best practices,best practices,False,unchanged,unchanged,False,unchanged
+72,medium,medium,False,unchanged,unchanged,True,unchanged
+73,medium,medium,False,unchanged,unchanged,True,unchanged
+74,medium,medium,False,unchanged,medium,False,unchanged
+75,medium,medium,False,unchanged,low,False,less_severe
+76,medium,medium,False,unchanged,unchanged,False,unchanged
+77,low,low,False,unchanged,medium,False,more_severe
+78,low,low,False,unchanged,best practices,False,info or best practices
+79,medium,medium,False,unchanged,best practices,False,info or best practices
+80,medium,medium,False,unchanged,best practices,False,info or best practices
+81,medium,medium,False,unchanged,unchanged,False,unchanged
+82,medium,medium,False,unchanged,unchanged,True,unchanged
+83,info,info,False,unchanged,info,True,unchanged
+84,medium,medium,False,unchanged,low,False,less_severe
+85,medium,medium,False,unchanged,low,False,less_severe
