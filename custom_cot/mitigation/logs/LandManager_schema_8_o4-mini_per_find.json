@@ -1,0 +1,644 @@
+{
+  "document_id": "schema_8",
+  "findings": [
+    {
+      "strategy": {
+        "facts": {
+          "O_1": {
+            "answer": "yes",
+            "refs": [
+              {
+                "file": "LandManager.sol",
+                "lines": [
+                  281,
+                  287
+                ],
+                "why": "signed arithmetic and cast back to uint"
+              }
+            ]
+          },
+          "O_2": {
+            "answer": "yes",
+            "refs": [
+              {
+                "file": "LandManager.sol",
+                "lines": [
+                  3
+                ],
+                "why": "pragma solidity 0.8.25"
+              }
+            ]
+          },
+          "O_3": {
+            "answer": "yes",
+            "refs": [
+              {
+                "file": "LandManager.sol",
+                "lines": [
+                  272,
+                  280
+                ],
+                "why": "narrowing cast (uint8→int8) and signed-to-uint cast"
+              }
+            ]
+          },
+          "O_4": {
+            "answer": "no",
+            "refs": null
+          },
+          "O_5": {
+            "answer": "yes",
+            "refs": [
+              {
+                "file": "LandManager.sol",
+                "lines": [
+                  284,
+                  290
+                ],
+                "why": "overflow feeds unlimited mint exploit"
+              }
+            ]
+          },
+          "R_1": {
+            "answer": "yes",
+            "refs": [
+              {
+                "file": "LandManager.sol",
+                "lines": [
+                  268
+                ],
+                "why": "external call to nftAttributesManager"
+              }
+            ]
+          },
+          "R_2": {
+            "answer": "yes",
+            "refs": [
+              {
+                "file": "LandManager.sol",
+                "lines": [
+                  268,
+                  292
+                ],
+                "why": "SSTORE after external call"
+              }
+            ]
+          },
+          "R_3": {
+            "answer": "yes",
+            "refs": null
+          },
+          "R_4": {
+            "answer": "yes",
+            "refs": null
+          },
+          "R_5": {
+            "answer": "no",
+            "refs": null
+          },
+          "A_1": {
+            "answer": "yes",
+            "refs": null
+          },
+          "A_2": {
+            "answer": "no",
+            "refs": null
+          },
+          "A_3": {
+            "answer": "yes",
+            "refs": null
+          },
+          "A_4": {
+            "answer": "yes",
+            "refs": [
+              {
+                "file": "LandManager.sol",
+                "lines": [
+                  284,
+                  290
+                ],
+                "why": "critical protocol mint control"
+              }
+            ]
+          }
+        },
+        "fp": {
+          "duplicate": {
+            "answer": "no",
+            "refs": null
+          },
+          "design_intent": {
+            "answer": "no",
+            "refs": null
+          },
+          "auto_checked": {
+            "answer": "no",
+            "refs": null
+          },
+          "guarded": {
+            "answer": "no",
+            "refs": null
+          },
+          "removal_reason": "none"
+        },
+        "severity": {
+          "impact": "high",
+          "likelihood": "medium",
+          "matrix": "medium"
+        }
+      },
+      "reasoning_summary": "Signed-to-unsigned cast bypasses overflow checks (O_3 yes), and CEI is broken with no reentrancy guard (R_4 yes), so removal_reason=none; severity high.",
+      "adjustment": {
+        "index": 0,
+        "final_severity": "high",
+        "should_be_removed": false,
+        "comments": null
+      }
+    },
+    {
+      "strategy": {
+        "facts": {
+          "O_1": {
+            "answer": "no",
+            "refs": null
+          },
+          "O_2": {
+            "answer": "yes",
+            "refs": [
+              {
+                "file": "LandManager.sol",
+                "lines": [
+                  3
+                ],
+                "why": "pragma solidity 0.8.25"
+              }
+            ]
+          },
+          "O_3": {
+            "answer": "no",
+            "refs": null
+          },
+          "O_4": {
+            "answer": "no",
+            "refs": null
+          },
+          "O_5": {
+            "answer": "no",
+            "refs": null
+          },
+          "R_1": {
+            "answer": "no",
+            "refs": null
+          },
+          "R_2": {
+            "answer": "no",
+            "refs": null
+          },
+          "R_3": {
+            "answer": "yes",
+            "refs": null
+          },
+          "R_4": {
+            "answer": "no",
+            "refs": null
+          },
+          "R_5": {
+            "answer": "yes",
+            "refs": null
+          },
+          "A_1": {
+            "answer": "yes",
+            "refs": [
+              {
+                "file": "LandManager.sol",
+                "lines": [
+                  200,
+                  203
+                ],
+                "why": "external transferToUnoccupiedPlot can be called by any registered user"
+              }
+            ]
+          },
+          "A_2": {
+            "answer": "no",
+            "refs": null
+          },
+          "A_3": {
+            "answer": "yes",
+            "refs": null
+          },
+          "A_4": {
+            "answer": "yes",
+            "refs": null
+          }
+        },
+        "fp": {
+          "duplicate": {
+            "answer": "no",
+            "refs": null
+          },
+          "design_intent": {
+            "answer": "no",
+            "refs": null
+          },
+          "auto_checked": {
+            "answer": "no",
+            "refs": null
+          },
+          "guarded": {
+            "answer": "no",
+            "refs": null
+          },
+          "removal_reason": "none"
+        },
+        "severity": {
+          "impact": "high",
+          "likelihood": "medium",
+          "matrix": "medium"
+        }
+      },
+      "reasoning_summary": "toilerState.plotId is never updated on transfer, leading to stale IDs and retroactive minting; no FP flags, so severity set to high (impact high × likelihood medium).",
+      "adjustment": {
+        "index": 1,
+        "final_severity": "high",
+        "should_be_removed": false,
+        "comments": "Unbounded token inflation risk, severity boosted to high"
+      }
+    },
+    {
+      "strategy": {
+        "facts": {
+          "O_1": {
+            "answer": "no",
+            "refs": null
+          },
+          "O_2": {
+            "answer": "yes",
+            "refs": [
+              {
+                "file": "LandManager.sol",
+                "lines": [
+                  3
+                ],
+                "why": "pragma solidity 0.8.25"
+              }
+            ]
+          },
+          "O_3": {
+            "answer": "no",
+            "refs": null
+          },
+          "O_4": {
+            "answer": "no",
+            "refs": null
+          },
+          "O_5": {
+            "answer": "no",
+            "refs": null
+          },
+          "R_1": {
+            "answer": "yes",
+            "refs": [
+              {
+                "file": "LandManager.sol",
+                "lines": [
+                  153
+                ],
+                "why": "external ERC721.transferFrom call"
+              }
+            ]
+          },
+          "R_2": {
+            "answer": "yes",
+            "refs": [
+              {
+                "file": "LandManager.sol",
+                "lines": [
+                  155,
+                  160,
+                  161,
+                  163
+                ],
+                "why": "storage writes after transfer"
+              }
+            ]
+          },
+          "R_3": {
+            "answer": "yes",
+            "refs": [
+              {
+                "file": "LandManager.sol",
+                "lines": [
+                  132,
+                  136,
+                  173
+                ],
+                "why": "no reentrancy guard on stakeMunchable"
+              }
+            ]
+          },
+          "R_4": {
+            "answer": "yes",
+            "refs": null
+          },
+          "R_5": {
+            "answer": "no",
+            "refs": null
+          },
+          "A_1": {
+            "answer": "yes",
+            "refs": [
+              {
+                "file": "LandManager.sol",
+                "lines": [
+                  132
+                ],
+                "why": "external entry point"
+              }
+            ]
+          },
+          "A_2": {
+            "answer": "no",
+            "refs": null
+          },
+          "A_3": {
+            "answer": "yes",
+            "refs": null
+          },
+          "A_4": {
+            "answer": "no",
+            "refs": null
+          }
+        },
+        "fp": {
+          "duplicate": {
+            "answer": "no",
+            "refs": null
+          },
+          "design_intent": {
+            "answer": "no",
+            "refs": null
+          },
+          "auto_checked": {
+            "answer": "no",
+            "refs": null
+          },
+          "guarded": {
+            "answer": "no",
+            "refs": null
+          },
+          "removal_reason": "none"
+        },
+        "severity": {
+          "impact": "low",
+          "likelihood": "high",
+          "matrix": "medium"
+        }
+      },
+      "reasoning_summary": "Logic bug (O_1 no) leads to off-by-one in stake limit; CEI broken on transferFrom (R_1 yes, R_2 yes) without guard; impact low, likelihood high → medium severity.",
+      "adjustment": {
+        "index": 2,
+        "final_severity": "medium",
+        "should_be_removed": false,
+        "comments": null
+      }
+    },
+    {
+      "strategy": {
+        "facts": {
+          "O_1": {
+            "answer": "no",
+            "refs": null
+          },
+          "O_2": {
+            "answer": "yes",
+            "refs": [
+              {
+                "file": "LandManager.sol",
+                "lines": [
+                  3
+                ],
+                "why": "pragma solidity 0.8.25"
+              }
+            ]
+          },
+          "O_3": {
+            "answer": "no",
+            "refs": null
+          },
+          "O_4": {
+            "answer": "no",
+            "refs": null
+          },
+          "O_5": {
+            "answer": "no",
+            "refs": null
+          },
+          "R_1": {
+            "answer": "no",
+            "refs": null
+          },
+          "R_2": {
+            "answer": "no",
+            "refs": null
+          },
+          "R_3": {
+            "answer": "yes",
+            "refs": null
+          },
+          "R_4": {
+            "answer": "no",
+            "refs": null
+          },
+          "R_5": {
+            "answer": "yes",
+            "refs": null
+          },
+          "A_1": {
+            "answer": "yes",
+            "refs": null
+          },
+          "A_2": {
+            "answer": "yes",
+            "refs": null
+          },
+          "A_3": {
+            "answer": "yes",
+            "refs": null
+          },
+          "A_4": {
+            "answer": "yes",
+            "refs": null
+          }
+        },
+        "fp": {
+          "duplicate": {
+            "answer": "no",
+            "refs": null
+          },
+          "design_intent": {
+            "answer": "no",
+            "refs": null
+          },
+          "auto_checked": {
+            "answer": "no",
+            "refs": null
+          },
+          "guarded": {
+            "answer": "no",
+            "refs": null
+          },
+          "removal_reason": "none"
+        },
+        "severity": {
+          "impact": "medium",
+          "likelihood": "medium",
+          "matrix": "medium"
+        }
+      },
+      "reasoning_summary": "PRICE_PER_PLOT can be zero, causing division-by-zero reverts in _getNumPlots; not a false positive; severity set to medium due to system-wide DoS.",
+      "adjustment": {
+        "index": 3,
+        "final_severity": "medium",
+        "should_be_removed": false,
+        "comments": null
+      }
+    },
+    {
+      "strategy": {
+        "facts": {
+          "O_1": {
+            "answer": "no",
+            "refs": null
+          },
+          "O_2": {
+            "answer": "yes",
+            "refs": [
+              {
+                "file": "LandManager.sol",
+                "lines": [
+                  3
+                ],
+                "why": "pragma solidity 0.8.25"
+              }
+            ]
+          },
+          "O_3": {
+            "answer": "no",
+            "refs": null
+          },
+          "O_4": {
+            "answer": "no",
+            "refs": null
+          },
+          "O_5": {
+            "answer": "no",
+            "refs": null
+          },
+          "R_1": {
+            "answer": "yes",
+            "refs": [
+              {
+                "file": "LandManager.sol",
+                "lines": [
+                  301,
+                  310
+                ],
+                "why": "external AccountManager.updatePlayer calls"
+              }
+            ]
+          },
+          "R_2": {
+            "answer": "yes",
+            "refs": [
+              {
+                "file": "LandManager.sol",
+                "lines": [
+                  292,
+                  293,
+                  301
+                ],
+                "why": "state writes occur before and after external call"
+              }
+            ]
+          },
+          "R_3": {
+            "answer": "yes",
+            "refs": null
+          },
+          "R_4": {
+            "answer": "yes",
+            "refs": null
+          },
+          "R_5": {
+            "answer": "no",
+            "refs": [
+              {
+                "file": "LandManager.sol",
+                "lines": [
+                  301
+                ],
+                "why": "calls external AccountManager"
+              }
+            ]
+          },
+          "A_1": {
+            "answer": "yes",
+            "refs": [
+              {
+                "file": "LandManager.sol",
+                "lines": [
+                  132
+                ],
+                "why": "public stakeMunchable entry point"
+              }
+            ]
+          },
+          "A_2": {
+            "answer": "no",
+            "refs": null
+          },
+          "A_3": {
+            "answer": "yes",
+            "refs": null
+          },
+          "A_4": {
+            "answer": "yes",
+            "refs": null
+          }
+        },
+        "fp": {
+          "duplicate": {
+            "answer": "no",
+            "refs": null
+          },
+          "design_intent": {
+            "answer": "no",
+            "refs": null
+          },
+          "auto_checked": {
+            "answer": "no",
+            "refs": null
+          },
+          "guarded": {
+            "answer": "no",
+            "refs": null
+          },
+          "removal_reason": "none"
+        },
+        "severity": {
+          "impact": "high",
+          "likelihood": "high",
+          "matrix": "high"
+        }
+      },
+      "reasoning_summary": "External calls to AccountManager.updatePlayer (R_1 yes) with storage writes before/after those calls (R_2 yes) and no reentrancy guard (R_3 yes) so removal_reason=none. This enables reentrancy theft and state corruption. Severity set to high/high → high.",
+      "adjustment": {
+        "index": 4,
+        "final_severity": "high",
+        "should_be_removed": false,
+        "comments": "Add nonReentrant or reorder CEI pattern to prevent re-entrancy."
+      }
+    }
+  ]
+}

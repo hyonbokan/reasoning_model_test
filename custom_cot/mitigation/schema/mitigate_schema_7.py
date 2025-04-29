@@ -1,5 +1,15 @@
-from typing import List, Literal
-from pydantic import BaseModel, Field
+"""
+Schema-7  – Three-stage custom CoT
+-----------------------------------
+• Stage-1  facts      : overflow / re-entrancy / access booleans (+ refs)
+• Stage-2  fp         : false-positive gate derived from facts
+• Stage-3  severity   : impact × likelihood → matrix
+• adjustment          : single final decision
+"""
+from __future__ import annotations
+from typing    import List, Literal
+from pydantic  import BaseModel, Field, model_validator
+
 
 # --- primitive enums -------------------------------------------------
 _YN  = Literal["yes", "no"]
@@ -7,18 +17,21 @@ _IMP = Literal["high", "medium", "low"]
 _LIK = _IMP
 _SEV = Literal["high", "medium", "low", "info", "best practices"]
 
-# --- evidence helper -------------------------------------------------
+
+# ───────────────── evidence helper ────────────────────────────────
 class CodeRef(BaseModel):
-    file: str
-    lines: List[int]
-    why:  str | None = None
+    file : str                           
+    lines: List[int]                    # 1-based
+    why  : str | None = None            # ≤ 40 chars
 
 class CheckedYN(BaseModel):
     answer: _YN
-    refs:   List[CodeRef] | None = None
+    # refs  : List[CodeRef] | None = None
 
-# --- strategy (= custom CoT) ----------------------------------------
-class MitigationChecklist(BaseModel):
+# ═══════════════════════════════════════════════════════════════════════════
+# Stage-1 facts
+# ═══════════════════════════════════════════════════════════════════════════
+class FactChecklist(BaseModel):
 # ---------- Overflow / Under-flow  -----------------------------------------
     # STEP 1 ───────── Identify scope
     O_1: CheckedYN = Field(
@@ -121,7 +134,7 @@ class MitigationChecklist(BaseModel):
         ...,
         description=(
             "STEP 4 — Is the CEI pattern **broken**?\n"
-            "Rule: answer **yes** if R_1 = yes *and* R_2 = yes.\n"
+            "Rule: answer **yes** iff R_1 = yes *and* R_2 = yes.\n"
             "Otherwise answer **no**. (This field can be auto-derived)."
         ),
     )
@@ -180,149 +193,122 @@ class MitigationChecklist(BaseModel):
         ),
     )
 
-    # ---------- False-positive filters  ------------------------------------------
-    # STEP 0  – de-duplication
-    F_1: CheckedYN = Field(
+
+# ═══════════════════════════════════════════════════════════════════════════
+#  Stage-2  FALSE-POSITIVE decision -- enriched with descriptions & refs
+# ═══════════════════════════════════════════════════════════════════════════
+class FPDecision(BaseModel):
+    duplicate     : CheckedYN = Field(
         ...,
-        description=(
-            "STEP 0 — Duplicate?  Does another finding already cover the *same* root cause?\n"
-            "yes : remove and set removal_reason = 'duplicate'."
-        ),
+        description="Another finding covers the same root cause (>70 % text overlap or identical code refs)."
+    )
+    design_intent : CheckedYN = Field(
+        ...,
+        description="Behaviour is clearly specified or commented as intentional (e.g. overflow counter)."
+    )
+    auto_checked  : CheckedYN = Field(
+        ...,
+        description="Overflow auto-reverted (≥0.8 and no bypass) **or** vulnerable math is never reachable by external users."
+    )
+    guarded       : CheckedYN = Field(
+        ...,
+        description="Re-entrancy properly protected (nonReentrant, mutex) **or** CEI fully respected."
     )
 
-    # STEP 1  – design intent / spec
-    F_2: CheckedYN = Field(
-        ...,
-        description=(
-            "STEP 1 — Is the behaviour **explicitly intended** and documented "
-            "(spec comment, README, audit notes)?\n"
-            "yes : set removal_reason = 'design_intent'."
-        ),
-    )
-
-    # STEP 2  – purely theoretical
-    F_3: CheckedYN = Field(
-        ...,
-        description=(
-            "STEP 2 — Purely theoretical (no feasible exploit path, requires impossible pre-conditions)?\n"
-            "yes : downgrade to 'Info' or set removal_reason = 'none' and severity = Info."
-        ),
-    )
-
-    # STEP 3a – overflow auto-checked
-    F_4: CheckedYN = Field(
-        ...,
-        description=(
-            "STEP 3.a — Overflow FP: Solidity ≥ 0.8 **AND** no bypass (no `unchecked`, no narrowing cast, "
-            "no inline assembly math).\n"
-            "yes : set removal_reason = 'auto_checked'."
-        ),
-    )
-
-    # STEP 3b – internal-only overflow
-    F_6: CheckedYN = Field(
-        ...,
-        description=(
-            "STEP 3.b — Overflow in an **internal / private** function that is never called by "
-            "external / public code?\n"
-            "yes : set removal_reason = 'auto_checked' (cannot be exploited)."
-        ),
-    )
-
-    # STEP 4a – re-entrancy correctly guarded
-    F_5: CheckedYN = Field(
-        ...,
-        description=(
-            "STEP 4.a — Re-entrancy FP: Proper guard (`nonReentrant` or mutex) "
-            "OR CEI fully respected.\n"
-            "yes : set removal_reason = 'guarded'."
-        ),
-    )
-
-    # STEP 4b – internal-only external-call wrapper
-    F_7: CheckedYN = Field(
-        ...,
-        description=(
-            "STEP 4.b — Re-entrancy: call is internal-only wrapper with no user-controlled delegatecall.\n"
-            "yes : set removal_reason = 'guarded'."
-        ),
-    )
-
-    removal_reason: Literal[
+    # derived field ----------------------------------------------------------
+    removal_reason : Literal[
         "duplicate", "design_intent", "auto_checked", "guarded", "none"
     ] = Field(
         default="none",
-        description=(
-            "If the finding should be removed, indicate why:\n"
-            "- duplicate        : same issue elsewhere\n"
-            "- design_intent    : behaviour is intentional\n"
-            "- auto_checked     : overflow auto-reverted (≥0.8, no unchecked)\n"
-            "- guarded          : re-entrancy guard / CEI in place\n"
-            "- none             : keep the finding"
-        ),
+        description="Resolver: choose first true flag in order duplicate › design_intent › auto_checked › guarded; else 'none'."
     )
 
-    # ---------- Severity derivation -------------------------------------------
+    @model_validator(mode="after")
+    def _derive_reason(cls, v):
+        mapping = [
+            ("duplicate",     v.duplicate.answer),
+            ("design_intent", v.design_intent.answer),
+            ("auto_checked",  v.auto_checked.answer),
+            ("guarded",       v.guarded.answer),
+        ]
+        for tag, flag in mapping:
+            if flag == "yes":
+                v.removal_reason = tag
+                break
+        return v
+
+# ═══════════════════════════════════════════════════════════════════════════
+#  Stage-3  SEVERITY decision -- descriptions + matrix check
+# ═══════════════════════════════════════════════════════════════════════════
+class SeverityDecision(BaseModel):
     impact: _IMP = Field(
         ...,
-        description=(
-            "Impact category:\n"
-            "- high   : protocol-wide loss, permanent funds theft, or critical control loss\n"
-            "- medium : significant financial or functional loss, but recoverable\n"
-            "- low    : limited scope or value; nuisance not critical\n"
-            "**Pick one: high / medium / low.**"
-        ),
+        description="High: protocol-wide loss / control.  Medium: significant but recoverable.  Low: nuisance."
     )
-
-    likelihood: _LIK = Field(
+    likelihood : _LIK = Field(
+        ...,
+        description="High: trivial or already exploitable.  Medium: feasible.  Low: highly unlikely."
+    )
+    matrix: _SEV = Field(
         ...,
         description=(
-            "Likelihood category (how easy to exploit):\n"
-            "- high   : trivial or already exploitable in prod\n"
-            "- medium : feasible with moderate effort / conditions\n"
-            "- low    : highly unlikely, requires extreme conditions\n"
-            "**Pick one: high / medium / low.**"
-        ),
+            "Lookup from impact×likelihood matrix.  If torn between two, pick the lower."
+        )
     )
 
-    matrix_severity: _SEV = Field(
-        ...,
-        description=(
-            "Final severity derived from the 3×3 matrix below.\n"
-            "│ Impact/Likelihood │  High  │  Medium │  Low  │\n"
-            "├───────────────────┼────────┼─────────┼───────┤\n"
-            "│ High likelihood   │  High  │  Medium │ Medium│\n"
-            "│ Medium likelihood │  High  │  Medium │  Low  │\n"
-            "│ Low likelihood    │ Medium │   Low   │  Low  │\n\n"
-            "Derivation steps:\n"
-            "1. Choose *impact* then *likelihood*.\n"
-            "2. Read the intersection cell for the preliminary severity.\n"
-            "3. If torn between two severities, **pick the lower one** (principle of conservatism).\n"
-            "4. Use only these labels: High, Medium, Low, Info, Best Practices.\n"
-            "   – ‘Info’ / ‘Best Practices’ are reserved for non-issues or stylistic notes."
-        ),
-    )
+    @model_validator(mode="after")
+    def _validate(cls, v):
+        tbl = {("high","high"):"high", ("high","medium"):"medium",
+               ("high","low"):"medium", ("medium","high"):"high",
+               ("medium","medium"):"medium", ("medium","low"):"low",
+               ("low","high"):"medium", ("low","medium"):"low",
+               ("low","low"):"low"}
+        expected = tbl[(v.impact, v.likelihood)]
+        if v.matrix != expected:
+            v.matrix = expected
+        return v
 
+
+# ═══════════════════════════════════════════════════════════════════════════
+#  Bundle   (facts  → fp  → severity)
+# ═══════════════════════════════════════════════════════════════════════════
+
+class FindingStrategy(BaseModel):
+    facts    : FactChecklist
+    fp       : FPDecision
+    severity : SeverityDecision | None = None
+
+# ---------------------------------------------------------------------------
 class Adjustment(BaseModel):
-    index: int
-    new_severity: _SEV | Literal["unchanged"]
-    should_be_removed: bool
-    comments: str | None = None
+    index             : int
+    final_severity    : _SEV | Literal["unchanged"]
+    should_be_removed : bool
+    comments          : str | None = None
 
 class FindingResponse(BaseModel):
-    strategy: MitigationChecklist = Field(
+    strategy: FindingStrategy = Field(
         ...,
-        description="Fill every checklist field first; this is the structured chain-of-thought."
+        description="Three-stage reasoning pipeline: facts → false-positive gate → severity."
     )
-    reasoning_summary: str = Field(
+    reasoning_summary : str = Field(
         ...,
-        description="≤ 3-sentence human-readable rationale that stitches strategy to adjustment."
+        description=(
+        "Mention one pivotal fact, the FP decision (or why not removed), and the final severity."
+        "Example: \"Overflow auto-checked (O_2 yes, O_3 no) so removal_reason=auto_checked;"
+        "finding removed.\""
+        ),
     )
     adjustment: Adjustment = Field(
         ...,
-        description="Final decision (index, final_severity, should_be_removed, comments)."
+        description=(
+            "The final corrective action:\n"
+            "• index             : original finding index\n"
+            "• final_severity    : new severity or 'unchanged'\n"
+            "• should_be_removed : true if the finding is to be dropped\n"
+            "• comments          : any free-form rationale or notes"
+        ),
     )
 
 class AuditResponse(BaseModel):
-    document_id: str
-    findings: List[FindingResponse]
+    document_id : str
+    findings    : List[FindingResponse]

@@ -11,7 +11,6 @@ from schema.mitigate_schema_6 import AuditResponse, FindingResponse
 GPT_4O   = "gpt-4o-2024-08-06"
 GPT_4_1  = "gpt-4.1-2025-04-14"
 O4_MINI  = "o4-mini"
-SCHEMA = "schema_6"
 # ───────────────────────── configuration ─────────────────────────
 MODEL = GPT_4_1
 PROMPT_FILE = "utils/prompts/task_prompt_reasoning_2.py"
@@ -23,6 +22,7 @@ CONTRACT = pathlib.Path(CONTRACT_FILE).read_text()
 FINDINGS = json.loads(pathlib.Path(FINDINGS_FILE).read_text())
 # BATCH_SIZE = len(FINDINGS)
 BATCH_SIZE = 20
+SCHEMA = "schema_8"
 # ───────────────────────── OpenAI client ─────────────────────────
 load_dotenv()
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
@@ -68,7 +68,7 @@ all_adj = [fr.adjustment.model_dump() for fr in all_findings]
 
 # ───────────────────────── save outputs ──────────────────────────
 report = AuditResponse(
-    document_id="audit_run_schema6_all",
+    document_id=SCHEMA,
     findings=all_findings
 )
 

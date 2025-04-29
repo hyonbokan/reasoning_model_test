@@ -9,3 +9,92 @@ schema4_gpt4.1: FP - 8
 
 schema5_o4 : FP - 
 schema5_gpt4.1: FP - 5 and 1052.6 s
+
+
+staging with assistant:
+1 Stage-1 — Facts
+python
+Copy
+Edit
+messages = [
+    {"role": "system", "content": TASK_PROMPT},
+    {"role": "user",   "content": CONTRACT},
+    {"role": "user",   "content": (
+        "Stage-1 / FACTS\n"
+        "Fill O_, R_, A_ questions with yes/no and attach CodeRefs."
+    )},
+    {"role": "user",   "content": json.dumps(finding, indent=2)},
+]
+
+stage1 = client.beta.chat.completions.parse(
+    model=MODEL,
+    messages=messages,
+    response_format=FactChecklist,
+    temperature=0,
+).choices[0].message.parsed           # ← a FactChecklist instance
+
+
+
+2 Stage-2 — False-positive decision
+messages = [
+    {"role": "system",    "content": TASK_PROMPT},
+    # feed stage-1 back to the model
+    {"role": "assistant", "content": stage1.model_dump_json(indent=2)},
+    {"role": "user", "content": (
+        "Stage-2 / FP\n"
+        "Using the facts above, set duplicate / design_intent / auto_checked / "
+        "guarded, and derive removal_reason."
+    )},
+]
+
+stage2 = client.beta.chat.completions.parse(
+    model=MODEL,
+    messages=messages,
+    response_format=FPDecision,
+    temperature=0,
+).choices[0].message.parsed
+
+
+3 Stage-3 — Severity (only if not removed)
+Edit
+if stage2.removal_reason == "none":
+    messages = [
+        {"role": "system",    "content": TASK_PROMPT},
+        {"role": "assistant", "content": json.dumps({
+            "facts": stage1.model_dump(),
+            "fp"   : stage2.model_dump()
+        }, indent=2)},
+        {"role": "user", "content": (
+            "Stage-3 / SEVERITY\n"
+            "Pick impact, likelihood, then the correct matrix cell."
+        )},
+    ]
+
+    stage3 = client.beta.chat.completions.parse(
+        model=MODEL,
+        messages=messages,
+        response_format=SeverityDecision,
+        temperature=0,
+    ).choices[0].message.parsed
+else:
+    stage3 = None            # Finding is removed; no severity needed
+
+
+
+4 Assemble the final FindingResponse
+finding_response = FindingResponse(
+    strategy = FindingStrategy(facts=stage1, fp=stage2, severity=stage3),
+    reasoning_summary = (
+        "Based on O_2=yes & O_3=no the arithmetic is auto-checked, "
+        "so removal_reason='auto_checked'. Severity omitted."
+        if stage3 is None else
+        f"Overflow bypass via unchecked → impact {stage3.impact}, "
+        f"likelihood {stage3.likelihood}, severity {stage3.matrix}."
+    ),
+    adjustment = Adjustment(
+        index             = finding["index"],
+        final_severity    = stage3.matrix if stage3 else "unchanged",
+        should_be_removed = (stage2.removal_reason != "none"),
+        comments          = stage2.removal_reason if stage2.removal_reason != "none" else None
+    )
+)

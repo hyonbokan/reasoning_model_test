@@ -1,0 +1,518 @@
+[
+  {
+    "index": 0,
+    "new_severity": "high",
+    "should_be_removed": false,
+    "comments": "Overflow is possible via a single configuration value; this is a critical, high-severity economic break that can be exploited by an attacker with config privileges or a buggy admin."
+  },
+  {
+    "index": 1,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "The issue is valid, moderately impactful, and should remain at Medium severity to match the risk from farming excess rewards."
+  },
+  {
+    "index": 2,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 3,
+    "new_severity": "high",
+    "should_be_removed": false,
+    "comments": "Severity upgraded to high since an unmitigated division-by-zero here bricks major protocol functions and all user assets are affected."
+  },
+  {
+    "index": 4,
+    "new_severity": "high",
+    "should_be_removed": false,
+    "comments": "Severity is escalated to high due to the possibility of asset theft and critical state corruption without existing mitigations."
+  },
+  {
+    "index": 5,
+    "new_severity": "high",
+    "should_be_removed": false,
+    "comments": "The issue's severity is rated as 'High' since it may consistently and significantly affect user rewards and data integrity, though it does not directly threaten funds or protocol control."
+  },
+  {
+    "index": 6,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 7,
+    "new_severity": "low",
+    "should_be_removed": false,
+    "comments": "Per-checklist, this issue is minor (Low impact) and easily triggered (Medium likelihood), resulting in Low severity."
+  },
+  {
+    "index": 8,
+    "new_severity": "low",
+    "should_be_removed": false,
+    "comments": "This is a valid edge-case overflow finding with limited scope; mitigation is recommended by adding appropriate bounds checking before conversion."
+  },
+  {
+    "index": 9,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Severity elevated to 'medium' per the matrix for a low-impact, high-likelihood cost inefficiency. No removal is justified as this is not a duplicate, intentional, nor a tool false positive."
+  },
+  {
+    "index": 10,
+    "new_severity": "low",
+    "should_be_removed": false,
+    "comments": "Not exploitable in isolation, but could introduce operational risks if configuration contract is faulty or misused. Marked low severity as a signal for improved code clarity and config interface hygiene."
+  },
+  {
+    "index": 11,
+    "new_severity": "low",
+    "should_be_removed": false,
+    "comments": "This issue is not a critical vulnerability since it is recoverable and only causes a minor, temporary impact. Downgraded from 'Info' to 'Low' for accuracy."
+  },
+  {
+    "index": 12,
+    "new_severity": "low",
+    "should_be_removed": false,
+    "comments": "The affected loop cannot exceed the uint8 limit due to enforced caps on staked tokens, so the code has no exploitable risk, but type consistency is still a valid minor concern."
+  },
+  {
+    "index": 13,
+    "new_severity": "high",
+    "should_be_removed": false,
+    "comments": "Severity is high as per the risk matrix and protocol impact. Not removable: confirmed root-cause and exploitability."
+  },
+  {
+    "index": 14,
+    "new_severity": "high",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 15,
+    "new_severity": "high",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 16,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 17,
+    "new_severity": "low",
+    "should_be_removed": false,
+    "comments": "The finding is valid as a best practice/usability issue, not a critical security flaw; severity adjusted to Low in line with impact and likelihood."
+  },
+  {
+    "index": 18,
+    "new_severity": "high",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 19,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 20,
+    "new_severity": "high",
+    "should_be_removed": false,
+    "comments": "Correct classification; this is a high-severity DoS vector, not a false positive, as it enables an admin or attacker to brick all user interactions."
+  },
+  {
+    "index": 21,
+    "new_severity": "high",
+    "should_be_removed": false,
+    "comments": "This issue represents a single-point-of-failure with severe operational consequences if misconfigured and no robust on-chain mitigation is evident."
+  },
+  {
+    "index": 22,
+    "new_severity": "low",
+    "should_be_removed": false,
+    "comments": "Recommend using uint256 for the loop counter to future-proof against design changes that could allow more than 255 staked tokens per user, but current logic and revert conditions keep the severity low."
+  },
+  {
+    "index": 23,
+    "new_severity": "low",
+    "should_be_removed": false,
+    "comments": "This is a UX concern with no significant risk to assets or protocol invariants."
+  },
+  {
+    "index": 24,
+    "new_severity": "high",
+    "should_be_removed": false,
+    "comments": "A misconfiguration of this nature can break protocol economics across all users and functions\u2014it requires urgent remediation."
+  },
+  {
+    "index": 25,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Severity is medium since the issue leads to unclear user state and reward loss, but does not break protocol logic or allow theft."
+  },
+  {
+    "index": 26,
+    "new_severity": "high",
+    "should_be_removed": false,
+    "comments": "Severity high due to the possibility of rendering core staking mechanics unusable, with standard arithmetic checks bypassed by explicit casting."
+  },
+  {
+    "index": 27,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Change the check from '> 10' to '>= 10' to enforce the intended maximum."
+  },
+  {
+    "index": 28,
+    "new_severity": "info",
+    "should_be_removed": true,
+    "comments": "Removable as 'auto_checked': The hard upper bound on staked munchables and Solidity's built-in checks make a uint8 overflow in the loop counter unreachable."
+  },
+  {
+    "index": 29,
+    "new_severity": "low",
+    "should_be_removed": false,
+    "comments": "Low severity; purely a UI/integration consideration, no security or functional breakage."
+  },
+  {
+    "index": 30,
+    "new_severity": "low",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 31,
+    "new_severity": "low",
+    "should_be_removed": false,
+    "comments": "Low-severity business logic flaw that could result in landlords missing expected tax income due to uninitialized metadata, but without critical protocol or fund safety implications."
+  },
+  {
+    "index": 32,
+    "new_severity": "high",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 33,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Severity is medium based on the 3x3 matrix for medium impact and likelihood; issue is not a duplicate or design intent, and its effect is user-facing disruption, not catastrophic protocol loss."
+  },
+  {
+    "index": 34,
+    "new_severity": "high",
+    "should_be_removed": false,
+    "comments": "The DoS potential from unchecked indexing is considerable due to user-controlled data and on-chain array config. Proper bounds checks or revert guards should be added to ensure safe access."
+  },
+  {
+    "index": 35,
+    "new_severity": "high",
+    "should_be_removed": false,
+    "comments": "This finding is valid and critical, as a zero PRICE_PER_PLOT fully blocks key protocol actions due to revert."
+  },
+  {
+    "index": 36,
+    "new_severity": "high",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 37,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Severity raised to medium per matrix due to trivial exploitability, but impact is limited to staking count enforcement."
+  },
+  {
+    "index": 38,
+    "new_severity": "high",
+    "should_be_removed": false,
+    "comments": "Severity remains High because the overflow can be triggered by any user and results in DOS and loss of funds/protocol function."
+  },
+  {
+    "index": 39,
+    "new_severity": "high",
+    "should_be_removed": false,
+    "comments": "Severity is raised to high given the protocol-wide consequences of state corruption or asset lockup in the absence of both CEI compliance and re-entrancy guards."
+  },
+  {
+    "index": 40,
+    "new_severity": "low",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 41,
+    "new_severity": "low",
+    "should_be_removed": false,
+    "comments": "Findings reflect a real, though minor, economic exploit stemming from uninitialized metadata. Severity aligns with matrix."
+  },
+  {
+    "index": 42,
+    "new_severity": "high",
+    "should_be_removed": false,
+    "comments": "Matrix maps high-impact (asset or accounting loss) and medium likelihood (non-trivial but feasible) to 'high' severity."
+  },
+  {
+    "index": 43,
+    "new_severity": "high",
+    "should_be_removed": false,
+    "comments": "Finding is valid and severity is high due to the potential for infinite schnibbles minting by any user."
+  },
+  {
+    "index": 44,
+    "new_severity": "high",
+    "should_be_removed": false,
+    "comments": "Incorrect storage key use can set critical contract parameters to erroneous values, impacting core protocol security and usability for all users."
+  },
+  {
+    "index": 45,
+    "new_severity": "low",
+    "should_be_removed": false,
+    "comments": "Matrix: low impact (only individual state impacted) \u00d7 medium likelihood (possible with malicious token). Finding should be fixed but is not protocol-critical."
+  },
+  {
+    "index": 46,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 47,
+    "new_severity": "high",
+    "should_be_removed": false,
+    "comments": "Consider adding an explicit check to prevent PRICE_PER_PLOT being zero (both on set and use) or enforcing a reasonable default in storage logic."
+  },
+  {
+    "index": 48,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Issue warrants addition of require(address != address(0)) checks for external dependencies during reconfiguration and initialization."
+  },
+  {
+    "index": 49,
+    "new_severity": "low",
+    "should_be_removed": false,
+    "comments": "Bug is a minor logic flaw that allows staking 11 instead of 10 Munchables; no exploit chain nor meaningful impact."
+  },
+  {
+    "index": 50,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 51,
+    "new_severity": "high",
+    "should_be_removed": false,
+    "comments": "Info severity in the finding underestimates the real protocol risk; the central admin can affect core user-facing values and protocol safety."
+  },
+  {
+    "index": 52,
+    "new_severity": "high",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 53,
+    "new_severity": "high",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 54,
+    "new_severity": "low",
+    "should_be_removed": false,
+    "comments": "Confirmed as a valid low-severity logic issue causing state inconsistency but with limited impact."
+  },
+  {
+    "index": 55,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "The off-by-one bug allows an 11th stake, creating a minor rules violation but does not risk protocol funds or introduce privilege escalation."
+  },
+  {
+    "index": 56,
+    "new_severity": "high",
+    "should_be_removed": false,
+    "comments": "Bug causes denial-of-service for NFT withdrawals through reliable, user-triggerable underflow; impact and likelihood both meet 'high' matrix criteria."
+  },
+  {
+    "index": 57,
+    "new_severity": "high",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 58,
+    "new_severity": "high",
+    "should_be_removed": false,
+    "comments": "The negative bonus can be reached by normal user inputs and leads to permanent loss of access to staked NFTs, meeting the threshold for high-severity DoS."
+  },
+  {
+    "index": 59,
+    "new_severity": "high",
+    "should_be_removed": false,
+    "comments": "The finding is valid and severe since it can cause user asset loss without recourse."
+  },
+  {
+    "index": 60,
+    "new_severity": "high",
+    "should_be_removed": false,
+    "comments": "External calls before internal state mutation, lacking reentrancy protection, enable real-world exploits in staking logic."
+  },
+  {
+    "index": 61,
+    "new_severity": "high",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 62,
+    "new_severity": "high",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 63,
+    "new_severity": "high",
+    "should_be_removed": false,
+    "comments": "Issue is valid, not mitigated, and escalation/abuse is feasible due to sound exploit path and business logic error."
+  },
+  {
+    "index": 64,
+    "new_severity": "high",
+    "should_be_removed": false,
+    "comments": "Severity is high as the bug can disrupt protocol operation for all participants; the finding is valid and should be addressed."
+  },
+  {
+    "index": 65,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "This is a minor, but user-observable logic bug with very limited protocol impact."
+  },
+  {
+    "index": 66,
+    "new_severity": "high",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 67,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Severity matches matrix; finding is clear and not a duplicate or design intent."
+  },
+  {
+    "index": 68,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Recommend updating toilerState[tokenId].plotId on plot transfer to resolve ghost occupancy."
+  },
+  {
+    "index": 69,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Severity matches the matrix; the finding is valid and not a duplicate or design intent."
+  },
+  {
+    "index": 70,
+    "new_severity": "info",
+    "should_be_removed": true,
+    "comments": "Intended one-time user metadata initializer; not a vulnerability. Remove as per design intent."
+  },
+  {
+    "index": 71,
+    "new_severity": "low",
+    "should_be_removed": false,
+    "comments": "Issue is legitimate under protocol economic fairness, but limited in protocol-wide impact; severity adjusted per matrix."
+  },
+  {
+    "index": 72,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Recommend adding an explicit check and revert with a clear, contract-specific error for nonexistent tokenIds to improve UX."
+  },
+  {
+    "index": 73,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Recommend additional logic to bounds-check or periodically cleanup the munchablesStaked array to prevent state bloat and DoS vectors."
+  },
+  {
+    "index": 74,
+    "new_severity": "high",
+    "should_be_removed": false,
+    "comments": "The report accurately identifies a high-severity issue: assets can be permanently locked if staked to the zero address."
+  },
+  {
+    "index": 75,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "While the calculation does not cause an overflow but instead a revert due to out-of-bounds indexing, this can still block users from interacting with their plots and thus presents a genuine risk."
+  },
+  {
+    "index": 76,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Issue can lead to permanent user loss of rewards with standard contract use and should be addressed."
+  },
+  {
+    "index": 77,
+    "new_severity": "low",
+    "should_be_removed": false,
+    "comments": "This is a minor consistency issue with limited user impact and no evident exploitable scenario."
+  },
+  {
+    "index": 78,
+    "new_severity": "low",
+    "should_be_removed": false,
+    "comments": "This is a cosmetic issue affecting event accuracy, not protocol safety."
+  },
+  {
+    "index": 79,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 80,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 81,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "The inconsistent use of outdated tax rate in distribution calculations is relevant and warrants a 'medium' severity."
+  },
+  {
+    "index": 82,
+    "new_severity": "low",
+    "should_be_removed": true,
+    "comments": "Can be removed as a true exploit path cannot occur due to the function's limited internal visibility (auto_checked)."
+  },
+  {
+    "index": 83,
+    "new_severity": "info",
+    "should_be_removed": true,
+    "comments": "Oracle functionality is intentionally omitted per contract design\u2014removal recommended."
+  },
+  {
+    "index": 84,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Severity is medium per matrix; correct by rearranging arithmetic operations to avoid precision loss."
+  },
+  {
+    "index": 85,
+    "new_severity": "medium",
+    "should_be_removed": false,
+    "comments": "The integer division truncation can lead to consistent underpayment in some edge cases, which could affect trust or satisfaction, though does not endanger assets or protocol logic."
+  }
+]

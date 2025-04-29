@@ -4,7 +4,7 @@ from textwrap import dedent
 from dotenv import load_dotenv
 from openai import OpenAI
 
-from schema.mitigate_schema_6 import AuditResponse, FindingResponse
+from schema.mitigate_schema_8 import AuditResponse, FindingResponse
 
 # ------------ models & paths -------------------------------------------------
 GPT_4O   = "gpt-4o-2024-08-06"
@@ -12,15 +12,15 @@ GPT_4_1  = "gpt-4.1-2025-04-14"
 O4_MINI  = "o4-mini"
 
 # ───────────────────────── configuration ─────────────────────────
-MODEL = GPT_4_1
-PROMPT_FILE = "utils/prompts/task_prompt_reasoning_2.py"
+MODEL = O4_MINI
+PROMPT_FILE = "utils/prompts/task_prompt_reasoning_3.py"
 CONTRACT_FILE = "utils/contracts/LandManagerWithLines.sol"
 FINDINGS_FILE = "utils/findings/LandManager_findings.json"
 
 TASK_PROMPT = pathlib.Path(PROMPT_FILE).read_text()
 CONTRACT = pathlib.Path(CONTRACT_FILE).read_text()
 FINDINGS = json.loads(pathlib.Path(FINDINGS_FILE).read_text())
-SCHEMA = "schema_6"
+SCHEMA = "schema_8"
 # ───────────────────────── OpenAI client ─────────────────────────
 load_dotenv()
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
@@ -52,7 +52,7 @@ all_adj      : list[dict] = []
 
 start = time.time()
 
-for idx, finding in enumerate(FINDINGS):
+for idx, finding in enumerate(FINDINGS[:5]):
     print(f"Analyzing finding #{idx} …")
     try:
         fr = analyse_finding(idx, finding)
@@ -66,7 +66,7 @@ for idx, finding in enumerate(FINDINGS):
 
 # ───────────────────────── save outputs ──────────────────────────
 report = AuditResponse(
-    document_id="audit_run_schema6",
+    document_id=SCHEMA,
     findings=all_findings
 )
 
@@ -74,8 +74,8 @@ ts = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
 out_dir = pathlib.Path("logs")
 out_dir.mkdir(parents=True, exist_ok=True)
 
-(out_dir / f"LandManager_{MODEL}_{SCHEMA}_per_find.json").write_text(report.model_dump_json(indent=2))
-(out_dir / f"LandManager_{MODEL}_{SCHEMA}_adjustments_per_find.json").write_text(json.dumps(all_adj, indent=2))
+(out_dir / f"LandManager_{SCHEMA}_{MODEL}_per_find.json").write_text(report.model_dump_json(indent=2))
+(out_dir / f"LandManager_{SCHEMA}_{MODEL}_adjustments_per_find.json").write_text(json.dumps(all_adj, indent=2))
 
 print(f"\n✅  Finished {len(all_findings)} findings in {round(time.time()-start,1)} s")
 print(f"Results saved to {out_dir}")

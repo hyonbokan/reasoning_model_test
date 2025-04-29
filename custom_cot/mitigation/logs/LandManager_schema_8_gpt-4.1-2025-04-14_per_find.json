@@ -1,0 +1,866 @@
+{
+  "document_id": "schema_8",
+  "findings": [
+    {
+      "strategy": {
+        "facts": {
+          "O_1": {
+            "answer": "yes",
+            "refs": [
+              {
+                "file": "LandManager.sol",
+                "lines": [
+                  283,
+                  284,
+                  285,
+                  286
+                ],
+                "why": "Overflow occurs via negative int256 cast to uint256."
+              }
+            ]
+          },
+          "O_2": {
+            "answer": "yes",
+            "refs": [
+              {
+                "file": "LandManager.sol",
+                "lines": [
+                  3
+                ],
+                "why": "pragma solidity 0.8.25; auto-reverts except on type-casts (as here)."
+              }
+            ]
+          },
+          "O_3": {
+            "answer": "yes",
+            "refs": [
+              {
+                "file": "LandManager.sol",
+                "lines": [
+                  284,
+                  285,
+                  286
+                ],
+                "why": "Result is type cast after signed math; unchecked conversion."
+              }
+            ]
+          },
+          "O_4": {
+            "answer": "no",
+            "refs": null
+          },
+          "O_5": {
+            "answer": "yes",
+            "refs": [
+              {
+                "file": "LandManager.sol",
+                "lines": [
+                  284,
+                  285,
+                  286,
+                  287,
+                  288,
+                  289,
+                  296,
+                  297,
+                  299
+                ],
+                "why": "Overflow feeds an exploit chain: mints unbounded schnibbles, breaks economic invariants."
+              }
+            ]
+          },
+          "R_1": {
+            "answer": "no",
+            "refs": [
+              {
+                "file": "LandManager.sol",
+                "lines": [
+                  248,
+                  284,
+                  299,
+                  310
+                ],
+                "why": "No untrusted code directly called during mint; only state and local math."
+              }
+            ]
+          },
+          "R_2": {
+            "answer": "no",
+            "refs": [
+              {
+                "file": "LandManager.sol",
+                "lines": [
+                  292,
+                  293,
+                  294,
+                  299,
+                  310
+                ],
+                "why": "Storage writes update user state, but no external call-then-write reentrancy."
+              }
+            ]
+          },
+          "R_3": {
+            "answer": "yes",
+            "refs": [
+              {
+                "file": "LandManager.sol",
+                "lines": [
+                  233,
+                  248
+                ],
+                "why": "No mutex or nonReentrant present around _farmPlots."
+              }
+            ]
+          },
+          "R_4": {
+            "answer": "no",
+            "refs": null
+          },
+          "R_5": {
+            "answer": "no",
+            "refs": [
+              {
+                "file": "LandManager.sol",
+                "lines": [
+                  229,
+                  230,
+                  233
+                ],
+                "why": "Function is externally accessible; not internal/private."
+              }
+            ]
+          },
+          "A_1": {
+            "answer": "yes",
+            "refs": [
+              {
+                "file": "LandManager.sol",
+                "lines": [
+                  229,
+                  230
+                ],
+                "why": "Any registered, unprivileged user can call farmPlots."
+              }
+            ]
+          },
+          "A_2": {
+            "answer": "yes",
+            "refs": [
+              {
+                "file": "LandManager.sol",
+                "lines": [
+                  53,
+                  54,
+                  81,
+                  82,
+                  83,
+                  84
+                ],
+                "why": "ConfigStorage owner/privileged role centralizes config array control."
+              }
+            ]
+          },
+          "A_3": {
+            "answer": "yes",
+            "refs": [
+              {
+                "file": "LandManager.sol",
+                "lines": [
+                  81,
+                  82,
+                  83,
+                  84
+                ],
+                "why": "No timelock or multisig required for ConfigStorage changes."
+              }
+            ]
+          },
+          "A_4": {
+            "answer": "yes",
+            "refs": [
+              {
+                "file": "LandManager.sol",
+                "lines": [
+                  284,
+                  297,
+                  299
+                ],
+                "why": "Can mint arbitrary schnibbles, breaks core protocol accounting."
+              }
+            ]
+          }
+        },
+        "fp": {
+          "duplicate": {
+            "answer": "no",
+            "refs": null
+          },
+          "design_intent": {
+            "answer": "no",
+            "refs": null
+          },
+          "auto_checked": {
+            "answer": "no",
+            "refs": [
+              {
+                "file": "LandManager.sol",
+                "lines": [
+                  284,
+                  285,
+                  286
+                ],
+                "why": "Unchecked type-cast from negative int256 to uint256 is not caught by Solidity 0.8+ auto-reverts."
+              }
+            ]
+          },
+          "guarded": {
+            "answer": "no",
+            "refs": [
+              {
+                "file": "LandManager.sol",
+                "lines": [
+                  233,
+                  248
+                ],
+                "why": "No additional guard for the bonus array or schnibble mint math."
+              }
+            ]
+          },
+          "removal_reason": "none"
+        },
+        "severity": {
+          "impact": "high",
+          "likelihood": "high",
+          "matrix": "high"
+        }
+      },
+      "reasoning_summary": "Arithmetic overflow is unguarded (O_2 yes, O_3 yes) and can be triggered by anyone (A_1 yes). The overflow directly enables loss of all schnibbles economic value (O_5, A_4 yes). Not removed; severity is high.",
+      "adjustment": {
+        "index": 0,
+        "final_severity": "high",
+        "should_be_removed": false,
+        "comments": "Critical overflow; unprivileged caller can mint max schnibbles. Exploitable via config."
+      }
+    },
+    {
+      "strategy": {
+        "facts": {
+          "O_1": {
+            "answer": "no",
+            "refs": null
+          },
+          "O_2": {
+            "answer": "yes",
+            "refs": [
+              {
+                "file": "LandManager.sol",
+                "lines": [
+                  3
+                ],
+                "why": "Solidity version is 0.8.25, auto-revert for math overflows."
+              }
+            ]
+          },
+          "O_3": {
+            "answer": "no",
+            "refs": null
+          },
+          "O_4": {
+            "answer": "no",
+            "refs": null
+          },
+          "O_5": {
+            "answer": "no",
+            "refs": null
+          },
+          "R_1": {
+            "answer": "no",
+            "refs": [
+              {
+                "file": "LandManager.sol",
+                "lines": [
+                  200,
+                  227
+                ],
+                "why": "No external (untrusted) call, only internal plot/mapping updates and events."
+              }
+            ]
+          },
+          "R_2": {
+            "answer": "no",
+            "refs": [
+              {
+                "file": "LandManager.sol",
+                "lines": [
+                  204,
+                  227
+                ],
+                "why": "No storage writes after any external call (there are no external calls)."
+              }
+            ]
+          },
+          "R_3": {
+            "answer": "yes",
+            "refs": null
+          },
+          "R_4": {
+            "answer": "no",
+            "refs": null
+          },
+          "R_5": {
+            "answer": "no",
+            "refs": [
+              {
+                "file": "LandManager.sol",
+                "lines": [
+                  200,
+                  227
+                ],
+                "why": "Externally callable via public/external functions."
+              }
+            ]
+          },
+          "A_1": {
+            "answer": "yes",
+            "refs": [
+              {
+                "file": "LandManager.sol",
+                "lines": [
+                  200
+                ],
+                "why": "transferToUnoccupiedPlot is external and lacks access controls."
+              }
+            ]
+          },
+          "A_2": {
+            "answer": "no",
+            "refs": [
+              {
+                "file": "LandManager.sol",
+                "lines": [
+                  200
+                ],
+                "why": "Anyone eligible can call, not privileged-only."
+              }
+            ]
+          },
+          "A_3": {
+            "answer": "no",
+            "refs": [
+              {
+                "file": "LandManager.sol",
+                "lines": [
+                  200
+                ],
+                "why": "No privileged risk, so mitigations unnecessary."
+              }
+            ]
+          },
+          "A_4": {
+            "answer": "no",
+            "refs": null
+          }
+        },
+        "fp": {
+          "duplicate": {
+            "answer": "no",
+            "refs": null
+          },
+          "design_intent": {
+            "answer": "no",
+            "refs": null
+          },
+          "auto_checked": {
+            "answer": "no",
+            "refs": null
+          },
+          "guarded": {
+            "answer": "no",
+            "refs": null
+          },
+          "removal_reason": "none"
+        },
+        "severity": {
+          "impact": "medium",
+          "likelihood": "medium",
+          "matrix": "medium"
+        }
+      },
+      "reasoning_summary": "The stale plotId presents a logic flaw, not an arithmetic or access-control issue (O_1 no, A_1 yes). Auto-detection and duplicate/intent checks do not justify removal. Given risks to reward accounting and off-chain invariant checks, severity is set to medium.",
+      "adjustment": {
+        "index": 1,
+        "final_severity": "medium",
+        "should_be_removed": false,
+        "comments": "Bug can affect reward logic and external integrations; no evidence for FP."
+      }
+    },
+    {
+      "strategy": {
+        "facts": {
+          "O_1": {
+            "answer": "no",
+            "refs": null
+          },
+          "O_2": {
+            "answer": "yes",
+            "refs": [
+              {
+                "file": "LandManager.sol",
+                "lines": [
+                  3
+                ],
+                "why": "pragma solidity 0.8.25, arithmetic auto-reverts"
+              }
+            ]
+          },
+          "O_3": {
+            "answer": "no",
+            "refs": null
+          },
+          "O_4": {
+            "answer": "no",
+            "refs": null
+          },
+          "O_5": {
+            "answer": "no",
+            "refs": null
+          },
+          "R_1": {
+            "answer": "no",
+            "refs": null
+          },
+          "R_2": {
+            "answer": "no",
+            "refs": null
+          },
+          "R_3": {
+            "answer": "no",
+            "refs": null
+          },
+          "R_4": {
+            "answer": "no",
+            "refs": null
+          },
+          "R_5": {
+            "answer": "no",
+            "refs": null
+          },
+          "A_1": {
+            "answer": "yes",
+            "refs": [
+              {
+                "file": "LandManager.sol",
+                "lines": [
+                  132
+                ],
+                "why": "stakeMunchable is external and has no privilege checks"
+              }
+            ]
+          },
+          "A_2": {
+            "answer": "no",
+            "refs": null
+          },
+          "A_3": {
+            "answer": "no",
+            "refs": [
+              {
+                "file": "LandManager.sol",
+                "lines": [
+                  141
+                ],
+                "why": "Token count limit logic is present (faulty but intended as mitigation)"
+              }
+            ]
+          },
+          "A_4": {
+            "answer": "no",
+            "refs": null
+          }
+        },
+        "fp": {
+          "duplicate": {
+            "answer": "no",
+            "refs": null
+          },
+          "design_intent": {
+            "answer": "no",
+            "refs": null
+          },
+          "auto_checked": {
+            "answer": "no",
+            "refs": null
+          },
+          "guarded": {
+            "answer": "no",
+            "refs": null
+          },
+          "removal_reason": "none"
+        },
+        "severity": {
+          "impact": "low",
+          "likelihood": "high",
+          "matrix": "medium"
+        }
+      },
+      "reasoning_summary": "The check at line 141 fails to properly cap staked tokens, letting users exceed the intended max (A_1 yes, A_3 no). Not a FP; issue exposes minor denial-of-service or edge inconsistencies, so severity is low.",
+      "adjustment": {
+        "index": 2,
+        "final_severity": "low",
+        "should_be_removed": false,
+        "comments": "Confirmed: improper use of '>' allows extra stake beyond 10 per user."
+      }
+    },
+    {
+      "strategy": {
+        "facts": {
+          "O_1": {
+            "answer": "no",
+            "refs": [
+              {
+                "file": "LandManager.sol",
+                "lines": [
+                  345,
+                  346
+                ],
+                "why": "Core issue is division by zero, not overflow or underflow."
+              }
+            ]
+          },
+          "O_2": {
+            "answer": "yes",
+            "refs": [
+              {
+                "file": "LandManager.sol",
+                "lines": [
+                  3
+                ],
+                "why": "Pragma is 0.8.25. Modern Solidity."
+              }
+            ]
+          },
+          "O_3": {
+            "answer": "no",
+            "refs": [
+              {
+                "file": "LandManager.sol",
+                "lines": [],
+                "why": "No unchecked/unsafe math seen in _getNumPlots()."
+              }
+            ]
+          },
+          "O_4": {
+            "answer": "no",
+            "refs": null
+          },
+          "O_5": {
+            "answer": "no",
+            "refs": null
+          },
+          "R_1": {
+            "answer": "no",
+            "refs": [
+              {
+                "file": "LandManager.sol",
+                "lines": [
+                  345,
+                  346
+                ],
+                "why": "No transfer of control to untrusted/external code in _getNumPlots."
+              }
+            ]
+          },
+          "R_2": {
+            "answer": "no",
+            "refs": null
+          },
+          "R_3": {
+            "answer": "no",
+            "refs": null
+          },
+          "R_4": {
+            "answer": "no",
+            "refs": null
+          },
+          "R_5": {
+            "answer": "no",
+            "refs": null
+          },
+          "A_1": {
+            "answer": "yes",
+            "refs": [
+              {
+                "file": "LandManager.sol",
+                "lines": [
+                  229,
+                  132,
+                  174,
+                  200
+                ],
+                "why": "External (unprivileged) users can call functions that use _getNumPlots."
+              }
+            ]
+          },
+          "A_2": {
+            "answer": "yes",
+            "refs": [
+              {
+                "file": "LandManager.sol",
+                "lines": [
+                  78,
+                  46,
+                  53,
+                  67
+                ],
+                "why": "Critical config (PRICE_PER_PLOT) is settable by privileged config owner."
+              }
+            ]
+          },
+          "A_3": {
+            "answer": "yes",
+            "refs": [
+              {
+                "file": "LandManager.sol",
+                "lines": [
+                  46,
+                  78,
+                  67
+                ],
+                "why": "No timelock/multisig enforced for config updates."
+              }
+            ]
+          },
+          "A_4": {
+            "answer": "yes",
+            "refs": [
+              {
+                "file": "LandManager.sol",
+                "lines": [
+                  345,
+                  132,
+                  174,
+                  200
+                ],
+                "why": "Setting PRICE_PER_PLOT=0 bricks staking and farming, freezing the protocol."
+              }
+            ]
+          }
+        },
+        "fp": {
+          "duplicate": {
+            "answer": "no",
+            "refs": null
+          },
+          "design_intent": {
+            "answer": "no",
+            "refs": null
+          },
+          "auto_checked": {
+            "answer": "no",
+            "refs": null
+          },
+          "guarded": {
+            "answer": "no",
+            "refs": null
+          },
+          "removal_reason": "none"
+        },
+        "severity": {
+          "impact": "high",
+          "likelihood": "medium",
+          "matrix": "medium"
+        }
+      },
+      "reasoning_summary": "Division-by-zero is possible if PRICE_PER_PLOT is 0 (O_1 no). Since config is privileged (A_2/A_3 yes) but critical, and there are no strong mitigations, severity is medium. Finding should not be removed.",
+      "adjustment": {
+        "index": 3,
+        "final_severity": "medium",
+        "should_be_removed": false,
+        "comments": "Exploit would freeze core protocol interactions; config is single-owner."
+      }
+    },
+    {
+      "strategy": {
+        "facts": {
+          "O_1": {
+            "answer": "no",
+            "refs": null
+          },
+          "O_2": {
+            "answer": "yes",
+            "refs": [
+              {
+                "file": "LandManager.sol",
+                "lines": [
+                  3
+                ],
+                "why": "Solidity version 0.8.25 ensures auto-reverting on overflows"
+              }
+            ]
+          },
+          "O_3": {
+            "answer": "no",
+            "refs": null
+          },
+          "O_4": {
+            "answer": "no",
+            "refs": null
+          },
+          "O_5": {
+            "answer": "no",
+            "refs": null
+          },
+          "R_1": {
+            "answer": "yes",
+            "refs": [
+              {
+                "file": "LandManager.sol",
+                "lines": [
+                  301,
+                  310
+                ],
+                "why": "External call to accountManager, an upgradable contract"
+              }
+            ]
+          },
+          "R_2": {
+            "answer": "yes",
+            "refs": [
+              {
+                "file": "LandManager.sol",
+                "lines": [
+                  292,
+                  293,
+                  295,
+                  160,
+                  161,
+                  162
+                ],
+                "why": "State written after external call in some entry points"
+              }
+            ]
+          },
+          "R_3": {
+            "answer": "yes",
+            "refs": [
+              {
+                "file": "LandManager.sol",
+                "lines": [
+                  46,
+                  136,
+                  176,
+                  200
+                ],
+                "why": "No nonReentrant or mutex on public functions"
+              }
+            ]
+          },
+          "R_4": {
+            "answer": "yes",
+            "refs": null
+          },
+          "R_5": {
+            "answer": "no",
+            "refs": [
+              {
+                "file": "LandManager.sol",
+                "lines": [
+                  301,
+                  310
+                ],
+                "why": "accountManager is a separate contract"
+              }
+            ]
+          },
+          "A_1": {
+            "answer": "yes",
+            "refs": [
+              {
+                "file": "LandManager.sol",
+                "lines": [
+                  132,
+                  174,
+                  200
+                ],
+                "why": "No access control on user stake/unstake/move"
+              }
+            ]
+          },
+          "A_2": {
+            "answer": "yes",
+            "refs": [
+              {
+                "file": "LandManager.sol",
+                "lines": [
+                  301,
+                  310
+                ],
+                "why": "AccountManager implementation could be swapped"
+              }
+            ]
+          },
+          "A_3": {
+            "answer": "yes",
+            "refs": [
+              {
+                "file": "LandManager.sol",
+                "lines": [
+                  46,
+                  136,
+                  176,
+                  200
+                ],
+                "why": "No time lock, no multisig, no pause on updatePlayer route"
+              }
+            ]
+          },
+          "A_4": {
+            "answer": "yes",
+            "refs": [
+              {
+                "file": "LandManager.sol",
+                "lines": [
+                  153,
+                  196
+                ],
+                "why": "NFTs could be stolen or stake logic can be bypassed by reentrancy"
+              }
+            ]
+          }
+        },
+        "fp": {
+          "duplicate": {
+            "answer": "no",
+            "refs": null
+          },
+          "design_intent": {
+            "answer": "no",
+            "refs": null
+          },
+          "auto_checked": {
+            "answer": "no",
+            "refs": null
+          },
+          "guarded": {
+            "answer": "no",
+            "refs": null
+          },
+          "removal_reason": "none"
+        },
+        "severity": {
+          "impact": "high",
+          "likelihood": "medium",
+          "matrix": "medium"
+        }
+      },
+      "reasoning_summary": "Re-entrancy is possible (R_1/R_2/R_3 yes), unguarded by mutex, and can lead to loss of NFT and protocol state inconsistency (A_4, O_5). No mitigation applies, so severity is high.",
+      "adjustment": {
+        "index": 4,
+        "final_severity": "high",
+        "should_be_removed": false,
+        "comments": "No re-entrancy guard and external contract can be hostile—risk is protocol-critical."
+      }
+    }
+  ]
+}

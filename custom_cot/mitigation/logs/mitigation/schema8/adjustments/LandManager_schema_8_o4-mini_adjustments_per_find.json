@@ -1,0 +1,500 @@
+[
+  {
+    "index": 0,
+    "final_severity": "high",
+    "should_be_removed": false,
+    "comments": "Validate bonus inputs or clamp signed bonus before casting to uint256 to prevent underflow wrap."
+  },
+  {
+    "index": 1,
+    "final_severity": "medium",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 2,
+    "final_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Change the length check to `>= 10` to enforce the cap and prevent the eleventh stake."
+  },
+  {
+    "index": 3,
+    "final_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Validate that PRICE_PER_PLOT is non-zero during initialization or configuration updates to prevent division by zero."
+  },
+  {
+    "index": 4,
+    "final_severity": "unchanged",
+    "should_be_removed": true,
+    "comments": null
+  },
+  {
+    "index": 5,
+    "final_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Ensure to update toilerState[tokenId].plotId to the new plotId within transferToUnoccupiedPlot."
+  },
+  {
+    "index": 6,
+    "final_severity": "low",
+    "should_be_removed": false,
+    "comments": "Add logic to clear `dirty` when a landlord\u2019s plot count is restored or provide a mechanism to re-enable farming without requiring unstake/retake."
+  },
+  {
+    "index": 7,
+    "final_severity": "medium",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 8,
+    "final_severity": "low",
+    "should_be_removed": false,
+    "comments": "Unchanged severity: low impact/low likelihood of exploit via negative bonus wrap."
+  },
+  {
+    "index": 9,
+    "final_severity": "best practices",
+    "should_be_removed": false,
+    "comments": "Consider aggregating landlord updates and calling accountManager.updatePlayer() once per landlord to reduce gas costs."
+  },
+  {
+    "index": 10,
+    "final_severity": "info",
+    "should_be_removed": false,
+    "comments": "Verify and align StorageKey enum values with getUint/getAddress usage to prevent misconfiguration."
+  },
+  {
+    "index": 11,
+    "final_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Add a check that plotMetadata[landlord].lastUpdated != 0 or initialize metadata to prevent zero tax rates."
+  },
+  {
+    "index": 13,
+    "final_severity": "medium",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 14,
+    "final_severity": "high",
+    "should_be_removed": false,
+    "comments": "Add a require check to ensure PRICE_PER_PLOT is non-zero before dividing, e.g. in _reconfigure or at declaration."
+  },
+  {
+    "index": 15,
+    "final_severity": "high",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 16,
+    "final_severity": "low",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 17,
+    "final_severity": "best practices",
+    "should_be_removed": false,
+    "comments": "Implement IERC721Receiver.onERC721Received to support safeTransferFrom and improve token interoperability."
+  },
+  {
+    "index": 18,
+    "final_severity": "high",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 19,
+    "final_severity": "low",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 20,
+    "final_severity": "unchanged",
+    "should_be_removed": true,
+    "comments": "Removed as the unchecked multiplication overflow always reverts in Solidity 0.8+, preventing silent wrap."
+  },
+  {
+    "index": 21,
+    "final_severity": "high",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 22,
+    "final_severity": "low",
+    "should_be_removed": false,
+    "comments": "Consider using a uint256 counter or enforcing a maximum stake length to avoid this overflow."
+  },
+  {
+    "index": 23,
+    "final_severity": "info",
+    "should_be_removed": false,
+    "comments": "Consider refreshing toilerState.lastToilDate in transferToUnoccupiedPlot to avoid zero\u2010yield confusion."
+  },
+  {
+    "index": 24,
+    "final_severity": "high",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 25,
+    "final_severity": "best practices",
+    "should_be_removed": false,
+    "comments": "Consider informing users when their staked NFT becomes dirty to avoid confusion."
+  },
+  {
+    "index": 26,
+    "final_severity": "unchanged",
+    "should_be_removed": true,
+    "comments": "Solidity 0.8 runtime checks prevent negative-to-uint conversion underflow."
+  },
+  {
+    "index": 27,
+    "final_severity": "low",
+    "should_be_removed": false,
+    "comments": "Change the check to >= 10 (or > 9) to enforce the intended 10-item limit."
+  },
+  {
+    "index": 28,
+    "final_severity": "unchanged",
+    "should_be_removed": true,
+    "comments": "False positive: uint8 increment auto-reverts on overflow under Solidity 0.8.25."
+  },
+  {
+    "index": 29,
+    "final_severity": "best practices",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 30,
+    "final_severity": "low",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 33,
+    "final_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Missing state update due to logic bug; medium severity for misallocation risk."
+  },
+  {
+    "index": 34,
+    "final_severity": "medium",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 35,
+    "final_severity": "low",
+    "should_be_removed": false,
+    "comments": "Add a require(PRICE_PER_PLOT != 0) check or enforce non-zero configuration to prevent division by zero."
+  },
+  {
+    "index": 36,
+    "final_severity": "medium",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 37,
+    "final_severity": "low",
+    "should_be_removed": false,
+    "comments": "Revise the staking limit check to `>= 10` or change to `length >= 10` to enforce the intended cap."
+  },
+  {
+    "index": 38,
+    "final_severity": "high",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 39,
+    "final_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Introduce a nonReentrant guard or apply the checks-effects-interactions pattern around accountManager.updatePlayer calls to prevent reentrancy."
+  },
+  {
+    "index": 40,
+    "final_severity": "low",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 41,
+    "final_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Enforce MIN_TAX_RATE when reading uninitialized metadata or initialize `currentTaxRate` on first use to prevent zero-rate exploits."
+  },
+  {
+    "index": 42,
+    "final_severity": "high",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 43,
+    "final_severity": "high",
+    "should_be_removed": false,
+    "comments": "Severity remains high due to protocol-wide economic risk"
+  },
+  {
+    "index": 44,
+    "final_severity": "high",
+    "should_be_removed": false,
+    "comments": "Increased to high due to critical misconfiguration of tax rate keys allowing potential protocol-wide bypass."
+  },
+  {
+    "index": 45,
+    "final_severity": "low",
+    "should_be_removed": false,
+    "comments": "Add a nonReentrant guard or reorder to apply state changes before external calls."
+  },
+  {
+    "index": 46,
+    "final_severity": "low",
+    "should_be_removed": false,
+    "comments": "Add explicit bounds checks for REALM_BONUSES and RARITY_BONUSES before indexing to prevent out-of-bounds panics and potential denial-of-service."
+  },
+  {
+    "index": 47,
+    "final_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Validate or require PRICE_PER_PLOT > 0 in initialization or configuration to prevent division by zero."
+  },
+  {
+    "index": 48,
+    "final_severity": "medium",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 49,
+    "final_severity": "low",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 50,
+    "final_severity": "best practices",
+    "should_be_removed": false,
+    "comments": "Loop is bounded by stake limit; no vulnerability present, classify as best practices."
+  },
+  {
+    "index": 51,
+    "final_severity": "info",
+    "should_be_removed": true,
+    "comments": "Configuration centralization is a conscious design decision, not an exploitable vulnerability."
+  },
+  {
+    "index": 52,
+    "final_severity": "high",
+    "should_be_removed": false,
+    "comments": "Clamp finalBonus or enforce bounds to prevent negative values below -100 before applying the percentage adjustment."
+  },
+  {
+    "index": 53,
+    "final_severity": "medium",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 54,
+    "final_severity": "low",
+    "should_be_removed": false,
+    "comments": "Add an assignment toilerState[tokenId].plotId = plotId in transferToUnoccupiedPlot to maintain correct state."
+  },
+  {
+    "index": 55,
+    "final_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Change the condition to `>= 10` in `stakeMunchable` to enforce the limit correctly."
+  },
+  {
+    "index": 56,
+    "final_severity": "high",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 57,
+    "final_severity": "high",
+    "should_be_removed": false,
+    "comments": "Maintain high severity; validate landlord registration to prevent NFT trapping."
+  },
+  {
+    "index": 58,
+    "final_severity": "high",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 59,
+    "final_severity": "high",
+    "should_be_removed": false,
+    "comments": "Add validation in stakeMunchable to ensure landlord is registered to prevent NFT lock-up."
+  },
+  {
+    "index": 60,
+    "final_severity": "high",
+    "should_be_removed": false,
+    "comments": "Apply a nonReentrant modifier or move state updates before external calls to enforce CEI and prevent reentrancy."
+  },
+  {
+    "index": 61,
+    "final_severity": "high",
+    "should_be_removed": false,
+    "comments": "Replace `<` with `<=` in the plot validity check to ensure invalid plots are marked dirty and prevent perpetual farming."
+  },
+  {
+    "index": 62,
+    "final_severity": "high",
+    "should_be_removed": false,
+    "comments": "Ensure finalBonus remains \u2265\u201399 or clamp numerator before casting to uint256 to prevent underflow."
+  },
+  {
+    "index": 63,
+    "final_severity": "high",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 64,
+    "final_severity": "high",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 65,
+    "final_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Change the check to `>= 10` to enforce the 10-munchable limit."
+  },
+  {
+    "index": 66,
+    "final_severity": "medium",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 67,
+    "final_severity": "medium",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 68,
+    "final_severity": "high",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 69,
+    "final_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Logic bug causes DoS by ghost occupancy; severity unchanged."
+  },
+  {
+    "index": 70,
+    "final_severity": "info",
+    "should_be_removed": true,
+    "comments": null
+  },
+  {
+    "index": 71,
+    "final_severity": "best practices",
+    "should_be_removed": false,
+    "comments": "Introduce a cooldown or timelock on updateTaxRate to prevent front-running and unpredictable economic outcomes."
+  },
+  {
+    "index": 72,
+    "final_severity": "best practices",
+    "should_be_removed": false,
+    "comments": "Add an explicit existence check for tokenId to provide clear error messaging when staking non-existent tokens."
+  },
+  {
+    "index": 73,
+    "final_severity": "unchanged",
+    "should_be_removed": true,
+    "comments": "Length cap of 10 and swap-and-pop guard against unbounded growth; false positive."
+  },
+  {
+    "index": 74,
+    "final_severity": "high",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 75,
+    "final_severity": "low",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 76,
+    "final_severity": "medium",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 77,
+    "final_severity": "low",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 78,
+    "final_severity": "unchanged",
+    "should_be_removed": false,
+    "comments": "Consider adding an explicit `require(plotId != oldPlotId)` check to avoid misleading leave/take events."
+  },
+  {
+    "index": 79,
+    "final_severity": "unchanged",
+    "should_be_removed": true,
+    "comments": "False positive: tax rate is locked-in per farm cycle to avoid slippage."
+  },
+  {
+    "index": 80,
+    "final_severity": "high",
+    "should_be_removed": false,
+    "comments": "Add expiration or slippage parameters to updateTaxRate to prevent front-running and protect toilers."
+  },
+  {
+    "index": 81,
+    "final_severity": "medium",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 82,
+    "final_severity": "low",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 83,
+    "final_severity": "info",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 84,
+    "final_severity": "low",
+    "should_be_removed": false,
+    "comments": "Reorder the calculation to multiply before dividing (e.g., `(schnibblesTotal * (100 + finalBonus)) / 100`) to avoid truncation."
+  },
+  {
+    "index": 85,
+    "final_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Consider reordering multiplication before division or using higher-precision fixed-point arithmetic to reduce rounding errors."
+  }
+]
