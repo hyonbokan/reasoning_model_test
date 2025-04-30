@@ -18,7 +18,7 @@ O4_MINI  = "o4-mini"
 MODEL = GPT_4_1
 PROMPT_FILE_SYSTEM = "utils/prompts/phase0_system_prompt.py"
 INPUT_FILE_FULL_CONTEXT = "utils/inputs/phase0_full_context.md"
-OUTPUT_DIR = "log/phase0_results"
+OUTPUT_DIR = "logs/phase0_results"
 
 # --- Load prompts and input ---
 try:
