@@ -1,0 +1,121 @@
+import json
+import pathlib
+import datetime
+import time
+import os
+from textwrap import dedent
+from dotenv import load_dotenv
+from openai import OpenAI
+from schema.dynamic_cot.phase_0_schema import InitialAnalysisPhaseOutput
+from pydantic import ValidationError
+
+# ------------ models & paths -------------------------------------------------
+GPT_4O   = "gpt-4o-2024-08-06"
+GPT_4_1  = "gpt-4.1-2025-04-14"
+O4_MINI  = "o4-mini"
+
+# ───────────────────────── Configuration ─────────────────────────
+MODEL = GPT_4_1
+PROMPT_FILE_SYSTEM = "utils/prompts/phase0_system_prompt.py"
+INPUT_FILE_FULL_CONTEXT = "utils/inputs/phase0_full_context.md"
+OUTPUT_DIR = "log/phase0_results"
+
+# --- Load prompts and input ---
+try:
+    SYSTEM_PROMPT_PHASE0 = pathlib.Path(PROMPT_FILE_SYSTEM).read_text()
+    FULL_USER_INPUT = pathlib.Path(INPUT_FILE_FULL_CONTEXT).read_text()
+except FileNotFoundError as e:
+    print(f"Error loading input files: {e}")
+    print("Please ensure prompts/system_prompt_phase0.txt and inputs/full_context_and_code.txt exist.")
+    exit(1)
+
+# ───────────────────────── OpenAI Client ─────────────────────────
+load_dotenv()
+openai_api_key = os.getenv("OPENAI_API_KEY")
+if not openai_api_key:
+    print("Error: OPENAI_API_KEY not found in environment variables.")
+    exit(1)
+client = OpenAI(api_key=openai_api_key)
+
+# ───────────────── Function for Phase 0 Analysis ─────────────────
+def perform_phase0_analysis() -> InitialAnalysisPhaseOutput | None:
+    """
+    Performs the Phase 0 analysis by calling the LLM once with the full context
+    and expecting an InitialAnalysisPhaseOutput object.
+    """
+    print(f"Starting Phase 0 analysis using model: {MODEL}...")
+    start_time = time.time()
+
+    # Construct the messages for the API call
+    messages = [
+        {"role": "system", "content": SYSTEM_PROMPT_PHASE0},
+        # Pass the entire context and code as a single user message
+        {"role": "user", "content": FULL_USER_INPUT},
+        {"role": "user", "content": "Analyze the provided contracts and context. Populate the InitialAnalysisPhaseOutput schema, summarizing context and identifying potential vulnerability candidates."},
+    ]
+
+    try:
+        completion = client.beta.chat.completions.parse(
+            model=MODEL,
+            messages=messages,
+            response_format=InitialAnalysisPhaseOutput,
+        )
+
+        # Access the parsed Pydantic object
+        parsed_output: InitialAnalysisPhaseOutput = completion.choices[0].message.parsed
+        analysis_time = time.time() - start_time
+        print(f"Phase 0 analysis completed successfully in {analysis_time:.2f} seconds.")
+        return parsed_output
+
+    except ValidationError as e:
+        print(f"\n--- Pydantic Validation Error ---")
+        print(e)
+        try:
+            # Fallback to standard completion call to get raw text for debugging
+            raw_completion = client.chat.completions.create(
+                 model=MODEL,
+                 messages=messages,
+            )
+            raw_text = raw_completion.choices[0].message.content
+            print("\n--- Raw LLM Output (Failed Validation) ---")
+            print(raw_text)
+            # Save raw output for debugging
+            ts = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+            error_dir = pathlib.Path(OUTPUT_DIR) / "errors"
+            error_dir.mkdir(parents=True, exist_ok=True)
+            error_file = error_dir / f"phase0_error_{MODEL}_{ts}.txt"
+            error_file.write_text(f"Pydantic Validation Error:\n{e}\n\nRaw Output:\n{raw_text}")
+            print(f"\nRaw output saved to {error_file}")
+        except Exception as raw_e:
+            print(f"\nError retrieving raw LLM output: {raw_e}")
+        return None
+
+    except Exception as e:
+        print(f"\n--- API Call Error ---")
+        print(f"An error occurred during the API call: {e}")
+        analysis_time = time.time() - start_time
+        print(f"Analysis failed after {analysis_time:.2f} seconds.")
+        return None
+
+# ───────────────────────── Main Execution ──────────────────────────
+if __name__ == "__main__":
+    phase0_result = perform_phase0_analysis()
+
+    if phase0_result:
+        output_path = pathlib.Path(OUTPUT_DIR)
+        output_path.mkdir(parents=True, exist_ok=True)
+
+        timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+        output_filename = output_path / f"phase0_output_{MODEL}_{timestamp}.json"
+
+        try:
+            with open(output_filename, "w", encoding="utf-8") as f:
+                # Use model_dump_json for Pydantic v2+
+                f.write(phase0_result.model_dump_json(indent=2))
+            print(f"\n✅ Successfully saved Phase 0 output to: {output_filename}")
+            print(f"   - Contracts Summarized: {len(phase0_result.analyzed_contracts_summary)}")
+            print(f"   - Candidates Identified: {len(phase0_result.identified_finding_candidates)}")
+        except Exception as e:
+            print(f"\nError saving output JSON: {e}")
+    else:
+        print("\nPhase 0 analysis did not complete successfully. No output saved.")

@@ -1,5 +1,5 @@
-from textwrap import dedent
 
+from textwrap import dedent
 
 SYSTEM_PROMPT_PHASE0 = dedent("""
 You are an expert Solidity security auditor specializing in initial context analysis and vulnerability candidate identification.
