@@ -4,7 +4,7 @@ from pydantic import BaseModel, Field
 # --- primitive enums -------------------------------------------------
 _YN  = Literal["yes", "no"]
 _IMP = Literal["high", "medium", "low"]
-_LIK = _IMP
+_LIK = Literal["high", "medium", "low"]
 _SEV = Literal["high", "medium", "low", "info", "best practices"]
 
 # --- evidence helper -------------------------------------------------

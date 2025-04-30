@@ -16,7 +16,7 @@ class Adjustment(BaseModel):
 # Helper enums
 _YN = Literal["yes", "no"]
 _Impact = Literal["high", "medium", "low"]
-_Likelihood = _Impact
+_Likelihood = Literal["high", "medium", "low"]
 _FinalSeverity = Literal["high", "medium", "low", "info", "best practices"]
 
 class MitigationChecklist(BaseModel):

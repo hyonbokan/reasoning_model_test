@@ -5,7 +5,7 @@ from pydantic import BaseModel, Field
 # helper aliases
 _YN  = Literal["yes", "no"]
 _IMP = Literal["high", "medium", "low"]
-_LIK = _IMP
+_LIK = Literal["high", "medium", "low"]
 _SEV = Literal["high", "medium", "low", "info", "best practices"]
 
 class MitigationChecklist(BaseModel):
