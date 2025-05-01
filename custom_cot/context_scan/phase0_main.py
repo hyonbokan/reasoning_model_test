@@ -3,10 +3,9 @@ import pathlib
 import datetime
 import time
 import os
-from textwrap import dedent
 from dotenv import load_dotenv
 from openai import OpenAI
-from schema.dynamic_cot.phase_0_schema import InitialAnalysisPhaseOutput
+from schema.phase_0_schemas.phase_0_schema_v2 import ContextSummaryOutput
 from pydantic import ValidationError
 
 # ------------ models & paths -------------------------------------------------
@@ -15,10 +14,11 @@ GPT_4_1  = "gpt-4.1-2025-04-14"
 O4_MINI  = "o4-mini"
 O3 = "o3-2025-04-16"
 # ───────────────────────── Configuration ─────────────────────────
-MODEL = O3
-PROMPT_FILE_SYSTEM = "utils/prompts/phase0_system_prompt.py"
+MODEL = GPT_4_1
+PROMPT_FILE_SYSTEM = "utils/prompts/phase0_v2_sys_prompt.py"
 INPUT_FILE_FULL_CONTEXT = "utils/inputs/phase0_full_context.md"
-OUTPUT_DIR = "logs/phase0_results"
+PHASE = "phase0_v2"
+OUTPUT_DIR_PHASE0 = "logs/phase0_results"
 
 # --- Load prompts and input ---
 try:
@@ -38,11 +38,7 @@ if not openai_api_key:
 client = OpenAI(api_key=openai_api_key)
 
 # ───────────────── Function for Phase 0 Analysis ─────────────────
-def perform_phase0_analysis() -> InitialAnalysisPhaseOutput | None:
-    """
-    Performs the Phase 0 analysis by calling the LLM once with the full context
-    and expecting an InitialAnalysisPhaseOutput object.
-    """
+def perform_phase0_analysis() -> ContextSummaryOutput | None:
     print(f"Starting Phase 0 analysis using model: {MODEL}...")
     start_time = time.time()
 
@@ -58,12 +54,12 @@ def perform_phase0_analysis() -> InitialAnalysisPhaseOutput | None:
         completion = client.beta.chat.completions.parse(
             model=MODEL,
             messages=messages,
-            response_format=InitialAnalysisPhaseOutput,
+            response_format=ContextSummaryOutput,
             # temperature=0
         )
 
         # Access the parsed Pydantic object
-        parsed_output: InitialAnalysisPhaseOutput = completion.choices[0].message.parsed
+        parsed_output: ContextSummaryOutput = completion.choices[0].message.parsed
         analysis_time = time.time() - start_time
         print(f"Phase 0 analysis completed successfully in {analysis_time:.2f} seconds.")
         return parsed_output
@@ -82,7 +78,7 @@ def perform_phase0_analysis() -> InitialAnalysisPhaseOutput | None:
             print(raw_text)
             # Save raw output for debugging
             ts = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-            error_dir = pathlib.Path(OUTPUT_DIR) / "errors"
+            error_dir = pathlib.Path(OUTPUT_DIR_PHASE0) / "errors"
             error_dir.mkdir(parents=True, exist_ok=True)
             error_file = error_dir / f"phase0_error_{MODEL}_{ts}.txt"
             error_file.write_text(f"Pydantic Validation Error:\n{e}\n\nRaw Output:\n{raw_text}")
@@ -103,11 +99,11 @@ if __name__ == "__main__":
     phase0_result = perform_phase0_analysis()
 
     if phase0_result:
-        output_path = pathlib.Path(OUTPUT_DIR)
+        output_path = pathlib.Path(OUTPUT_DIR_PHASE0)
         output_path.mkdir(parents=True, exist_ok=True)
 
         timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-        output_filename = output_path / f"phase0_output_{MODEL}_{timestamp}.json"
+        output_filename = output_path / f"{PHASE}_{MODEL}_{timestamp}.json"
 
         try:
             with open(output_filename, "w", encoding="utf-8") as f:
@@ -115,7 +111,7 @@ if __name__ == "__main__":
                 f.write(phase0_result.model_dump_json(indent=2))
             print(f"\n✅ Successfully saved Phase 0 output to: {output_filename}")
             print(f"   - Contracts Summarized: {len(phase0_result.analyzed_contracts_summary)}")
-            print(f"   - Candidates Identified: {len(phase0_result.identified_finding_candidates)}")
+            # print(f"   - Candidates Identified: {len(phase0_result.identified_finding_candidates)}")
         except Exception as e:
             print(f"\nError saving output JSON: {e}")
     else:

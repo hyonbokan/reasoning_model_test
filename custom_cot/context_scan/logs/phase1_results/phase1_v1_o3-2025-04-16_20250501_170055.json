@@ -1,0 +1,121 @@
+{
+  "detected_findings": [
+    {
+      "finding_id": "VULN-001",
+      "contract_file": "LandManager.sol",
+      "vulnerability_class": "Re-Entrancy / Checks-Effects-Interactions Violation",
+      "primary_code_ref": {
+        "file": "LandManager.sol",
+        "element_name": "stakeMunchable",
+        "unique_snippet": "munchNFT.transferFrom(mainAccount, address(this), tokenId);",
+        "rationale": "External ERC-721 transfer is executed before any internal state changes that mark the plot as occupied or record ownership."
+      },
+      "related_code_refs": [
+        {
+          "file": "LandManager.sol",
+          "element_name": "stakeMunchable",
+          "unique_snippet": "plotOccupied[landlord][plotId] = Plot({ occupied: true, tokenId: tokenId });",
+          "rationale": "State intended to be protected against re-entrancy is only set after the external call."
+        }
+      ],
+      "detailed_description": "WHAT:  stakeMunchable performs an external call to munchNFT.transferFrom **before** updating any LandManager book-keeping (plotOccupied, munchablesStaked, munchableOwner, toilerState).\n\nHOW:  A malicious or non-standard ERC-721 implementation can invoke re-entrant calls back into stakeMunchable (or any other writable function), because LandManager lacks a re-entrancy guard.  During the re-entrant context the contract still believes the plot is free and that the player has fewer than 10 staked NFTs.  The attacker can therefore stake the same or additional NFTs multiple times, violate the 10-NFT limit, or occupy multiple plots that will later all be considered legitimately staked once the first call returns and finalises the state updates.\n\nWHY:  The contract violates the checks-effects-interactions pattern; state invariants are only enforced after the external interaction, leaving a window where they can be bypassed.",
+      "supporting_evidence": [
+        {
+          "file": "LandManager.sol",
+          "element_name": "stakeMunchable",
+          "unique_snippet": "if (munchablesStaked[mainAccount].length > 10) revert TooManyStakedMunchiesError();",
+          "rationale": "Limit that can be skirted inside the re-entrant window."
+        },
+        {
+          "context_source": "web_context",
+          "context_type": "common_vulnerability",
+          "details": "Calls to ERC721.transferFrom may enable reentrancy if the ERC721 is custom/non-compliant."
+        }
+      ],
+      "violated_invariants": [
+        "After staking, plot is marked occupied and tokenId assigned.",
+        "After staking, munchableOwner maps tokenId to the staker (mainAccount).",
+        "Stake cannot increase the munchablesStaked for an account beyond the limit; capped at 10."
+      ],
+      "exploit_scenario": "Attacker deploys a custom ERC-721 that calls back into LandManager.stakeMunchable during transferFrom.  The re-entrant call passes the same pre-checks (plot still unoccupied, <=10 staked) and stashes an additional token or claims the same plot twice.  After the outer call finishes, internal arrays/mappings contain duplicate or excessive entries, giving the attacker more Schnibbles than allowed and breaking accounting for future farming/unstake operations.",
+      "initial_impact_estimate": "high",
+      "initial_likelihood_estimate": "medium",
+      "related_static_analysis_finding_ids": []
+    },
+    {
+      "finding_id": "VULN-002",
+      "contract_file": "LandManager.sol",
+      "vulnerability_class": "State-Integrity / Invariant Violation – Incomplete State Update",
+      "primary_code_ref": {
+        "file": "LandManager.sol",
+        "element_name": "transferToUnoccupiedPlot",
+        "unique_snippet": "toilerState[tokenId].latestTaxRate = plotMetadata[_toiler.landlord].currentTaxRate;",
+        "rationale": "Only latestTaxRate is updated; plotId remains untouched, leaving stale data."
+      },
+      "related_code_refs": [
+        {
+          "file": "LandManager.sol",
+          "element_name": "transferToUnoccupiedPlot",
+          "unique_snippet": "plotOccupied[_toiler.landlord][plotId] = Plot({ occupied: true, tokenId: tokenId });",
+          "rationale": "Occupancy for the new plot is recorded, implying the logical move did occur."
+        }
+      ],
+      "detailed_description": "WHAT:  transferToUnoccupiedPlot fails to update toilerState[tokenId].plotId to the new plot.\n\nHOW:  The function records the vacancy of the old plot and the occupation of the new one, and it refreshes latestTaxRate, but it never assigns the new plotId to the toilerState struct.  Consequently the canonical source of truth for the NFT’s location (toilerState.plotId) remains the **old** value.\n\nWHY:  Any subsequent logic that relies on toilerState.plotId (e.g., _farmPlots dirty-flag check, landlord revenue attribution, or occupancy validation during future moves) will operate on outdated data, leading to mis-calculated Schnibbles, incorrect dirty flagging, or rejection of legitimate operations.",
+      "supporting_evidence": [
+        {
+          "file": "LandManager.sol",
+          "element_name": "_farmPlots",
+          "unique_snippet": "if (_getNumPlots(landlord) < _toiler.plotId) { toilerState[tokenId].dirty = true; }",
+          "rationale": "_farmPlots relies on the plotId stored in toilerState; with stale data it may mark NFTs dirty erroneously."
+        },
+        {
+          "context_source": "invariants",
+          "context_type": "invariant_rule",
+          "details": "After transfer, toilerState.plotId is updated."
+        }
+      ],
+      "violated_invariants": [
+        "After transfer, toilerState.plotId is updated."
+      ],
+      "exploit_scenario": "A user moves their NFT to an adjacent empty plot (id 5 ⇒ 2).  Because plotId is not updated, later farming loops still think the NFT is on plot 5.  If the landlord now owns <5 plots, _farmPlots marks the NFT dirty, eliminating its rewards.  Conversely, an attacker could intentionally exploit the mismatch to keep earning rewards while occupying a supposedly out-of-range plot, evading dirty status.",
+      "initial_impact_estimate": "medium",
+      "initial_likelihood_estimate": "high",
+      "related_static_analysis_finding_ids": []
+    },
+    {
+      "finding_id": "VULN-003",
+      "contract_file": "LandManager.sol",
+      "vulnerability_class": "Math & Preconditions – Division By Zero / Misconfiguration",
+      "primary_code_ref": {
+        "file": "LandManager.sol",
+        "element_name": "_getNumPlots",
+        "unique_snippet": "return lockManager.getLockedWeightedValue(_account) / PRICE_PER_PLOT;",
+        "rationale": "PRICE_PER_PLOT is used as a divisor with no non-zero guarantee."
+      },
+      "related_code_refs": [
+        {
+          "file": "LandManager.sol",
+          "element_name": "_reconfigure",
+          "unique_snippet": "PRICE_PER_PLOT = IConfigStorage(configStorage).getUint(StorageKey.NFTOverlord);",
+          "rationale": "PRICE_PER_PLOT is freely loaded from external config with no validation."
+        }
+      ],
+      "detailed_description": "WHAT:  PRICE_PER_PLOT may be set to 0 via mis-configuration, causing division-by-zero panics wherever _getNumPlots is called.\n\nHOW:  _reconfigure pulls PRICE_PER_PLOT from ConfigStorage without asserting it is >0.  Any later call to _getNumPlots executes an unchecked division, which will revert the entire transaction if PRICE_PER_PLOT == 0.\n\nWHY:  This breaks the invariant that PRICE_PER_PLOT must be non-zero, rendering core functions (stake, farm, transfer) unusable and effectively DoS-ing the protocol until an upgrade or re-configuration is executed.",
+      "supporting_evidence": [
+        {
+          "context_source": "invariants",
+          "context_type": "invariant_rule",
+          "details": "PRICE_PER_PLOT must be non-zero after _reconfigure."
+        }
+      ],
+      "violated_invariants": [
+        "PRICE_PER_PLOT must be non-zero after _reconfigure."
+      ],
+      "exploit_scenario": "A malicious or careless admin sets PRICE_PER_PLOT to 0 in the ConfigStorage.  All user interactions that read their plot count (stakeMunchable, _farmPlots, etc.) revert, halting the game economy.  Attackers could exploit the downtime for griefing or to force emergency upgrades.",
+      "initial_impact_estimate": "medium",
+      "initial_likelihood_estimate": "medium",
+      "related_static_analysis_finding_ids": []
+    }
+  ],
+  "detection_summary_notes": "Key issues include a classical re-entrancy window in stakeMunchable, a critical omission of plotId update on plot transfers, and unchecked configuration leading to divide-by-zero DoS.  Other minor observations (e.g., lastUpdated not refreshed in updateTaxRate) were deemed low impact compared to the highlighted findings."
+}
