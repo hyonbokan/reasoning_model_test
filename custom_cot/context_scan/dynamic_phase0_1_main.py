@@ -13,9 +13,9 @@ from pydantic import ValidationError
 GPT_4O   = "gpt-4o-2024-08-06"
 GPT_4_1  = "gpt-4.1-2025-04-14"
 O4_MINI  = "o4-mini"
-
+O3 = "o3-2025-04-16"
 # ───────────────────────── Configuration ─────────────────────────
-MODEL = GPT_4_1
+MODEL = O3
 PROMPT_FILE_SYSTEM = "utils/prompts/phase0_system_prompt.py"
 INPUT_FILE_FULL_CONTEXT = "utils/inputs/phase0_full_context.md"
 OUTPUT_DIR = "logs/phase0_results"
@@ -59,6 +59,7 @@ def perform_phase0_analysis() -> InitialAnalysisPhaseOutput | None:
             model=MODEL,
             messages=messages,
             response_format=InitialAnalysisPhaseOutput,
+            # temperature=0
         )
 
         # Access the parsed Pydantic object

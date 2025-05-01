@@ -1,16 +1,15 @@
-# 1.  **Multiple Contracts & Context:**
-#     * `analyzed_contracts_summary`: A list to hold analysis for each input contract file.
-#     * `project_context_summary`: Consolidates information from *all* context sources (summary, docs, invariants, web).
-#     * `critical_cross_contract_interactions`: Specifically asks for links *between* contracts.
-# 2.  **Context Structuring:**
-#     * Fields like `core_purpose`, `identified_roles`, `key_state_variables_security`, `external_dependencies` structure the contract information.
-#     * Fields like `overall_protocol_goal`, `system_actors_and_capabilities`, `core_assets_managed`, `key_security_assumptions_from_context` structure the project context.
-#     * `applicable_general_security_warnings` forces the LLM to connect generic web context points to this specific project.
-# 3.  **Candidate Identification:**
-#     * `identified_finding_candidates`: A list to hold multiple candidates found across any input file.
-#     * `FindingCandidate` structure includes `contract_file`, `code_refs` (with file/lines), a specific `hypothesized_vuln_class`, and `observation_reasoning`.
-# 4.  **LLM Guidance:** Detailed `description` fields guide the LLM on what information to extract and how to structure it.
-# 5.  **Validation:** The `@model_validator` ensures that candidates refer to files that were actually analyzed and that code references are consistent within a candidate.
+# Key Sub-Models:
+# ContractAnalysis: Focuses on summarizing one contract file structurally.
+# ProjectContextAnalysis: Focuses on summarizing all non-code context semantically.
+# FindingCandidate: Represents one specific point of interest requiring further analysis.
+# CodeRef: Crucially, this identifies a code location without line numbers. It relies on:
+    # file: Which contract file.
+    # element_name: The function, modifier, variable, etc.
+    # unique_snippet: A short piece of code within that element that should uniquely pinpoint the exact spot. This is the key locator used instead of line numbers.
+# ContextRef: Links a piece of information back to its origin and meaning:
+    # source: Where in the input document structure it came from (e.g., summary, docs, web_context).
+    # context_type: What kind of information it is (e.g., security_assumption, best_practice, common_vulnerability). This adds semantic understanding.
+    # details: The actual text or quote.
 
 # This schema provides a solid foundation for the first LLM call, capturing the necessary structured information to feed into the subsequent, more focused analysis phases for each identified candidates
 
