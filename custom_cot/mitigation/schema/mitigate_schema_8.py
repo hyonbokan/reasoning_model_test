@@ -39,9 +39,9 @@ class FactChecklist(BaseModel):
     O_1: CheckedYN = Field(
         ...,
         description=(
-            "STEP 1 — Is the *core* of this finding arithmetic overflow / under-flow?\n"
-            "- yes : the bug relies on wrapping / truncation.\n"
-            "- no  : overflow is incidental or not in scope.\n"
+            "Is the *core* of this finding truly about arithmetic overflow or underflow?\n"
+            "- yes: bug exploits wrapping/truncation or cast-wide wrap.\n"
+            "- no : overflow mention is incidental."
             "Note: losing bits via signed→unsigned *or* via narrowing cast counts as overflow."
         ),
     )
@@ -50,11 +50,9 @@ class FactChecklist(BaseModel):
     O_2: CheckedYN = Field(
         ...,
         description=(
-            "STEP 2 — Is the contract compiled with Solidity ≥ 0.8.0?\n"
-            "Rule: ≥0.8 auto-reverts on **all** arithmetic *except*:\n"
-            "  • type-casts (e.g. uint256→uint128)\n"
-            "  • inline assembly or low-level `add`, `sub`.\n"
-            "If unknown, assume the pragma shown at the top of the file."
+            "Is the contract compiled with Solidity ≥ 0.8.0?\n"
+            "- yes: compiler will revert on over/under-flow unless bypassed.\n"
+            "- no : overflow checks are *not* automatic."
         ),
     )
 
@@ -62,12 +60,9 @@ class FactChecklist(BaseModel):
     O_3: CheckedYN = Field(
         ...,
         description=(
-            "STEP 3 — Is there **any** bypass of auto-checks?\n"
-            "  - `unchecked {}` block around the math, **or**\n"
-            "  - explicit assembly / `unsafeMath` / `addmod`, **or**\n"
-            "  - narrowing cast that can wrap (e.g. uint256→uint8).\n"
-            "yes : at least one bypass is present.\n"
-            "no  : none of the above."
+            "Is there **any** bypass of auto-checks?\n"
+            "- yes: use of `unchecked {}` blocks, inline assembly math, `addmod`, or narrowing casts.\n"
+            "- no : no bypass; revert would occur."
         ),
     )
 
@@ -75,7 +70,7 @@ class FactChecklist(BaseModel):
     O_4: CheckedYN = Field(
         ...,
         description=(
-            "STEP 4 — Is there a documented business requirement to *allow* wrapping\n"
+            "Is there a documented business requirement to *allow* wrapping\n"
             "instead of reverting? Examples: counter roll-over, ring-buffer index.\n"
             "yes : spec, comment, or unit test proves intentional wrap.\n"
             "no  : no such evidence."
@@ -86,7 +81,7 @@ class FactChecklist(BaseModel):
     O_5: CheckedYN = Field(
         ...,
         description=(
-            "STEP 5 — Does this overflow feed a *larger* exploit chain\n"
+            "Does this overflow feed a *larger* exploit chain\n"
             "(e.g. price manipulation, privilege escalation)?\n"
             "yes : overflow is one link in a multi-step attack.\n"
             "no  : standalone wrap only."
@@ -98,7 +93,7 @@ class FactChecklist(BaseModel):
     R_1: CheckedYN = Field(
         ...,
         description=(
-            "STEP 1 — Does the function transfer control to **un-trusted code**?\n"
+            "Does the function transfer control to **un-trusted code**?\n"
             "Count any of the following as **yes**:\n"
             "  • Interface / library call to a contract held in storage or calldata\n"
             "  • `call`, `delegatecall`, `staticcall`, `.send`, `.transfer`\n"
@@ -113,7 +108,7 @@ class FactChecklist(BaseModel):
     R_2: CheckedYN = Field(
         ...,
         description=(
-            "STEP 2 — Are there **ANY** contract-storage writes *after* the external call on the same execution path?\n"
+            "Are there **ANY** contract-storage writes *after* the external call on the same execution path?\n"
             "- yes : at least one `SSTORE`, mapping update, array push, etc. appears **below** the call\n"
             "- no  : *all* writes occur beforehand, and therefore CEI respected"
         ),
@@ -123,7 +118,7 @@ class FactChecklist(BaseModel):
     R_3: CheckedYN = Field(
         ...,
         description=(
-            "STEP 3 — Is **no** re-entrancy guard present?\n"
+            "Is **no** re-entrancy guard present?\n"
             "'Guard' means:\n"
             "  • OpenZeppelin `nonReentrant` **or**\n"
             "  • A custom mutex (bool lock; require(!lock); lock=true; …; lock=false)\n"
@@ -135,8 +130,8 @@ class FactChecklist(BaseModel):
     R_4: CheckedYN = Field(
         ...,
         description=(
-            "STEP 4 — Is the CEI pattern **broken**?\n"
-            "Rule: answer **yes** iff R_1 = yes *and* R_2 = yes.\n"
+            "Is the CEI pattern **broken**?\n"
+            "Rule: answer **yes** if R_1 = yes *and* R_2 = yes.\n"
             "Otherwise answer **no**. (This field can be auto-derived)."
         ),
     )
@@ -145,7 +140,7 @@ class FactChecklist(BaseModel):
     R_5: CheckedYN = Field(
         ...,
         description=(
-            "STEP 5 — Is the call internal-only (same contract, no `delegatecall`)?\n"
+            "Is the call internal-only (same contract, no `delegatecall`)?\n"
             "- yes : Solidity `internal` / `private` function without low-level external call\n"
             "- no  : any external address involved.\n"
             "If R_5 = yes the issue is automatically a false-positive."
@@ -157,7 +152,7 @@ class FactChecklist(BaseModel):
     A_1: CheckedYN = Field(
         ...,
         description=(
-            "STEP 1 — Can an **un-privileged** account *directly or indirectly* call the target "
+            "Can an **un-privileged** account *directly or indirectly* call the target "
             "function?\n"
             "• yes : no `onlyOwner`, `onlyRole`, governor-only or msg.sender check prevents it\n"
             "• no  : proper access check present on every entry-point"
@@ -168,7 +163,7 @@ class FactChecklist(BaseModel):
     A_2: CheckedYN = Field(
         ...,
         description=(
-            "STEP 2 — Is the privileged role **centralised** in a single EOA or small multisig "
+            "Is the privileged role **centralised** in a single EOA or small multisig "
             "without delay?\n"
             "• yes : single EOA owner, 2-of-2 multisig, upgrade controlled by dev key, etc.\n"
             "• no  : DAO vote, >=3-of-5 multisig, or time-lock ≥ 24 h."
@@ -179,7 +174,7 @@ class FactChecklist(BaseModel):
     A_3: CheckedYN = Field(
         ...,
         description=(
-            "STEP 3 — Are mitigation controls **missing**?\n"
+            "Are mitigation controls **missing**?\n"
             "Mitigations include: Timelock, multisig ≥ 3-of-n, role revocation, pause guardian.\n"
             "• yes : none of the above in place for the risky function.\n"
             "• no  : at least one mitigation applies."
@@ -190,7 +185,7 @@ class FactChecklist(BaseModel):
     A_4: CheckedYN = Field(
         ...,
         description=(
-            "STEP 4 — Does the ability enable **critical protocol manipulation**?\n"
+            "Does the ability enable **critical protocol manipulation**?\n"
             "Examples: mint/burn tokens, upgrade core contracts, drain reserves, freeze user funds."
         ),
     )

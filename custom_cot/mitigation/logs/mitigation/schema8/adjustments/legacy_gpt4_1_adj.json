@@ -1,0 +1,506 @@
+[
+  {
+    "index": 0,
+    "final_severity": "high",
+    "should_be_removed": false,
+    "comments": "Overflow is directly exploitable via contract config with catastrophic effect; not guarded, by design, or auto-checked."
+  },
+  {
+    "index": 1,
+    "final_severity": "medium",
+    "should_be_removed": false,
+    "comments": "State variable inconsistency introduces a feasible reward manipulation vector; the issue is genuine and neither mitigated nor out-of-scope."
+  },
+  {
+    "index": 2,
+    "final_severity": "low",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 3,
+    "final_severity": "low",
+    "should_be_removed": false,
+    "comments": "Division-by-zero possible if PRICE_PER_PLOT is badly configured; recommend validation on load to prevent configuration errors. Kept as low severity per impact-likelihood matrix."
+  },
+  {
+    "index": 4,
+    "final_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Re-entrancy into state-changing functions via AccountManager could allow double-spend, bypassed checks, or NFT theft, raising this above 'low' severity."
+  },
+  {
+    "index": 5,
+    "final_severity": "high",
+    "should_be_removed": false,
+    "comments": "The finding is accurate; not updating plotId leads to critical inconsistencies and reward errors that may be exploited or lead to user loss."
+  },
+  {
+    "index": 6,
+    "final_severity": "medium",
+    "should_be_removed": false,
+    "comments": "There is a meaningful and unrecoverable loss of functionality for users unless they manually unstake and restake. Medium severity is justified."
+  },
+  {
+    "index": 7,
+    "final_severity": "low",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 8,
+    "final_severity": "low",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 9,
+    "final_severity": "low",
+    "should_be_removed": false,
+    "comments": "Redundant calls increase transaction costs but do not impact protocol safety."
+  },
+  {
+    "index": 10,
+    "final_severity": "info",
+    "should_be_removed": false,
+    "comments": "While unintuitive parameter retrieval could result in confusing configuration or administrative errors, it does not directly introduce a security vulnerability in the contract logic as written."
+  },
+  {
+    "index": 11,
+    "final_severity": "low",
+    "should_be_removed": false,
+    "comments": "The missing check may cause edge case reward misassignment but does not present significant risk or exploitation opportunity."
+  },
+  {
+    "index": 12,
+    "final_severity": "best practices",
+    "should_be_removed": false,
+    "comments": "Addressing this would improve code maintainability and future-proofing, but does not affect protocol correctness or security."
+  },
+  {
+    "index": 13,
+    "final_severity": "high",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 14,
+    "final_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Division by zero can halt operations and must be guarded with require(PRICE_PER_PLOT > 0), but does not lead to permanent loss or privilege escalation."
+  },
+  {
+    "index": 15,
+    "final_severity": "medium",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 16,
+    "final_severity": "low",
+    "should_be_removed": false,
+    "comments": "A simple off-by-one error allows one extra NFT to be staked, but this does not enable an exploit or critical failure."
+  },
+  {
+    "index": 17,
+    "final_severity": "best practices",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 18,
+    "final_severity": "high",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 19,
+    "final_severity": "medium",
+    "should_be_removed": false,
+    "comments": "The off-by-one allows exceeding the staking hard limit, impacting downstream logic integrity. Fix by using \">= 10\" rather than \"> 10\"."
+  },
+  {
+    "index": 21,
+    "final_severity": "low",
+    "should_be_removed": false,
+    "comments": "Severe impact if mis-configured, but unlikely if deployment procedures are robust; keep as low severity."
+  },
+  {
+    "index": 22,
+    "final_severity": "low",
+    "should_be_removed": false,
+    "comments": "This is a real, low-likelihood issue with minor impact, mainly dependent on future design or unforeseen bugs in the staking limit."
+  },
+  {
+    "index": 23,
+    "final_severity": "info",
+    "should_be_removed": false,
+    "comments": "Acknowledged as minor UX quirk; not exploitable, but worth documenting."
+  },
+  {
+    "index": 24,
+    "final_severity": "high",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 25,
+    "final_severity": "medium",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 26,
+    "final_severity": "unchanged",
+    "should_be_removed": true,
+    "comments": "Solidity 0.8.25 auto-reverts on negative-to-unsigned casts, so this computation will not cause a silent underflow and is not exploitable."
+  },
+  {
+    "index": 27,
+    "final_severity": "low",
+    "should_be_removed": false,
+    "comments": "Business logic flaw (off-by-one) in stake limit; update '> 10' to '>= 10' to enforce intention."
+  },
+  {
+    "index": 28,
+    "final_severity": "low",
+    "should_be_removed": false,
+    "comments": "Although the type mismatch does not introduce a practical bug due to staked list limits, using a consistent and appropriate type contributes to maintainability and clarity."
+  },
+  {
+    "index": 30,
+    "final_severity": "low",
+    "should_be_removed": false,
+    "comments": "Explicit bounds checks would increase contract robustness, but current risk is limited to potential reverts rather than high-severity exploits."
+  },
+  {
+    "index": 31,
+    "final_severity": "low",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 32,
+    "final_severity": "high",
+    "should_be_removed": false,
+    "comments": "Reentrancy is feasible via unrestricted external call prior to storage update, without any guard or mitigation."
+  },
+  {
+    "index": 33,
+    "final_severity": "medium",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 34,
+    "final_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Unchecked indexing could impact all users by breaking farming; this risk is not mitigated by access control or business logic."
+  },
+  {
+    "index": 35,
+    "final_severity": "medium",
+    "should_be_removed": false,
+    "comments": "A missing non-zero check on PRICE_PER_PLOT could break staking, farming, and other core actions if misconfigured; needs proper validation."
+  },
+  {
+    "index": 36,
+    "final_severity": "medium",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 37,
+    "final_severity": "low",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 38,
+    "final_severity": "high",
+    "should_be_removed": false,
+    "comments": "Overflow here is reachable by any user and can brick protocol logic, so the issue must remain and is high severity."
+  },
+  {
+    "index": 39,
+    "final_severity": "high",
+    "should_be_removed": false,
+    "comments": "Vulnerable to re-entrancy due to unguarded state during external calls; multiple attack paths are explicitly described."
+  },
+  {
+    "index": 40,
+    "final_severity": "low",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 41,
+    "final_severity": "low",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 42,
+    "final_severity": "high",
+    "should_be_removed": false,
+    "comments": "Critical state inconsistencies are possible due to the missing plotId update, leading to exploit scenarios and corrupted gameplay logic."
+  },
+  {
+    "index": 43,
+    "final_severity": "high",
+    "should_be_removed": false,
+    "comments": "Unchecked conversion of negative int256 to uint256 in schnibbles reward computation presents a severe, readily exploitable bug."
+  },
+  {
+    "index": 44,
+    "final_severity": "high",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 45,
+    "final_severity": "medium",
+    "should_be_removed": false,
+    "comments": "State update partially after external call without reentrancy guard; matches standard CEI violation, medium severity."
+  },
+  {
+    "index": 46,
+    "final_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Potential DoS by transaction revert due to unchecked array access with user-controlled values."
+  },
+  {
+    "index": 47,
+    "final_severity": "medium",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 48,
+    "final_severity": "low",
+    "should_be_removed": false,
+    "comments": "This is a low-severity issue as failure would result from an unlikely misconfiguration, not direct user attack."
+  },
+  {
+    "index": 49,
+    "final_severity": "low",
+    "should_be_removed": false,
+    "comments": "This is a business logic bug causing a soft limit bypass, not a security issue."
+  },
+  {
+    "index": 50,
+    "final_severity": "low",
+    "should_be_removed": false,
+    "comments": "Loop external calls are gas-intensive, but risk is capped by the uint8 limit and no critical asset loss occurs."
+  },
+  {
+    "index": 51,
+    "final_severity": "unchanged",
+    "should_be_removed": true,
+    "comments": "Centralized configuration is by design in this protocol; the issue represents a known trade-off, not an actionable vulnerability."
+  },
+  {
+    "index": 52,
+    "final_severity": "high",
+    "should_be_removed": false,
+    "comments": "Critical overflow in schnibbles reward calculation yields protocol-wide impact; reliable trigger present if bonus data is attacker-controlled or misconfigured."
+  },
+  {
+    "index": 53,
+    "final_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Division by zero is feasible only if misconfigured, but would disrupt core protocol operations."
+  },
+  {
+    "index": 54,
+    "final_severity": "low",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 55,
+    "final_severity": "low",
+    "should_be_removed": false,
+    "comments": "True off-by-one: condition allows 11 instead of 10 staked; does not enable a critical exploit."
+  },
+  {
+    "index": 56,
+    "final_severity": "high",
+    "should_be_removed": false,
+    "comments": "The underflow can still occur, trapping user assets due to a logical error not prevented by language checks; the severity remains high."
+  },
+  {
+    "index": 57,
+    "final_severity": "high",
+    "should_be_removed": false,
+    "comments": "No mitigations are present for this NFT-stuck situation; high severity is warranted."
+  },
+  {
+    "index": 58,
+    "final_severity": "high",
+    "should_be_removed": false,
+    "comments": "The flaw exposes a DoS scenario with tangible asset loss, and no mitigating controls are present."
+  },
+  {
+    "index": 59,
+    "final_severity": "high",
+    "should_be_removed": false,
+    "comments": "Locking NFTs due to missing landlord registration check creates a permanent DoS, as no mechanism exists to recover assets once stuck."
+  },
+  {
+    "index": 60,
+    "final_severity": "high",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 61,
+    "final_severity": "high",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 62,
+    "final_severity": "high",
+    "should_be_removed": false,
+    "comments": "Clear underflow risk; impact and exploitability are both high with attacker-controlled input."
+  },
+  {
+    "index": 63,
+    "final_severity": "high",
+    "should_be_removed": false,
+    "comments": "Findings and impact analysis are accurate; critical misconfiguration leads to loss of protocol functionality and security."
+  },
+  {
+    "index": 64,
+    "final_severity": "high",
+    "should_be_removed": false,
+    "comments": "Severe protocol risk: improper configuration bricks user plots and can cause permanent DoS."
+  },
+  {
+    "index": 65,
+    "final_severity": "medium",
+    "should_be_removed": false,
+    "comments": "The off-by-one error is confirmed and does permit exceeding the intended max, though the overall risk is limited to breaking user-facing limits."
+  },
+  {
+    "index": 66,
+    "final_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Issue is valid. The absence of validation allows protocol-level economic manipulation benefiting renters over landlords."
+  },
+  {
+    "index": 67,
+    "final_severity": "medium",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 68,
+    "final_severity": "medium",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 69,
+    "final_severity": "medium",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 70,
+    "final_severity": "unchanged",
+    "should_be_removed": true,
+    "comments": "The reviewed code implements only expected, safe initialization with strong guardrails; thus, any finding here is a false positive by design intent."
+  },
+  {
+    "index": 71,
+    "final_severity": "best practices",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 72,
+    "final_severity": "low",
+    "should_be_removed": false,
+    "comments": "The absence of an explicit error message for non-existent tokens can confuse users, but does not introduce a security risk or protocol loss."
+  },
+  {
+    "index": 73,
+    "final_severity": "medium",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 74,
+    "final_severity": "medium",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 75,
+    "final_severity": "low",
+    "should_be_removed": false,
+    "comments": "Accessing an array out of bounds will revert, preventing exploitation but can disrupt user experience; the impact is low because funds or control cannot be seized."
+  },
+  {
+    "index": 76,
+    "final_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Issue is valid as no control or automated recovery mechanism exists for the dirty flag, and affected users can be permanently prevented from earning rewards."
+  },
+  {
+    "index": 77,
+    "final_severity": "low",
+    "should_be_removed": false,
+    "comments": "Stale tax rates can cause inconsistent schnibble calculations until farmed, but do not pose critical financial or security risk."
+  },
+  {
+    "index": 78,
+    "final_severity": "low",
+    "should_be_removed": false,
+    "comments": "No direct exploit or economic impact; the issue creates potential confusion in event logs and downstream integrations."
+  },
+  {
+    "index": 79,
+    "final_severity": "medium",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 80,
+    "final_severity": "medium",
+    "should_be_removed": false,
+    "comments": null
+  },
+  {
+    "index": 81,
+    "final_severity": "unchanged",
+    "should_be_removed": true,
+    "comments": "Functionality reflects an intentional design where current tax rates only take effect on the next farming action, not retroactively. Removal reason: design_intent."
+  },
+  {
+    "index": 82,
+    "final_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Precision mismatch in schnibbles and tax computation could affect users' reward shares; medium severity aligns with the matrix."
+  },
+  {
+    "index": 83,
+    "final_severity": "best practices",
+    "should_be_removed": true,
+    "comments": "This informational finding does not apply since use of an oracle is not required by the contract's business logic."
+  },
+  {
+    "index": 84,
+    "final_severity": "medium",
+    "should_be_removed": false,
+    "comments": "Precision loss is material and directly impacts protocol users' economic returns, justifying the medium severity."
+  },
+  {
+    "index": 85,
+    "final_severity": "low",
+    "should_be_removed": false,
+    "comments": "The loss of schnibbles due to rounding is a nuisance but not critical, and does not present protocol-wide risk. Consider mitigation if micro-rewards are important to protocol economics."
+  }
+]

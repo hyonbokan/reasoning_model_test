@@ -12,7 +12,7 @@ GPT_4_1  = "gpt-4.1-2025-04-14"
 O4_MINI  = "o4-mini"
 
 # ───────────────────────── configuration ─────────────────────────
-MODEL = O4_MINI
+MODEL = GPT_4_1
 PROMPT_FILE = "utils/prompts/task_prompt_reasoning_3.py"
 CONTRACT_FILE = "utils/contracts/LandManagerWithLines.sol"
 FINDINGS_FILE = "utils/findings/LandManager_findings.json"
@@ -41,7 +41,7 @@ def analyse_finding(idx: int, finding_json: dict) -> FindingResponse:
         model=MODEL,
         messages=messages,
         response_format=AuditResponse,
-        # temperature=0
+        temperature=0 # cannot be used for reasoning models
     )
 
     return completion.choices[0].message.parsed.findings[0]
@@ -52,7 +52,7 @@ all_adj      : list[dict] = []
 
 start = time.time()
 
-for idx, finding in enumerate(FINDINGS[:5]):
+for idx, finding in enumerate(FINDINGS):
     print(f"Analyzing finding #{idx} …")
     try:
         fr = analyse_finding(idx, finding)
@@ -63,6 +63,19 @@ for idx, finding in enumerate(FINDINGS[:5]):
     all_findings.append(fr)
     all_adj.append(fr.adjustment.model_dump())
     print("Done.")
+
+# idx = 26
+# finding = FINDINGS[26]
+# print(f"Analyzing finding #{idx} …")
+
+# try:
+#     fr = analyse_finding(idx, finding)
+# except Exception as e:
+#     print(f"Error on #{idx}: {e}")
+
+# all_findings.append(fr)
+# all_adj.append(fr.adjustment.model_dump())
+# print("Done.")
 
 # ───────────────────────── save outputs ──────────────────────────
 report = AuditResponse(
