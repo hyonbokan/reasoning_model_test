@@ -1,0 +1,267 @@
+{
+  "findings": [
+    {
+      "finding_id": "VULN-001",
+      "reasoning_analysis": {
+        "primary_code_location": {
+          "file": "LandManager.sol",
+          "element_name": "transferToUnoccupiedPlot",
+          "unique_snippet": "plotOccupied[_toiler.landlord][plotId] = Plot({\n            occupied: true,\n            tokenId: tokenId\n        });",
+          "rationale": "function updates Plot structs but omits corresponding toilerState.plotId update"
+        },
+        "vulnerability_category_hypothesis": "State Update Error",
+        "state_variable_involved": "toilerState[tokenId].plotId",
+        "state_update_issue_type": "omitted",
+        "state_update_analysis": {
+          "answer": "yes",
+          "evidence_refs": [
+            {
+              "file": "LandManager.sol",
+              "element_name": "transferToUnoccupiedPlot",
+              "unique_snippet": "toilerState[tokenId].latestTaxRate = plotMetadata[_toiler.landlord].currentTaxRate;",
+              "rationale": "latestTaxRate is updated but plotId never is"
+            },
+            {
+              "context_source": "invariants",
+              "context_type": "invariant_rule",
+              "details": "After transfer, toilerState.plotId is updated."
+            }
+          ],
+          "reasoning": "Invariant explicitly requires plotId to be updated, yet function omits it."
+        },
+        "control_flow_issue_type": null,
+        "logic_flow_analysis": null,
+        "calculation_issue_type": null,
+        "numerical_analysis": null,
+        "access_control_issue_type": null,
+        "access_control_analysis": null,
+        "reentrancy_analysis": null,
+        "invariant_violation_analysis": {
+          "answer": "yes",
+          "evidence_refs": [
+            {
+              "context_source": "invariants",
+              "context_type": "invariant_rule",
+              "details": "After transfer, toilerState.plotId is updated."
+            }
+          ],
+          "reasoning": "Direct contradiction with documented invariant."
+        },
+        "contextual_factors": [
+          {
+            "context_source": "summary",
+            "context_type": "function_purpose",
+            "details": "transferToUnoccupiedPlot is intended to move a staked Munchable between plots keeping state in-sync."
+          }
+        ],
+        "related_static_analysis": null
+      },
+      "reasoning_severity": {
+        "assessed_impact": "high",
+        "impact_reasoning": "Incorrect plotId corrupts game logic: farming rewards, unstake permissions and future transfers will reference a non-existent/old plot, allowing double occupancy or blocking normal actions.",
+        "assessed_likelihood": "high",
+        "likelihood_reasoning": "Bug is deterministic and triggered every time the function is used – no special conditions required.",
+        "derived_severity": "High"
+      },
+      "Issue": "transferToUnoccupiedPlot fails to update toilerState.plotId, breaking critical invariants",
+      "Severity": "High",
+      "Contracts": [
+        "LandManager.sol"
+      ],
+      "Description": "Inside transferToUnoccupiedPlot, the contract clears the old Plot and marks the new Plot as occupied, but never writes the new plotId into the toilerState struct. Only latestTaxRate is updated:\n\n```\ntoilerState[tokenId].latestTaxRate = plotMetadata[_toiler.landlord].currentTaxRate;\n```\nThe invariant provided in Phase 0 requires that `toilerState[tokenId].plotId` be kept in-sync with actual occupancy. Omitting this update causes state divergence: subsequent farming, unstaking or further transfers will still treat the NFT as being on the old plot (now free). This enables double-use of a single NFT or permanently locks rewards.\n",
+      "Recommendation": ""
+    },
+    {
+      "finding_id": "VULN-002",
+      "reasoning_analysis": {
+        "primary_code_location": {
+          "file": "LandManager.sol",
+          "element_name": "stakeMunchable",
+          "unique_snippet": "if (munchablesStaked[mainAccount].length > 10)\n            revert TooManyStakedMunchiesError();",
+          "rationale": "Boundary check is off-by-one and executed before array push."
+        },
+        "vulnerability_category_hypothesis": "Logic Error",
+        "state_variable_involved": "munchablesStaked",
+        "state_update_issue_type": "condition_bypass",
+        "state_update_analysis": {
+          "answer": "yes",
+          "evidence_refs": [
+            {
+              "file": "LandManager.sol",
+              "element_name": "stakeMunchable",
+              "unique_snippet": "munchablesStaked[mainAccount].push(tokenId);",
+              "rationale": "push happens after the `> 10` check, allowing 11 entries"
+            },
+            {
+              "context_source": "invariants",
+              "context_type": "invariant_rule",
+              "details": "Stake cannot increase the munchablesStaked for an account beyond the limit; capped at 10."
+            }
+          ],
+          "reasoning": "Check should use \">= 10\" or check after push; current logic allows 11."
+        },
+        "control_flow_issue_type": "conditional_error",
+        "logic_flow_analysis": null,
+        "calculation_issue_type": null,
+        "numerical_analysis": null,
+        "access_control_issue_type": null,
+        "access_control_analysis": null,
+        "reentrancy_analysis": null,
+        "invariant_violation_analysis": {
+          "answer": "yes",
+          "evidence_refs": [
+            {
+              "context_source": "invariants",
+              "context_type": "invariant_rule",
+              "details": "Stake cannot increase the munchablesStaked for an account beyond the limit."
+            }
+          ],
+          "reasoning": "Off-by-one check allows invariant violation."
+        },
+        "contextual_factors": [],
+        "related_static_analysis": null
+      },
+      "reasoning_severity": {
+        "assessed_impact": "medium",
+        "impact_reasoning": "Players can stake an extra NFT beyond advertised cap, gaining excess farming rewards and upsetting game balance.",
+        "assessed_likelihood": "high",
+        "likelihood_reasoning": "Anyone with exactly 10 staked tokens can deterministically call stakeMunchable once more.",
+        "derived_severity": "High"
+      },
+      "Issue": "Off-by-one allows more than 10 NFTs to be staked per account",
+      "Severity": "High",
+      "Contracts": [
+        "LandManager.sol"
+      ],
+      "Description": "The size check in stakeMunchable reverts only when `length > 10`, but the array length is evaluated *before* the new token is pushed. When a user currently has exactly 10 staked NFTs, the check passes (`10 > 10` is false) and the subsequent `push` raises the length to 11, directly violating the documented limit of 10.\n",
+      "Recommendation": ""
+    },
+    {
+      "finding_id": "VULN-003",
+      "reasoning_analysis": {
+        "primary_code_location": {
+          "file": "LandManager.sol",
+          "element_name": "stakeMunchable",
+          "unique_snippet": "munchNFT.transferFrom(mainAccount, address(this), tokenId);",
+          "rationale": "External call performed before any state is written"
+        },
+        "vulnerability_category_hypothesis": "Re-entrancy / State Consistency",
+        "state_variable_involved": null,
+        "state_update_issue_type": "wrong_order",
+        "state_update_analysis": {
+          "answer": "yes",
+          "evidence_refs": [
+            {
+              "file": "LandManager.sol",
+              "element_name": "stakeMunchable",
+              "unique_snippet": "munchNFT.transferFrom(mainAccount, address(this), tokenId);",
+              "rationale": "call happens before mappings/arrays are updated"
+            }
+          ],
+          "reasoning": "If the ERC721 is malicious, it can re-enter and call LandManager functions in an inconsistent state."
+        },
+        "control_flow_issue_type": null,
+        "logic_flow_analysis": null,
+        "calculation_issue_type": null,
+        "numerical_analysis": null,
+        "access_control_issue_type": "public_function_exposure",
+        "access_control_analysis": null,
+        "reentrancy_analysis": {
+          "answer": "yes",
+          "evidence_refs": [
+            {
+              "context_source": "web_context",
+              "context_type": "common_vulnerability",
+              "details": "Calls to ERC721.transferFrom may enable reentrancy if the ERC721 is custom/non-compliant."
+            }
+          ],
+          "reasoning": "No ReentrancyGuard and Updates occur after external interaction."
+        },
+        "invariant_violation_analysis": null,
+        "contextual_factors": [],
+        "related_static_analysis": null
+      },
+      "reasoning_severity": {
+        "assessed_impact": "medium",
+        "impact_reasoning": "Malicious or upgraded NFT contract could exploit re-entrancy to bypass limits, double stake, or otherwise corrupt mappings before they are initialised.",
+        "assessed_likelihood": "medium",
+        "likelihood_reasoning": "Requires control over the ERC721 contract, but threat model warns about non-standard NFTs.",
+        "derived_severity": "Medium"
+      },
+      "Issue": "External transfer call before state updates exposes stakeMunchable to re-entrancy",
+      "Severity": "Medium",
+      "Contracts": [
+        "LandManager.sol"
+      ],
+      "Description": "stakeMunchable performs `munchNFT.transferFrom` *before* any contract state is written. A hostile or non-standard ERC721 could invoke arbitrary LandManager functions in its hooks, observing that `plotOccupied`, `munchableOwner`, `toilerState` etc. are still unset. Without a re-entrancy guard this opens multiple attack avenues (double-stake, bypass limit checks, inconsistent mappings).",
+      "Recommendation": ""
+    },
+    {
+      "finding_id": "VULN-004",
+      "reasoning_analysis": {
+        "primary_code_location": {
+          "file": "LandManager.sol",
+          "element_name": "_reconfigure",
+          "unique_snippet": "MIN_TAX_RATE = IConfigStorage(configStorage).getUint(StorageKey.LockManager);",
+          "rationale": "Configuration values are loaded using unrelated storage keys"
+        },
+        "vulnerability_category_hypothesis": "Configuration / Calculation Error",
+        "state_variable_involved": "MIN_TAX_RATE, MAX_TAX_RATE, DEFAULT_TAX_RATE, PRICE_PER_PLOT",
+        "state_update_issue_type": "incorrect_value",
+        "state_update_analysis": {
+          "answer": "yes",
+          "evidence_refs": [
+            {
+              "file": "LandManager.sol",
+              "element_name": "_reconfigure",
+              "unique_snippet": "MIN_TAX_RATE = IConfigStorage(configStorage).getUint(StorageKey.LockManager);",
+              "rationale": "LockManager key is meant for an address, not a uint"
+            }
+          ],
+          "reasoning": "Using wrong StorageKey enums feeds nonsense (likely zero) into critical economic parameters."
+        },
+        "control_flow_issue_type": null,
+        "logic_flow_analysis": null,
+        "calculation_issue_type": "incorrect_formula",
+        "numerical_analysis": null,
+        "access_control_issue_type": null,
+        "access_control_analysis": null,
+        "reentrancy_analysis": null,
+        "invariant_violation_analysis": {
+          "answer": "yes",
+          "evidence_refs": [
+            {
+              "context_source": "invariants",
+              "context_type": "invariant_rule",
+              "details": "PRICE_PER_PLOT must be non-zero; DEFAULT_TAX_RATE must be within bounds."
+            }
+          ],
+          "reasoning": "Mis-initialised constants can trivially violate invariants."
+        },
+        "contextual_factors": [
+          {
+            "context_source": "summary",
+            "context_type": "configuration_setting",
+            "details": "Economic parameters are expected to come from dedicated keys in ConfigStorage"
+          }
+        ],
+        "related_static_analysis": null
+      },
+      "reasoning_severity": {
+        "assessed_impact": "medium",
+        "impact_reasoning": "Setting MIN_TAX_RATE=0 or PRICE_PER_PLOT=0 destabilises the economy (unbounded tax rates, div-by-zero in _getNumPlots).",
+        "assessed_likelihood": "medium",
+        "likelihood_reasoning": "Occurs whenever ConfigStorage is (re)configured or upgrade introduces new keys—error is systemic, not attacker-dependent.",
+        "derived_severity": "Medium"
+      },
+      "Issue": "Reconfigure loads critical constants from wrong storage keys leading to zero / invalid values",
+      "Severity": "Medium",
+      "Contracts": [
+        "LandManager.sol"
+      ],
+      "Description": "_reconfigure assigns MIN_TAX_RATE, MAX_TAX_RATE, DEFAULT_TAX_RATE and others using StorageKey values that correspond to *addresses* of other managers, not dedicated numeric settings. As a result these variables will likely be zero or random, weakening validation logic (e.g., any tax rate becomes valid, or PRICE_PER_PLOT becomes 0 causing division-by-zero in `_getNumPlots`).",
+      "Recommendation": ""
+    }
+  ],
+  "analysis_summary_notes": "Main risks found are state-integrity violations (plotId omission), logic boundary mistakes (off-by-one), unsafe external-call ordering (re-entrancy) and mis-wiring of configuration values. Each directly contradicts invariants defined in Phase 0 and could be exploited without specialised tooling."
+}

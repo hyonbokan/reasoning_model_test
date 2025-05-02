@@ -7,7 +7,7 @@ import sys
 from dotenv import load_dotenv
 from openai import OpenAI
 from schema.phase_0_schemas.phase_0_schema_v2 import ContextSummaryOutput
-from schema.phase_1_schemas.phase_1_schema_v1 import VulnerabilityDetectionOutput
+from schema.phase_1_schemas.phase_1_schema_free import FinalAuditReport
 from pydantic import ValidationError, BaseModel
 
 # ------------ models & paths -------------------------------------------------
@@ -16,10 +16,10 @@ GPT_4_1  = "gpt-4.1-2025-04-14"
 O4_MINI  = "o4-mini"
 O3 = "o3-2025-04-16"
 # ───────────────────────── Configuration ─────────────────────────
-MODEL = GPT_4_1
+MODEL = O3
 PROMPT_FILE_SYSTEM = "utils/prompts/phase1_v1_sys_prompt.py"
 # INPUT_FILE_FULL_CONTEXT = "utils/inputs/phase0_full_context.md"
-PHASE = "phase1_v1"
+PHASE = "phase1_free"
 
 OUTPUT_DIR_PHASE1 = "logs/phase1_results"
 
@@ -79,7 +79,7 @@ client = OpenAI(api_key=openai_api_key)
 def perform_phase1_analysis(
     phase0_context: ContextSummaryOutput,
     raw_code: str
-) -> VulnerabilityDetectionOutput | None:
+) -> FinalAuditReport | None:
     """
     Performs the Phase 1 vulnerability detection using the reasoning model,
     structured context from Phase 0, and raw code.
@@ -107,37 +107,14 @@ def perform_phase1_analysis(
         completion = client.beta.chat.completions.parse(
             model=MODEL,
             messages=messages,
-            response_format=VulnerabilityDetectionOutput,
+            response_format=FinalAuditReport,
         )
 
         # Access the parsed Pydantic object
-        parsed_output: VulnerabilityDetectionOutput = completion.choices[0].message.parsed
+        parsed_output: FinalAuditReport = completion.choices[0].message.parsed
         analysis_time = time.time() - start_time
         print(f"Phase 1 analysis completed successfully in {analysis_time:.2f} seconds.")
         return parsed_output
-
-    except ValidationError as e:
-        print(f"\n--- Pydantic Validation Error (Phase 1) ---")
-        print(e)
-        # Attempt to get raw output for debugging
-        try:
-            raw_completion = client.chat.completions.create(
-                 model=MODEL,
-                 messages=messages,
-                 temperature=0,
-            )
-            raw_text = raw_completion.choices[0].message.content
-            print("\n--- Raw LLM Output (Failed Validation) ---")
-            print(raw_text)
-            ts = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-            error_dir = pathlib.Path(OUTPUT_DIR_PHASE1) / "errors"
-            error_dir.mkdir(parents=True, exist_ok=True)
-            error_file = error_dir / f"phase1_error_{MODEL}_{ts}.txt"
-            error_file.write_text(f"Pydantic Validation Error:\n{e}\n\nRaw Output:\n{raw_text}")
-            print(f"\nRaw output saved to {error_file}")
-        except Exception as raw_e:
-            print(f"\nError retrieving raw LLM output: {raw_e}")
-        return None
 
     except Exception as e:
         print(f"\n--- API Call Error (Phase 1) ---")
@@ -166,7 +143,7 @@ if __name__ == "__main__":
                 # Use model_dump_json for Pydantic v2+
                 f.write(phase1_result.model_dump_json(indent=2))
             print(f"\n✅ Successfully saved Phase 1 output to: {output_filename}")
-            print(f"   - Vulnerabilities Detected: {len(phase1_result.detected_findings)}")
+            print(f"   - Vulnerabilities Detected: {len(phase1_result.findings)}")
         except Exception as e:
             print(f"\nError saving Phase 1 output JSON: {e}")
     else:

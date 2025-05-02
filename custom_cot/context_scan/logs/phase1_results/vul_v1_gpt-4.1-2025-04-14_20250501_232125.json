@@ -1,0 +1,276 @@
+{
+  "findings": [
+    {
+      "finding_id": "VULN-001",
+      "reasoning_analysis": {
+        "primary_code_location": {
+          "file": "LandManager.sol",
+          "element_name": "stakeMunchable",
+          "unique_snippet": "if (munchablesStaked[mainAccount].length > 10)\n    revert TooManyStakedMunchiesError();",
+          "rationale": "Enforces invariant that a player cannot stake more than 10 Munchables at once."
+        },
+        "vulnerability_category_hypothesis": "State Update Error – off-by-one boundary condition",
+        "state_variable_involved": "munchablesStaked",
+        "state_update_issue_type": "incorrect_value",
+        "state_update_analysis": {
+          "answer": "yes",
+          "evidence_refs": [
+            {
+              "file": "LandManager.sol",
+              "element_name": "stakeMunchable",
+              "unique_snippet": "if (munchablesStaked[mainAccount].length > 10)\n    revert TooManyStakedMunchiesError();",
+              "rationale": "Allows user to have 11 staked munchables before revert."
+            }
+          ],
+          "reasoning": "The check uses '>' instead of '>='; thus, 11th Munchable can be staked before it reverts, violating the intended invariant."
+        },
+        "control_flow_issue_type": "conditional_error",
+        "logic_flow_analysis": {
+          "answer": "yes",
+          "evidence_refs": [
+            {
+              "file": "LandManager.sol",
+              "element_name": "stakeMunchable",
+              "unique_snippet": "if (munchablesStaked[mainAccount].length > 10)\n    revert TooManyStakedMunchiesError();",
+              "rationale": "Logic only fails after the 11th Munchable is staked."
+            }
+          ],
+          "reasoning": "The comparison should be '>=' to prevent the user from crossing the 10 staked limit."
+        },
+        "calculation_issue_type": null,
+        "numerical_analysis": null,
+        "access_control_issue_type": null,
+        "access_control_analysis": null,
+        "reentrancy_analysis": null,
+        "invariant_violation_analysis": {
+          "answer": "yes",
+          "evidence_refs": [
+            {
+              "context_source": "invariants",
+              "context_type": "invariant_rule",
+              "details": "Stake does not increase staked munchables beyond limit"
+            }
+          ],
+          "reasoning": "Invariant explicitly states the length must be <= 10, but as written can become 11 temporarily."
+        },
+        "contextual_factors": [
+          {
+            "context_source": "invariants",
+            "context_type": "invariant_rule",
+            "details": "Stake does not increase staked munchables beyond limit"
+          }
+        ],
+        "related_static_analysis": null
+      },
+      "reasoning_severity": {
+        "assessed_impact": "medium",
+        "impact_reasoning": "Allowing >10 Munchables is a direct functional violation, impacts fairness, and breaks design assumptions. Game mechanics could malfunction or be abused.",
+        "assessed_likelihood": "high",
+        "likelihood_reasoning": "Simple off-by-one error in a visible check. This path is easily reached by ordinary usage.",
+        "derived_severity": "High"
+      },
+      "Issue": "Off-by-one Error Allows Staking More than Maximum Munchables",
+      "Severity": "High",
+      "Contracts": [
+        "LandManager.sol"
+      ],
+      "Description": "An off-by-one error in the staked Munchables limit check allows users to stake 11 Munchables instead of the intended maximum of 10. The current check in ```solidity\nif (munchablesStaked[mainAccount].length > 10) revert TooManyStakedMunchiesError();\n``` only triggers after the user stakes their 11th Munchable. The comparison should be '>=' instead of '>' to ensure the invariant that no more than 10 Munchables can be staked per account. This can result in reward calculation and game logic inconsistencies, as the invariant states: \"munchablesStaked[mainAccount].length <= 10\" must hold after staking. This bug could be abused for unfair advantage.",
+      "Recommendation": ""
+    },
+    {
+      "finding_id": "VULN-002",
+      "reasoning_analysis": {
+        "primary_code_location": {
+          "file": "LandManager.sol",
+          "element_name": "stakeMunchable",
+          "unique_snippet": "munchNFT.transferFrom(mainAccount, address(this), tokenId);",
+          "rationale": "External NFT transfer occurs before all state updates are complete."
+        },
+        "vulnerability_category_hypothesis": "Reentrancy Risk – external call before state update",
+        "state_variable_involved": "munchablesStaked, plotOccupied, munchableOwner",
+        "state_update_issue_type": "wrong_order",
+        "state_update_analysis": {
+          "answer": "yes",
+          "evidence_refs": [
+            {
+              "file": "LandManager.sol",
+              "element_name": "stakeMunchable",
+              "unique_snippet": "munchNFT.transferFrom(mainAccount, address(this), tokenId);",
+              "rationale": "State updates (e.g. plotOccupied, munchablesStaked, owner mapping) happen after transferring the NFT, which is an external call."
+            }
+          ],
+          "reasoning": "The call to transfer the NFT (an external contract) is made before state is fully updated. In case of a malicious ERC721, this can cause reentrancy into this or other protocol actions."
+        },
+        "control_flow_issue_type": null,
+        "logic_flow_analysis": null,
+        "calculation_issue_type": null,
+        "numerical_analysis": null,
+        "access_control_issue_type": null,
+        "access_control_analysis": null,
+        "reentrancy_analysis": {
+          "answer": "yes",
+          "evidence_refs": [
+            {
+              "context_source": "docs",
+              "context_type": "best_practice",
+              "details": "ERC721.safeTransferFrom and transferFrom both trigger external calls when transferring to contracts that could be malicious."
+            },
+            {
+              "file": "LandManager.sol",
+              "element_name": "stakeMunchable",
+              "unique_snippet": "munchNFT.transferFrom(mainAccount, address(this), tokenId);",
+              "rationale": "placement of external call before state commit."
+            }
+          ],
+          "reasoning": "Standard ERC721 transfer calls invoke external code (receiver hooks). Without reentrancy guards or the full CEI pattern, protocol invariants can be bypassed mid-execution."
+        },
+        "invariant_violation_analysis": null,
+        "contextual_factors": [
+          {
+            "context_source": "docs",
+            "context_type": "best_practice",
+            "details": "safeTransferFrom or transferFrom can lead to reentrancy via receiver contracts. No reentrancy guard found."
+          }
+        ],
+        "related_static_analysis": null
+      },
+      "reasoning_severity": {
+        "assessed_impact": "high",
+        "impact_reasoning": "If a malicious ERC721 contract or token is used, it could re-enter logic via the external call, potentially allowing double-staking, bypassing occupancy checks, or corrupting state.",
+        "assessed_likelihood": "medium",
+        "likelihood_reasoning": "Requires the NFT contract or another stake target to be malicious or compromised. Not likely in ordinary play, but plausible, especially if custom/migrated contracts are integrated.",
+        "derived_severity": "Medium"
+      },
+      "Issue": "Reentrancy Risk from External NFT Transfer Before State Update",
+      "Severity": "Medium",
+      "Contracts": [
+        "LandManager.sol"
+      ],
+      "Description": "The LandManager contract performs an external call to transfer the NFT before updating internal state variables (such as plotOccupied, munchableOwner, and munchablesStaked) in the ```solidity\nmunchNFT.transferFrom(mainAccount, address(this), tokenId);\n``` line. This exposes the function to potential reentrancy if the ERC721 token is malicious, since the recipient contract (LandManager) implements other interfaces and callbacks could be triggered. Best practices recommend using the Checks-Effects-Interactions pattern or a reentrancy guard. Current code does not apply these protections, so protocol invariants may be violated during a reentrant attack.",
+      "Recommendation": ""
+    },
+    {
+      "finding_id": "VULN-003",
+      "reasoning_analysis": {
+        "primary_code_location": {
+          "file": "LandManager.sol",
+          "element_name": "_farmPlots",
+          "unique_snippet": "schnibblesLandlord = (schnibblesTotal * _toiler.latestTaxRate) / 1e18;",
+          "rationale": "Reward division uses integer division, tax rate with scaling (1e18), but doesn't check for overflow or correct sum."
+        },
+        "vulnerability_category_hypothesis": "Calculation Error – Rounding/Precision Loss, Integer Arithmetic",
+        "state_variable_involved": null,
+        "state_update_issue_type": null,
+        "state_update_analysis": null,
+        "control_flow_issue_type": null,
+        "logic_flow_analysis": null,
+        "calculation_issue_type": "precision_loss",
+        "numerical_analysis": {
+          "answer": "yes",
+          "evidence_refs": [
+            {
+              "file": "LandManager.sol",
+              "element_name": "_farmPlots",
+              "unique_snippet": "schnibblesLandlord = (schnibblesTotal * _toiler.latestTaxRate) / 1e18;",
+              "rationale": "Reward split and tax collection uses integer division, which can truncate small amounts."
+            }
+          ],
+          "reasoning": "If schnibblesTotal is low or tax rates are small, the division can truncate rewards entirely. Over time, this could lead to protocol income loss or user-facing reward discrepancies, especially for small staked amounts."
+        },
+        "access_control_issue_type": null,
+        "access_control_analysis": null,
+        "reentrancy_analysis": null,
+        "invariant_violation_analysis": null,
+        "contextual_factors": [
+          {
+            "context_source": "invariants",
+            "context_type": "invariant_rule",
+            "details": "In farming, total schnibbles split equals total"
+          }
+        ],
+        "related_static_analysis": null
+      },
+      "reasoning_severity": {
+        "assessed_impact": "medium",
+        "impact_reasoning": "Reward allocation can become zero or unbalanced due to rounding errors, leading to perceived or actual reward loss. Over millions of micro-rewards this could become material.",
+        "assessed_likelihood": "medium",
+        "likelihood_reasoning": "The issue arises at small schnibble values, which are likely to occur often for new or less active players.",
+        "derived_severity": "Medium"
+      },
+      "Issue": "Reward Precision Loss Due to Integer Division in _farmPlots",
+      "Severity": "Medium",
+      "Contracts": [
+        "LandManager.sol"
+      ],
+      "Description": "The reward-sharing logic in the _farmPlots function uses integer division to allocate schnibbles between the landlord and the Munchable owner, for example: ```solidity\nschnibblesLandlord = (schnibblesTotal * _toiler.latestTaxRate) / 1e18;\n```. This can lose precision for small values, leading to allocations of zero for one party and overall reward mismatch. While the invariant attempts to guarantee the split sums to total, integer division can still create small inconsistencies and unfairness in reward allocation, particularly for low-earning players or landlords with low tax rates.",
+      "Recommendation": ""
+    },
+    {
+      "finding_id": "VULN-004",
+      "reasoning_analysis": {
+        "primary_code_location": {
+          "file": "LandManager.sol",
+          "element_name": "_reconfigure",
+          "unique_snippet": "MIN_TAX_RATE = IConfigStorage(configStorage).getUint(StorageKey.LockManager);",
+          "rationale": "Mappings from config storage to MIN/MAX/DEFAULT tax rates use unrelated storage keys."
+        },
+        "vulnerability_category_hypothesis": "Configuration Logic Error – Incorrect Parameter Source",
+        "state_variable_involved": "MIN_TAX_RATE, MAX_TAX_RATE, DEFAULT_TAX_RATE",
+        "state_update_issue_type": "incorrect_value",
+        "state_update_analysis": {
+          "answer": "yes",
+          "evidence_refs": [
+            {
+              "file": "LandManager.sol",
+              "element_name": "_reconfigure",
+              "unique_snippet": "MIN_TAX_RATE = IConfigStorage(configStorage).getUint(StorageKey.LockManager);",
+              "rationale": "MIN_TAX_RATE, MAX_TAX_RATE and DEFAULT_TAX_RATE appear to retrieve values from possibly unrelated configuration keys."
+            }
+          ],
+          "reasoning": "MIN_TAX_RATE (and the others) should reference a dedicated tax config key, but are loaded from LockManager, AccountManager, and ClaimManager respectively. If these storage keys are repurposed elsewhere, the values set in LandManager may become completely incorrect or out of bounds."
+        },
+        "control_flow_issue_type": null,
+        "logic_flow_analysis": null,
+        "calculation_issue_type": null,
+        "numerical_analysis": null,
+        "access_control_issue_type": null,
+        "access_control_analysis": null,
+        "reentrancy_analysis": null,
+        "invariant_violation_analysis": {
+          "answer": "yes",
+          "evidence_refs": [
+            {
+              "context_source": "invariants",
+              "context_type": "invariant_rule",
+              "details": "DEFAULT_TAX_RATE within bounds"
+            }
+          ],
+          "reasoning": "If the wrong config value is loaded, the variable may be out of allowed range or zero, breaking invariants."
+        },
+        "contextual_factors": [
+          {
+            "context_source": "docs",
+            "context_type": "best_practice",
+            "details": "Config variables should be loaded from keys representing their meaning, not from unrelated manager keys."
+          }
+        ],
+        "related_static_analysis": null
+      },
+      "reasoning_severity": {
+        "assessed_impact": "high",
+        "impact_reasoning": "Configuring tax rates from the wrong storage keys may set rates to zero or arbitrary values determined by an unrelated contract/system, undermining the protocol’s core economics.",
+        "assessed_likelihood": "medium",
+        "likelihood_reasoning": "The issue will manifest if config storage keys are repurposed or contain unexpected values, which is plausible during upgrades or parameter adjustments.",
+        "derived_severity": "Medium"
+      },
+      "Issue": "Tax Rate Configuration Loaded Using Incorrect Storage Keys",
+      "Severity": "Medium",
+      "Contracts": [
+        "LandManager.sol"
+      ],
+      "Description": "In the `_reconfigure()` function, MIN_TAX_RATE, MAX_TAX_RATE, and DEFAULT_TAX_RATE are set using config storage keys associated with unrelated managers (LockManager, AccountManager, ClaimManager). For example: ```solidity\nMIN_TAX_RATE = IConfigStorage(configStorage).getUint(StorageKey.LockManager);\n``` This risks setting protocol-wide tax rates to unintended values, especially if these keys change meaning or value upstream. The invariant mandating DEFAULT_TAX_RATE bounds may be violated. All configurable values should be loaded from dedicated, semantically accurate storage keys.",
+      "Recommendation": ""
+    }
+  ],
+  "analysis_summary_notes": "Multiple medium severity findings related to logic, configuration, and reentrancy were found. Key risks center around incorrect limit enforcement, protocol economics via misconfiguration, and safe external interaction patterns."
+}

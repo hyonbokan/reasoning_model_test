@@ -1,0 +1,40 @@
+{
+  "findings": [
+    {
+      "Issue": "State variable `toilerState.plotId` not updated during plot transfer",
+      "Severity": "High",
+      "Contracts": [
+        "LandManager.sol"
+      ],
+      "Description": "WHAT: In `transferToUnoccupiedPlot` the contract updates the occupancy mappings for the old and new plots, **but never writes the new plotId back to storage**.\n\n```solidity\n// latestTaxRate is updated, but plotId is NOT\ntoilerState[tokenId].latestTaxRate = plotMetadata[_toiler.landlord].currentTaxRate;\n// <missing>  toilerState[tokenId].plotId = plotId;\n```\n\nHOW: Because `toilerState[tokenId].plotId` remains the old value, later calls that rely on the stored plotId (e.g., `_farmPlots`, further transfers, dirty-flag checks, etc.) operate on stale data. This breaks internal assumptions that the struct always reflects the physical occupancy mapping.\n\nWHY: This directly violates the documented invariant “After transfer, toilerState.plotId is updated.” A malicious player can repeatedly transfer the NFT around unoccupied plots while the contract still believes it occupies the first plot, leading to **double-occupation, reward mis-accounting, and potential griefing of other players**.",
+      "Recommendation": ""
+    },
+    {
+      "Issue": "Dirty-flag logic uses `<` instead of `<=`, failing to mark invalid plots",
+      "Severity": "Medium",
+      "Contracts": [
+        "LandManager.sol"
+      ],
+      "Description": "WHAT: The condition intended to mark a staked Munchable as *dirty* when its plot becomes invalid is off-by-one.\n\n```solidity\nif (_getNumPlots(landlord) < _toiler.plotId) {\n    toilerState[tokenId].dirty = true;\n}\n```\n\nHOW: Plot indices are 0-based. When a landlord reduces to *n* plots, the highest valid index is `n-1`. Suppose an NFT is staked at `plotId == n-1`. After the landlord drops to `n` plots, `_getNumPlots(landlord)` equals `n` and the comparison `n < n-1` is false, so the dirty flag **does not activate** even though the plot is now out of bounds.\n\nWHY: This breaks the invariant that *“Dirty flag is set when plot count decreases under a staked Munchable’s index.”* Unmarked NFTs can continue farming on non-existent land, receiving Schnibbles without paying a valid landlord, distorting game economics.",
+      "Recommendation": ""
+    },
+    {
+      "Issue": "Staking allowed before landlord metadata initialisation ⇒ zero-tax farming",
+      "Severity": "High",
+      "Contracts": [
+        "LandManager.sol"
+      ],
+      "Description": "WHAT: `stakeMunchable` reads `plotMetadata[landlord].currentTaxRate` without verifying that the metadata has been initialised.\n\n```solidity\nlatestTaxRate: plotMetadata[landlord].currentTaxRate, // defaults to 0 if not initialised\n```\n\nHOW: If a landlord never called `triggerPlotMetadata`/`updatePlotMetadata`, `currentTaxRate` is the storage default `0`. Players can immediately stake on that landlord’s plots and fix their `latestTaxRate` at 0. Even if the landlord later sets a non-zero tax, the staker continues to use the cached 0 rate until they move plots or unstake.\n\nWHY: This creates a **permanent tax-evasion loophole**, violating the economic expectation that every plot must carry at least the `DEFAULT_TAX_RATE`. Landlords suffer revenue loss while early attackers farm Schnibbles fee-free.",
+      "Recommendation": ""
+    },
+    {
+      "Issue": "Bonus arithmetic can revert due to negative result cast to uint256 (DoS)",
+      "Severity": "Medium",
+      "Contracts": [
+        "LandManager.sol"
+      ],
+      "Description": "WHAT: `finalBonus` is an `int16` that may drop below `-100`, for example if `REALM_BONUSES` contains ‑100 and `RARITY_BONUSES` is 200 (which wraps to ‑56 when cast to `int8`). The reward formula then becomes negative:\n\n```solidity\nschnibblesTotal = uint256(\n    (int256(schnibblesTotal) + (int256(schnibblesTotal) * finalBonus)) / 100\n);\n```\n\nIf the parenthesis evaluates to a negative number, casting it to `uint256` reverts, **bricking `farmPlots` for all users until configuration is fixed**.\n\nHOW: Attackers (or mis-configured game admins) can set bonus arrays to values that push the sum below ‑100, then call any function that triggers `forceFarmPlots`, causing an immediate revert and potential denial-of-service across stake/unstake/transfer paths.\n\nWHY: This is a classic unchecked sign/unsigned cast bug and violates the implicit invariant that farming should never revert for legitimate inputs.",
+      "Recommendation": ""
+    }
+  ]
+}

@@ -1,0 +1,239 @@
+{
+  "detected_findings": [
+    {
+      "finding_id": "VULN-001",
+      "contract_file": "LandManager.sol",
+      "vulnerability_class": "state_update_error",
+      "primary_code_location": {
+        "file": "LandManager.sol",
+        "element_name": "unstakeMunchable",
+        "unique_snippet": "munchablesStaked[mainAccount], munchableOwner[tokenId] = address(0), toilerState[tokenId] = ...",
+        "rationale": "Critical state cleanup upon unstake; bug could lead to stuck or mis-credited NFTs."
+      },
+      "related_code_locations": [
+        {
+          "file": "LandManager.sol",
+          "element_name": "_removeTokenIdFromStakedList",
+          "unique_snippet": "for (uint256 i = 0; i < stakedLength; i++) ...",
+          "rationale": "Helper responsible for updating list. Flaws might cause stale reference."
+        }
+      ],
+      "specifics": {
+        "issue_type": "state_update_error",
+        "missing_or_incorrect": "Incorrect or missing clearing of references (owner/toiler/plotOccupied) after unstake",
+        "consequences": "NFT might remain mapped as staked, user could lose access, or plots remain locked"
+      },
+      "detailed_description": "The method unstakeMunchable is intended to clear all mappings/arrays associated to a Munchable once unstaked: plotOccupied, munchableOwner, toilerState, and munchablesStaked array. If any part of the sequence fails (especially in _removeTokenIdFromStakedList due to lookup problems), stale mappings may persist. This could lead to locked NFTs or accounting drift.",
+      "exploit_scenario": "A user unstakes a Munchable, but due to a bug in _removeTokenIdFromStakedList (e.g., tokenId not present), the function reverts, preventing the NFT’s return and possibly leaving state inconsistent.",
+      "impact": "medium",
+      "likelihood": "medium",
+      "severity": "medium",
+      "supporting_evidence": [
+        {
+          "context_source": "invariants",
+          "context_type": "invariant_rule",
+          "details": "After unstaking, munchablesStaked does not contain tokenId and munchableOwner[tokenId] == address(0)"
+        }
+      ],
+      "violated_invariants": [
+        "After unstaking, plot is marked unoccupied",
+        "After unstaking, munchableOwner cleared",
+        "After unstaking, toilerState reset",
+        "After unstaking, munchablesStaked does not contain tokenId"
+      ],
+      "related_static_analysis_finding_ids": []
+    },
+    {
+      "finding_id": "VULN-002",
+      "contract_file": "LandManager.sol",
+      "vulnerability_class": "logic_edge_case",
+      "primary_code_location": {
+        "file": "LandManager.sol",
+        "element_name": "stakeMunchable",
+        "unique_snippet": "if (munchablesStaked[mainAccount].length > 10) revert TooManyStakedMunchiesError();",
+        "rationale": "Edge condition on stake limit for staked munchables."
+      },
+      "related_code_locations": [
+        {
+          "file": "LandManager.sol",
+          "element_name": "stakeMunchable",
+          "unique_snippet": "if (munchablesStaked[mainAccount].length > 10)",
+          "rationale": "Limits staked Munchables per mainAccount; ceiling is 11 not 10?"
+        }
+      ],
+      "specifics": {
+        "issue_type": "logic_edge_case",
+        "edge_condition": "Boundary off-by-one for 10 Munchables",
+        "faulty_branch": "Allows up to 11 if push occurs after check"
+      },
+      "detailed_description": "The function stakeMunchable checks if munchablesStaked[mainAccount].length > 10 before allowing the stake, and then pushes tokenId, making the potential max 11 staked Munchables if lengths and checks are off by one (should be >= 10 or check after push). This boundary may violate game rules or expectations.",
+      "exploit_scenario": "Player stakes 10 Munchables, then is able to stake an 11th due to improper check, gaining extra reward beyond protocol design.",
+      "impact": "low",
+      "likelihood": "medium",
+      "severity": "low",
+      "supporting_evidence": [
+        {
+          "context_source": "invariants",
+          "context_type": "invariant_rule",
+          "details": "Stake does not increase staked munchables beyond limit"
+        }
+      ],
+      "violated_invariants": [
+        "Stake does not increase staked munchables beyond limit"
+      ],
+      "related_static_analysis_finding_ids": []
+    },
+    {
+      "finding_id": "VULN-003",
+      "contract_file": "LandManager.sol",
+      "vulnerability_class": "access_control_missing_or_bypass",
+      "primary_code_location": {
+        "file": "LandManager.sol",
+        "element_name": "configUpdated",
+        "unique_snippet": "function configUpdated() external override onlyConfigStorage {...}",
+        "rationale": "Critical update method for configuration, depends on onlyConfigStorage"
+      },
+      "related_code_locations": [],
+      "specifics": {
+        "issue_type": "access_control_missing_or_bypass",
+        "actor": "Potential misconfigured allowed caller for onlyConfigStorage",
+        "privilege_gained": "May update protocol-critical variables arbitrarily"
+      },
+      "detailed_description": "The method configUpdated relies on onlyConfigStorage modifier for access control. If the configStorage address or the access control logic is misconfigured (per upgrade or deployment), any caller might be able to call _reconfigure(), allowing privilege escalation and protocol parameter manipulation.",
+      "exploit_scenario": "Attacker exploits a misconfigured configStorage reference, calls configUpdated, and points contract dependencies to owned implementations, draining assets or disrupting the protocol.",
+      "impact": "high",
+      "likelihood": "low",
+      "severity": "medium",
+      "supporting_evidence": [
+        {
+          "context_source": "docs",
+          "context_type": "external_dependency_info",
+          "details": "Design depends on configuration through upgradeable storage; misconfiguration leads to full control."
+        }
+      ],
+      "violated_invariants": [],
+      "related_static_analysis_finding_ids": []
+    },
+    {
+      "finding_id": "VULN-004",
+      "contract_file": "LandManager.sol",
+      "vulnerability_class": "math_precision_or_overflow",
+      "primary_code_location": {
+        "file": "LandManager.sol",
+        "element_name": "_farmPlots",
+        "unique_snippet": "schnibblesLandlord = (schnibblesTotal * _toiler.latestTaxRate) / 1e18;",
+        "rationale": "Reward/tax math using large numbers and rates; potential for rounding bugs, inflation/deflation."
+      },
+      "related_code_locations": [
+        {
+          "file": "LandManager.sol",
+          "element_name": "_farmPlots",
+          "unique_snippet": "schnibblesTotal = ((timestamp - _toiler.lastToilDate) * BASE_SCHNIBBLE_RATE ...)",
+          "rationale": "Dependent on correct calculation and value ranges, especially overflows"
+        }
+      ],
+      "specifics": {
+        "issue_type": "math_precision_or_overflow",
+        "operation": "(schnibblesTotal * _toiler.latestTaxRate) / 1e18",
+        "risk": "Rate scaling or time deltas may overflow, underflow, or produce tiny/zero values unintentionally"
+      },
+      "detailed_description": "Calculating rewards, especially over long time intervals (e.g., timestamp - lastToilDate), can cause integer overflows or large values. If BASE_SCHNIBBLE_RATE, latestTaxRate, or any bonuses are misconfigured, total minted rewards can be unintentionally low (lost rewards due to rounding) or high (protocol-inflation).",
+      "exploit_scenario": "A player stakes then doesn't farm for a very long time, leading to schnibblesTotal overflowing and receiving vast rewards, harming protocol economics.",
+      "impact": "high",
+      "likelihood": "low",
+      "severity": "medium",
+      "supporting_evidence": [
+        {
+          "context_source": "static_analysis",
+          "context_type": "common_vulnerability",
+          "details": "Use of unchecked math in reward emission, no overflow guards, scaling by 1e18"
+        }
+      ],
+      "violated_invariants": [
+        "In farming, total schnibbles split equals total",
+        "In farming, landlord allocation never exceeds total schnibbles"
+      ],
+      "related_static_analysis_finding_ids": []
+    },
+    {
+      "finding_id": "VULN-005",
+      "contract_file": "LandManager.sol",
+      "vulnerability_class": "reentrancy",
+      "primary_code_location": {
+        "file": "LandManager.sol",
+        "element_name": "unstakeMunchable",
+        "unique_snippet": "munchNFT.transferFrom(address(this), mainAccount, tokenId);",
+        "rationale": "ERC721 transfer can trigger external code, possible reentrancy."
+      },
+      "related_code_locations": [
+        {
+          "file": "LandManager.sol",
+          "element_name": "stakeMunchable",
+          "unique_snippet": "munchNFT.transferFrom(mainAccount, address(this), tokenId);",
+          "rationale": "Relevant to inbound NFT transfer as well."
+        }
+      ],
+      "specifics": {
+        "issue_type": "reentrancy",
+        "external_call": "munchNFT.transferFrom(address(this), mainAccount, tokenId)",
+        "state_updated_after": false
+      },
+      "detailed_description": "When unstaking, NFT is transferred to the user before state is fully cleared. If the transferred NFT’s onERC721Received function is implemented by a malicious contract (mainAccount), it could reenter, invoking contract logic in an inconsistent state.",
+      "exploit_scenario": "Malicious mainAccount contract receives the NFT and calls unstakeMunchable or other protocol calls before state is updated, causing double-withdrawals or inconsistent accounting.",
+      "impact": "high",
+      "likelihood": "medium",
+      "severity": "high",
+      "supporting_evidence": [
+        {
+          "context_source": "docs",
+          "context_type": "common_vulnerability",
+          "details": "ERC721 safeTransferFrom pattern warns about reentrancy before all effects;"
+        }
+      ],
+      "violated_invariants": [],
+      "related_static_analysis_finding_ids": []
+    },
+    {
+      "finding_id": "VULN-006",
+      "contract_file": "LandManager.sol",
+      "vulnerability_class": "state_initialization_fault",
+      "primary_code_location": {
+        "file": "LandManager.sol",
+        "element_name": "_reconfigure",
+        "unique_snippet": "MIN_TAX_RATE = IConfigStorage(configStorage).getUint(StorageKey.LockManager) ...",
+        "rationale": "Bootstraps all key constants from an external configuration contract. A misconfiguration means all variables may be unset (0)."
+      },
+      "related_code_locations": [
+        {
+          "file": "LandManager.sol",
+          "element_name": "initialize",
+          "unique_snippet": "BaseBlastManagerUpgradeable.initialize(_configStorage); _reconfigure();",
+          "rationale": "Calls config, but reinitializer missing for upgradeable path?"
+        }
+      ],
+      "specifics": {
+        "issue_type": "state_initialization_fault",
+        "uninitialised_var": "MIN_TAX_RATE, MAX_TAX_RATE, DEFAULT_TAX_RATE, BASE_SCHNIBBLE_RATE, PRICE_PER_PLOT, REALM_BONUSES, RARITY_BONUSES",
+        "read_context": "These variables must be set via configStorage; if not, protocol invariants and functions fail or misbehave."
+      },
+      "detailed_description": "Upgradeability patterns require correct one-time setup. If initialize() isn’t called, or _reconfigure() is mispointed or mishandled by an upgrade, all protocol configuration values will remain unset (zero), breaking protocol math and validation, likely leading to stuck or drained assets.",
+      "exploit_scenario": "Deployment or upgrade skips initialization, leaving PRICE_PER_PLOT = 0, which causes division by zero in _getNumPlots and disables plot minting and staking system-wide.",
+      "impact": "high",
+      "likelihood": "medium",
+      "severity": "high",
+      "supporting_evidence": [
+        {
+          "context_source": "docs",
+          "context_type": "best_practice",
+          "details": "Initializer issues are textbook upgradeable risk; _disableInitializers() constructor enforced"
+        }
+      ],
+      "violated_invariants": [
+        "PRICE_PER_PLOT is non-zero",
+        "DEFAULT_TAX_RATE within bounds"
+      ],
+      "related_static_analysis_finding_ids": []
+    }
+  ],
+  "detection_summary_notes": "Several areas are susceptible to classic protocol risks: state drift if internal arrays/maps go out of sync on edge cases, unchecked math, insufficient access gating on config reloads, and reentrancy through external NFT transfers. Risks further compounded by upgradeability and reliance on externally-set config values."
+}
