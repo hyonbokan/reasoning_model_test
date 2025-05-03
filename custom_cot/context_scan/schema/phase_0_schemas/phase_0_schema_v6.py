@@ -56,7 +56,8 @@ class InvariantRef(BaseModel):
     """Any rule that *must* always hold (economics, access, liveness…)."""
     id: str = Field(default_factory=_uid)
     description: str = Field(..., description="Huamn-readable rule")
-    related_code: Optional[str] = None          # CodeRef.id of check site
+    # related_code: Optional[str] = None
+    related_code: List[str] = Field(default_factory=list)
     
 class FlagTracker(BaseModel):
     """
@@ -129,6 +130,12 @@ class ContractSummary(BaseModel):
 
     core_purpose_raw: str
     core_purpose_digest: str = Field(..., description="≤120 chars")
+    
+    upgradeability_pattern: Optional[str] = Field(
+        None, description="e.g., 'UUPS', 'Transparent', or None"
+    )
+    consumed_interfaces: List[str] = Field(default_factory=list)
+    compiler_version: Optional[str] = None
 
     identified_roles: List[str] = Field(default_factory=list)
     key_state_vars:   List[str] = Field(default_factory=list)

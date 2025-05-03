@@ -1,2 +1,11 @@
+AuditAgent: 3 matches (2 exact 1 partial)
+
+Context Digestion
 temp=0
 some fields should be optional
+
+schema 5 is the best for muchables
+
+schema 6 needs improvement:
+- phase0v6_syspromt_free_v3_BEST: 3 matches (3 exact)
+- phase0v6_syspromt_free_v4_BEST: 4 matches (2 exact 2 partial)

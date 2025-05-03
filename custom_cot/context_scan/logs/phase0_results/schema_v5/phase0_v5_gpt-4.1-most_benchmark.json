@@ -1,0 +1,506 @@
+{
+  "analyzed_contracts": [
+    {
+      "id": "LandManager.sol",
+      "file_name": "LandManager.sol",
+      "core_purpose_raw": "The LandManager contract manages the relationship between landlords who own plots of land and users who stake their Munchable NFTs on these plots to earn rewards in the form of \"Schnibbles.\" It handles land ownership, tax rates, staking and unstaking of NFTs, reward generation and distribution, and integrates with other protocol components such as LockManager, AccountManager, MunchNFT, and NFTAttributesManager.",
+      "core_purpose_digest": "Manages land plots, NFT staking, tax rates, and Schnibbles rewards for landlords and users.",
+      "upgradeability_pattern": "UUPS",
+      "consumed_interfaces": [
+        "ILandManager",
+        "ILockManager",
+        "IAccountManager",
+        "INFTAttributesManager",
+        "IERC721"
+      ],
+      "compiler_version": "0.8.25",
+      "identified_roles": [
+        "admin",
+        "landlord",
+        "munchable owner"
+      ],
+      "key_state_vars": [
+        "BASE_SCHNIBBLE_RATE",
+        "DEFAULT_TAX_RATE",
+        "MAX_TAX_RATE",
+        "MIN_TAX_RATE",
+        "PRICE_PER_PLOT",
+        "RARITY_BONUSES",
+        "REALM_BONUSES",
+        "accountManager",
+        "lockManager",
+        "munchNFT",
+        "munchableOwner",
+        "munchablesStaked",
+        "nftAttributesManager",
+        "plotMetadata",
+        "plotOccupied",
+        "toilerState"
+      ],
+      "key_functions": [
+        "_farmPlots",
+        "_getMainAccountRequireRegistered",
+        "_getNumPlots",
+        "_reconfigure",
+        "_removeTokenIdFromStakedList",
+        "configUpdated",
+        "farmPlots",
+        "initialize",
+        "stakeMunchable",
+        "transferToUnoccupiedPlot",
+        "triggerPlotMetadata",
+        "unstakeMunchable",
+        "updatePlotMetadata",
+        "updateTaxRate"
+      ],
+      "external_dependencies": [
+        "IAccountManager",
+        "IConfigStorage",
+        "IERC721",
+        "ILockManager",
+        "INFTAttributesManager",
+        "MunchablesCommonLib"
+      ],
+      "security_notes": [],
+      "static_findings": [],
+      "config_params": [
+        {
+          "name": "lockManager",
+          "storage_key": "LockManager",
+          "load_site": {
+            "id": "LandManager.sol:reconfigure:lockManager",
+            "file": "LandManager.sol",
+            "element_name": "_reconfigure",
+            "unique_snippet": "lockManager = ILockManager(IConfigStorage(configStorage).getAddress(StorageKey.LockManager));"
+          },
+          "downstream_uses": [
+            "LandManager.sol:_getNumPlots"
+          ],
+          "notes": null
+        },
+        {
+          "name": "accountManager",
+          "storage_key": "AccountManager",
+          "load_site": {
+            "id": "LandManager.sol:reconfigure:accountManager",
+            "file": "LandManager.sol",
+            "element_name": "_reconfigure",
+            "unique_snippet": "accountManager = IAccountManager(IConfigStorage(configStorage).getAddress(StorageKey.AccountManager));"
+          },
+          "downstream_uses": [
+            "LandManager.sol:_getMainAccountRequireRegistered",
+            "LandManager.sol:_farmPlots"
+          ],
+          "notes": null
+        },
+        {
+          "name": "munchNFT",
+          "storage_key": "MunchNFT",
+          "load_site": {
+            "id": "LandManager.sol:reconfigure:munchNFT",
+            "file": "LandManager.sol",
+            "element_name": "_reconfigure",
+            "unique_snippet": "munchNFT = IERC721(configStorage.getAddress(StorageKey.MunchNFT));"
+          },
+          "downstream_uses": [
+            "LandManager.sol:stakeMunchable",
+            "LandManager.sol:unstakeMunchable"
+          ],
+          "notes": null
+        },
+        {
+          "name": "nftAttributesManager",
+          "storage_key": "NFTAttributesManager",
+          "load_site": {
+            "id": "LandManager.sol:reconfigure:nftAttributesManager",
+            "file": "LandManager.sol",
+            "element_name": "_reconfigure",
+            "unique_snippet": "nftAttributesManager = INFTAttributesManager(IConfigStorage(configStorage).getAddress(StorageKey.NFTAttributesManager));"
+          },
+          "downstream_uses": [
+            "LandManager.sol:_farmPlots"
+          ],
+          "notes": null
+        },
+        {
+          "name": "MIN_TAX_RATE",
+          "storage_key": "LockManager",
+          "load_site": {
+            "id": "LandManager.sol:reconfigure:MIN_TAX_RATE",
+            "file": "LandManager.sol",
+            "element_name": "_reconfigure",
+            "unique_snippet": "MIN_TAX_RATE = IConfigStorage(configStorage).getUint(StorageKey.LockManager);"
+          },
+          "downstream_uses": [
+            "LandManager.sol:updateTaxRate"
+          ],
+          "notes": null
+        },
+        {
+          "name": "MAX_TAX_RATE",
+          "storage_key": "AccountManager",
+          "load_site": {
+            "id": "LandManager.sol:reconfigure:MAX_TAX_RATE",
+            "file": "LandManager.sol",
+            "element_name": "_reconfigure",
+            "unique_snippet": "MAX_TAX_RATE = IConfigStorage(configStorage).getUint(StorageKey.AccountManager);"
+          },
+          "downstream_uses": [
+            "LandManager.sol:updateTaxRate"
+          ],
+          "notes": null
+        },
+        {
+          "name": "DEFAULT_TAX_RATE",
+          "storage_key": "ClaimManager",
+          "load_site": {
+            "id": "LandManager.sol:reconfigure:DEFAULT_TAX_RATE",
+            "file": "LandManager.sol",
+            "element_name": "_reconfigure",
+            "unique_snippet": "DEFAULT_TAX_RATE = IConfigStorage(configStorage).getUint(StorageKey.ClaimManager);"
+          },
+          "downstream_uses": [
+            "LandManager.sol:triggerPlotMetadata",
+            "LandManager.sol:updatePlotMetadata"
+          ],
+          "notes": null
+        },
+        {
+          "name": "BASE_SCHNIBBLE_RATE",
+          "storage_key": "MigrationManager",
+          "load_site": {
+            "id": "LandManager.sol:reconfigure:BASE_SCHNIBBLE_RATE",
+            "file": "LandManager.sol",
+            "element_name": "_reconfigure",
+            "unique_snippet": "BASE_SCHNIBBLE_RATE = IConfigStorage(configStorage).getUint(StorageKey.MigrationManager);"
+          },
+          "downstream_uses": [
+            "LandManager.sol:_farmPlots"
+          ],
+          "notes": null
+        },
+        {
+          "name": "PRICE_PER_PLOT",
+          "storage_key": "NFTOverlord",
+          "load_site": {
+            "id": "LandManager.sol:reconfigure:PRICE_PER_PLOT",
+            "file": "LandManager.sol",
+            "element_name": "_reconfigure",
+            "unique_snippet": "PRICE_PER_PLOT = IConfigStorage(configStorage).getUint(StorageKey.NFTOverlord);"
+          },
+          "downstream_uses": [
+            "LandManager.sol:_getNumPlots"
+          ],
+          "notes": null
+        },
+        {
+          "name": "REALM_BONUSES",
+          "storage_key": "RealmBonuses",
+          "load_site": {
+            "id": "LandManager.sol:reconfigure:REALM_BONUSES",
+            "file": "LandManager.sol",
+            "element_name": "_reconfigure",
+            "unique_snippet": "REALM_BONUSES = configStorage.getSmallIntArray(StorageKey.RealmBonuses);"
+          },
+          "downstream_uses": [
+            "LandManager.sol:_farmPlots"
+          ],
+          "notes": null
+        },
+        {
+          "name": "RARITY_BONUSES",
+          "storage_key": "RarityBonuses",
+          "load_site": {
+            "id": "LandManager.sol:reconfigure:RARITY_BONUSES",
+            "file": "LandManager.sol",
+            "element_name": "_reconfigure",
+            "unique_snippet": "RARITY_BONUSES = configStorage.getSmallUintArray(StorageKey.RarityBonuses);"
+          },
+          "downstream_uses": [
+            "LandManager.sol:_farmPlots"
+          ],
+          "notes": null
+        }
+      ],
+      "flag_trackers": [
+        {
+          "name": "toilerState[tokenId].dirty",
+          "expected_setters": [
+            "_farmPlots"
+          ],
+          "observed_setters": [
+            "_farmPlots"
+          ],
+          "note": "Set to true if plot count decreases below staked plotId; used to mark state as needing update."
+        }
+      ]
+    }
+  ],
+  "project_context": {
+    "overall_goal_raw": "The LandManager contract is part of a virtual land and farming protocol where users can stake NFT characters (Munchables) on plots of land owned by landlords. This contract manages the relationship between landlords who own plots of land and users who stake their Munchable NFTs on these plots to earn rewards in the form of \"Schnibbles.\"\n\nThe protocol implements a virtual real estate and farming economy with the following key components:\n\n- Land Ownership: Users can become landlords by locking tokens, which determines how many plots of land they own. The number of plots is calculated based on the locked weighted value divided by the price per plot.\n\n- Tax System: Landlords can set a tax rate (within minimum and maximum bounds) that determines what percentage of Schnibbles they collect from users farming on their land.\n\n- Staking Mechanism: Users can stake their Munchable NFTs on available plots owned by landlords. When staked, the NFT is transferred to the LandManager contract and begins generating Schnibbles.\n\n- Reward Generation: Staked Munchables generate Schnibbles over time at a base rate, with bonuses applied based on the Munchable's realm and rarity attributes, as well as the landlord's \"snuggery realm.\"\n\n- Revenue Sharing: When rewards are harvested through the \"farmPlots\" function, they are split between the Munchable owner and the landlord according to the tax rate.\n\n- Plot Management: Users can transfer their staked Munchables between unoccupied plots or unstake them completely to retrieve their NFTs.\n\nThe contract integrates with several other components of the ecosystem:\n- LockManager: Tracks locked tokens that determine land ownership\n- AccountManager: Manages player accounts and metadata\n- MunchNFT: The ERC721 token representing Munchable characters\n- NFTAttributesManager: Stores and provides attributes for the NFTs",
+    "overall_goal_digest": "Manages NFT staking, land plots, tax, and Schnibbles rewards in a virtual farming protocol.",
+    "actors_capabilities": [
+      "Admins: Update config via config storage.",
+      "Landlords: Own plots, set tax rates, initialize plot metadata.",
+      "Munchable owners: Stake/unstake NFTs, transfer between plots, harvest rewards."
+    ],
+    "core_assets": [
+      "Land plots",
+      "Locked tokens",
+      "Munchable NFTs",
+      "Schnibbles rewards"
+    ],
+    "critical_interactions": [
+      "Staking/unstaking NFTs (ERC721 transfers)",
+      "Harvesting Schnibbles (farmPlots)",
+      "Tax rate updates by landlords",
+      "Config updates via config storage"
+    ],
+    "key_assumptions": [
+      {
+        "id": "ctx1",
+        "source": "docs",
+        "context_type": "security_assumption",
+        "details": "Players must register via AccountManager before interacting with LandManager."
+      },
+      {
+        "id": "ctx2",
+        "source": "docs",
+        "context_type": "security_assumption",
+        "details": "ConfigStorage is trusted to provide correct addresses and values for protocol components."
+      }
+    ],
+    "invariants": [
+      {
+        "id": "inv1",
+        "description": "Current tax rate after update is within allowed bounds",
+        "related_code": [
+          "LandManager.sol:updateTaxRate"
+        ]
+      },
+      {
+        "id": "inv2",
+        "description": "After triggerPlotMetadata, metadata initialized",
+        "related_code": [
+          "LandManager.sol:triggerPlotMetadata"
+        ]
+      },
+      {
+        "id": "inv3",
+        "description": "After updatePlotMetadata, metadata lastUpdated is set",
+        "related_code": [
+          "LandManager.sol:updatePlotMetadata"
+        ]
+      },
+      {
+        "id": "inv4",
+        "description": "Stake does not increase staked munchables beyond limit",
+        "related_code": [
+          "LandManager.sol:stakeMunchable"
+        ]
+      },
+      {
+        "id": "inv5",
+        "description": "After staking, plot is marked occupied",
+        "related_code": [
+          "LandManager.sol:stakeMunchable"
+        ]
+      },
+      {
+        "id": "inv6",
+        "description": "After staking, munchableOwner maps token to staker",
+        "related_code": [
+          "LandManager.sol:stakeMunchable"
+        ]
+      },
+      {
+        "id": "inv7",
+        "description": "toilerState initialized correctly on stake",
+        "related_code": [
+          "LandManager.sol:stakeMunchable"
+        ]
+      },
+      {
+        "id": "inv8",
+        "description": "PRICE_PER_PLOT is non-zero",
+        "related_code": [
+          "LandManager.sol:_reconfigure"
+        ]
+      },
+      {
+        "id": "inv9",
+        "description": "DEFAULT_TAX_RATE within bounds",
+        "related_code": [
+          "LandManager.sol:_reconfigure"
+        ]
+      },
+      {
+        "id": "inv10",
+        "description": "After unstaking, plot is marked unoccupied",
+        "related_code": [
+          "LandManager.sol:unstakeMunchable"
+        ]
+      },
+      {
+        "id": "inv11",
+        "description": "After unstaking, munchableOwner cleared",
+        "related_code": [
+          "LandManager.sol:unstakeMunchable"
+        ]
+      },
+      {
+        "id": "inv12",
+        "description": "After unstaking, toilerState reset",
+        "related_code": [
+          "LandManager.sol:unstakeMunchable"
+        ]
+      },
+      {
+        "id": "inv13",
+        "description": "After unstaking, munchablesStaked does not contain tokenId",
+        "related_code": [
+          "LandManager.sol:unstakeMunchable"
+        ]
+      },
+      {
+        "id": "inv14",
+        "description": "Transfer to new plot updates occupancy correctly",
+        "related_code": [
+          "LandManager.sol:transferToUnoccupiedPlot"
+        ]
+      },
+      {
+        "id": "inv15",
+        "description": "Transfer to new plot updates latestTaxRate",
+        "related_code": [
+          "LandManager.sol:transferToUnoccupiedPlot"
+        ]
+      },
+      {
+        "id": "inv16",
+        "description": "After transfer, toilerState.plotId updated",
+        "related_code": [
+          "LandManager.sol:transferToUnoccupiedPlot"
+        ]
+      },
+      {
+        "id": "inv17",
+        "description": "_removeTokenIdFromStakedList removes the token",
+        "related_code": [
+          "LandManager.sol:_removeTokenIdFromStakedList"
+        ]
+      },
+      {
+        "id": "inv18",
+        "description": "_getNumPlots computes based on lockManager",
+        "related_code": [
+          "LandManager.sol:_getNumPlots"
+        ]
+      },
+      {
+        "id": "inv19",
+        "description": "In farming, total schnibbles split equals total",
+        "related_code": [
+          "LandManager.sol:_farmPlots"
+        ]
+      },
+      {
+        "id": "inv20",
+        "description": "In farming, landlord allocation never exceeds total schnibbles",
+        "related_code": [
+          "LandManager.sol:_farmPlots"
+        ]
+      },
+      {
+        "id": "inv21",
+        "description": "toilerState.lastToilDate updated to at most block.timestamp",
+        "related_code": [
+          "LandManager.sol:_farmPlots"
+        ]
+      },
+      {
+        "id": "inv22",
+        "description": "Dirty flag set when plot count decreases",
+        "related_code": [
+          "LandManager.sol:_farmPlots"
+        ]
+      },
+      {
+        "id": "inv23",
+        "description": "Only registered players can operate",
+        "related_code": [
+          "LandManager.sol:_getMainAccountRequireRegistered"
+        ]
+      },
+      {
+        "id": "inv24",
+        "description": "Tax rate update requires metadata initialized",
+        "related_code": [
+          "LandManager.sol:updateTaxRate"
+        ]
+      },
+      {
+        "id": "inv25",
+        "description": "Stake requires approved or operator rights",
+        "related_code": [
+          "LandManager.sol:stakeMunchable"
+        ]
+      },
+      {
+        "id": "inv26",
+        "description": "Unstake only if owned by staker",
+        "related_code": [
+          "LandManager.sol:unstakeMunchable"
+        ]
+      },
+      {
+        "id": "inv27",
+        "description": "Plot ID within available plots on stake",
+        "related_code": [
+          "LandManager.sol:stakeMunchable"
+        ]
+      },
+      {
+        "id": "inv28",
+        "description": "Cannot stake to self",
+        "related_code": [
+          "LandManager.sol:stakeMunchable"
+        ]
+      },
+      {
+        "id": "inv29",
+        "description": "Cannot transfer to occupied plot",
+        "related_code": [
+          "LandManager.sol:transferToUnoccupiedPlot"
+        ]
+      }
+    ],
+    "general_security_ctx": [
+      {
+        "id": "ctx3",
+        "source": "code_comment",
+        "context_type": "best_practice",
+        "details": "UUPS upgradeable contracts must use initializers instead of constructors and should call _disableInitializers() in the constructor to prevent direct initialization."
+      },
+      {
+        "id": "ctx4",
+        "source": "code_comment",
+        "context_type": "best_practice",
+        "details": "ERC721 safeTransferFrom should be used to prevent NFTs from being locked in non-compliant contracts and to mitigate reentrancy risks."
+      },
+      {
+        "id": "ctx5",
+        "source": "code_comment",
+        "context_type": "tooling_note",
+        "details": "Solidity 0.8.25 emits warnings for tstore opcode and uses mcopy for memory copying; ensure custom assembly is compatible."
+      },
+      {
+        "id": "ctx6",
+        "source": "code_comment",
+        "context_type": "best_practice",
+        "details": "Delegatecall-based proxies must align storage layout to prevent storage collision vulnerabilities."
+      }
+    ],
+    "static_summary": null
+  }
+}

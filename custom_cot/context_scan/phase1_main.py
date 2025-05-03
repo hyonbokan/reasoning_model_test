@@ -6,7 +6,7 @@ import os
 import sys
 from dotenv import load_dotenv
 from openai import OpenAI
-from schema.phase_0_schemas.phase_0_schema_v5 import ContextSummaryOutput
+from schema.phase_0_schemas.phase_0_schema_v6 import ContextSummaryOutput
 from schema.phase_1_schemas.phase_1_schema_free import FinalAuditReport
 from pydantic import ValidationError, BaseModel
 
@@ -17,13 +17,13 @@ O4_MINI  = "o4-mini"
 O3 = "o3-2025-04-16"
 # ───────────────────────── Configuration ─────────────────────────
 MODEL = O3
-PROMPT_FILE_SYSTEM = "utils/prompts/phase1_free_v3_sys_prompt.py"
+PROMPT_FILE_SYSTEM = "utils/prompts/phase1_free_v4_sys_prompt.py"
 # INPUT_FILE_FULL_CONTEXT = "utils/inputs/phase0_full_context.md"
-PHASE = "phase0v5_syspromt_freev3"
+PHASE = "phase0v6_syspromt_free_v4"
 
 OUTPUT_DIR_PHASE1 = "logs/phase1_results"
 
-INPUT_PHASE0_OUTPUT_FILE = "logs/phase0_results/schema_v5/phase0_v5_gpt-4.1-2025-04-14_20250503_233642.json"
+INPUT_PHASE0_OUTPUT_FILE = "logs/phase0_results/schema_v6/phase0_v6_gpt-4.1-2025-04-14_20250504_005017.json"
 INPUT_RAW_CODE_FILE = "utils/contracts/LandManager.sol"
 
 # --- Load prompts and input ---
