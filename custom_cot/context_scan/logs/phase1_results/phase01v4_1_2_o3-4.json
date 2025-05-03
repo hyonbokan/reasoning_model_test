@@ -1,0 +1,31 @@
+{
+  "findings": [
+    {
+      "Issue": "Unchecked underflow in _farmPlots can permanently brick farming/unstake",
+      "Severity": "High",
+      "Contracts": [
+        "LandManager.sol"
+      ],
+      "Description": "WHAT:\nIf the landlord’s available plot count drops below a toiler’s current plotId **and** the landlord’s `plotMetadata.lastUpdated` is earlier than the toiler’s `lastToilDate`, the subtraction\n```solidity\nschnibblesTotal = (timestamp - _toiler.lastToilDate) * BASE_SCHNIBBLE_RATE;\n```\nwill underflow and revert (Solidity ≥0.8 reverts on underflow).\n\nHOW:\nInside `_farmPlots` the code attempts to handle the “plot count shrank” edge-case by resetting `timestamp` to `plotMetadata[landlord].lastUpdated` and marking the toiler `dirty`:\n```solidity\nif (_getNumPlots(landlord) < _toiler.plotId) {\n    timestamp = plotMetadata[landlord].lastUpdated; // ← can be older\n    toilerState[tokenId].dirty = true;\n}\n```\nNo check ensures that this substituted `timestamp` is **≥** `_toiler.lastToilDate`.  When it is smaller, the subtraction underflows and reverts, halting the whole transaction.\n\nWHY IT MATTERS:\n`_farmPlots` is executed by:\n • `farmPlots()` (explicit harvesting)\n • the `forceFarmPlots` modifier ‑- automatically on `stakeMunchable`, `unstakeMunchable`, and `transferToUnoccupiedPlot`.\n\nOnce the revert condition is met, the affected renter can no longer harvest, transfer, or even **unstake** any of their NFTs, resulting in a permanent denial-of-service and asset lock.\n\nImpact → High (assets frozen).  Likelihood → Medium (landlord just needs to reduce locked value; `updatePlotMetadata` may never be called).",
+      "Recommendation": ""
+    },
+    {
+      "Issue": "Off-by-one allows more than 10 Munchables to be staked",
+      "Severity": "Low",
+      "Contracts": [
+        "LandManager.sol"
+      ],
+      "Description": "WHAT:\nThe intended invariant (see Phase-0 summary `invariant:stake_limit`) is `munchablesStaked.length <= 10`.  The check in `stakeMunchable` wrongly uses `>` instead of `>=`:\n```solidity\nif (munchablesStaked[mainAccount].length > 10)   // allows 11th stake\n    revert TooManyStakedMunchiesError();\n...\nmunchablesStaked[mainAccount].push(tokenId);\n```\nA user with exactly 10 tokens passes the guard, the `push` makes the length 11, violating protocol rules.\n\nWHY IT MATTERS:\nInternal accounting (UI, reward formulas, game-design limits, etc.) assumes a hard cap of 10. Exceeding it can give unfair reward advantages or break off-chain assumptions.\n\nImpact → Low (game balance / accounting).  Likelihood → High (any renter can do it).",
+      "Recommendation": ""
+    },
+    {
+      "Issue": "Division-by-zero risk if PRICE_PER_PLOT mis-configured",
+      "Severity": "Medium",
+      "Contracts": [
+        "LandManager.sol"
+      ],
+      "Description": "WHAT:\n`PRICE_PER_PLOT` is pulled from `ConfigStorage` without validation.  It is used as a divisor in `_getNumPlots`:\n```solidity\nfunction _getNumPlots(address _account) internal view returns (uint256) {\n    return lockManager.getLockedWeightedValue(_account) / PRICE_PER_PLOT; // ← divides by zero if 0\n}\n```\n\nIf an admin (or a bug in `ConfigStorage`) sets `PRICE_PER_PLOT` to `0`, any call that reaches `_getNumPlots` (stake, transfer, farming, tax updates) will revert, freezing large parts of the protocol.\n\nWHY IT MATTERS:\nAlthough only an authorized role can change config, mis-configuration is one of the most common causes of production incidents.  The contract should defensively reject obviously invalid parameters on `configUpdated`.\n\nImpact → High (global DoS).  Likelihood → Low (requires bad config).  Matrix ⇒ Medium.",
+      "Recommendation": ""
+    }
+  ]
+}

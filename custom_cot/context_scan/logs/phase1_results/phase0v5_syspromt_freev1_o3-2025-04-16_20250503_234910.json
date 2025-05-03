@@ -1,0 +1,40 @@
+{
+  "findings": [
+    {
+      "Issue": "Unchecked negative bonus can overflow rewards causing Schnibbles inflation",
+      "Severity": "High",
+      "Contracts": [
+        "LandManager.sol"
+      ],
+      "Description": "WHAT: The reward calculation in ```_farmPlots``` casts a (possibly negative) signed intermediate value to ```uint256```.\n```solidity\nfinalBonus = int16(REALM_BONUSES[...]) + int16(int8(RARITY_BONUSES[...]));\n...\nschnibblesTotal = uint256(\n    (int256(schnibblesTotal) + (int256(schnibblesTotal) * finalBonus)) / 100\n);\n```\nHOW: If **finalBonus < -100** the parenthesised expression becomes negative.  Converting a negative ```int256``` to ```uint256``` wraps the value, yielding an enormous number of Schnibbles that is added to the player and landlord balances.\nWHY: Neither the config arrays nor the sum are bounded on-chain.  A mis-configured or malicious config storage can therefore mint arbitrary rewards, breaking the in-game economy and leading to unlimited inflation.\n",
+      "Recommendation": ""
+    },
+    {
+      "Issue": "plotId in toilerState never updated on transferToUnoccupiedPlot",
+      "Severity": "Medium",
+      "Contracts": [
+        "LandManager.sol"
+      ],
+      "Description": "WHAT: After moving a staked Munchable to a new plot, the contract forgets to update ```toilerState[tokenId].plotId```.\n```solidity\n// latestTaxRate is updated, but plotId is NOT\ntoilerState[tokenId].latestTaxRate = plotMetadata[_toiler.landlord].currentTaxRate;\n// missing:  toilerState[tokenId].plotId = plotId;\n```\nHOW: The storage struct still points to the old plot id even though ```plotOccupied``` reflects the new one.  Subsequent calls to ```_farmPlots```, ```unstakeMunchable```, or another transfer will use the stale id, leading to reverts (e.g. OccupiedPlotError, NotStakedError) or reward attribution to the wrong plot.\nWHY: This breaks invariants inv-14 to inv-16 defined in the context summary and can lock users’ NFTs or deny them future rewards.\n",
+      "Recommendation": ""
+    },
+    {
+      "Issue": "Off-by-one allows staking 11 Munchables while limit claims to be 10",
+      "Severity": "Low",
+      "Contracts": [
+        "LandManager.sol"
+      ],
+      "Description": "WHAT: The staking limit check uses ```> 10``` instead of ```>= 10```.\n```solidity\nif (munchablesStaked[mainAccount].length > 10)\n    revert TooManyStakedMunchiesError();\n```\nHOW: When a user already has 10 staked NFTs, the length is 10, the condition is false, and the push brings the count to 11 before the next check reverts.  The real cap is therefore 11.\nWHY: Although low-impact, this violates documented expectations and may break front-end / game balance assumptions.\n",
+      "Recommendation": ""
+    },
+    {
+      "Issue": "External accountManager.updatePlayer calls inside loop lack re-entrancy protection",
+      "Severity": "Medium",
+      "Contracts": [
+        "LandManager.sol"
+      ],
+      "Description": "WHAT: ```_farmPlots``` calls ```accountManager.updatePlayer``` twice per staked token (for renter and landlord) while many state variables (e.g. ```toilerState```, ```munchablesStaked```) remain mutable.\n```solidity\naccountManager.updatePlayer(landlord, landlordMetadata); // inside loop\n...\naccountManager.updatePlayer(mainAccount, renterMetadata); // after loop\n```\nHOW: A malicious or mis-configured AccountManager could execute arbitrary code in its fallback or inside ```updatePlayer``` and re-enter vulnerable LandManager functions (e.g., ```stakeMunchable```, ```unstakeMunchable```).  LandManager has no re-entrancy guard and uses the **checks-effects-interactions** pattern inconsistently, exposing complex state during the call.\nWHY: While AccountManager is expected to be trusted, its upgradeability or a compromised implementation would allow an attacker to exploit the re-entrant window to corrupt state or bypass checks, posing a medium-impact, medium-likelihood threat.\n",
+      "Recommendation": ""
+    }
+  ]
+}

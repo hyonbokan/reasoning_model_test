@@ -19,4 +19,4 @@ class FindingOutput(BaseModel):
 
 class FinalAuditReport(BaseModel):
     """Represents the root structure of the final JSON audit report."""
-    findings: List[FindingOutput] = Field(..., description="List of all validated and formatted vulnerability findings, ordered by severity (ordering might be post-processed).")
+    findings: List[FindingOutput] = Field(..., description="List of all validated and formatted vulnerability findings.")

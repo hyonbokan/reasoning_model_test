@@ -1,0 +1,40 @@
+{
+  "findings": [
+    {
+      "Issue": "Re-entrancy risk through forceFarmPlots modifier",
+      "Severity": "Medium",
+      "Contracts": [
+        "LandManager.sol"
+      ],
+      "Description": "WHAT: `stakeMunchable`, `unstakeMunchable` and `transferToUnoccupiedPlot` are all protected with the `forceFarmPlots` modifier.  This modifier executes `_farmPlots(msg.sender)` **before** the function’s own state–changing logic.\n\nHOW: `_farmPlots` performs two external calls per loop iteration:\n```solidity\naccountManager.updatePlayer(landlord, landlordMetadata);\n...\naccountManager.updatePlayer(mainAccount, renterMetadata);\n```\nBecause `accountManager` is an arbitrary external contract the caller controls **neither the code nor the execution guarantees** of that contract.  If `updatePlayer` (or a malicious upgrade of `AccountManager`) calls back into `LandManager` during the same transaction, the re-entrant call bypasses any state-changes that the wrapping function (e.g. `stakeMunchable`) has not executed yet.  For example:\n1. User calls `stakeMunchable`.\n2. `forceFarmPlots` triggers `_farmPlots`, which calls the external `AccountManager`.\n3. `AccountManager` re-enters `LandManager.stakeMunchable` **again** (or any other mutative function).\n4. Internal state is still in the old state (token not yet transferred, `plotOccupied` not yet updated, etc.).  Inconsistent bookkeeping, double staking or exceeding the 10-token limit become possible.\n\nWHY: The contract does not employ a re-entrancy guard, nor does it follow the checks-effects-interactions pattern inside the modifier.  As the protocol evolves (upgradeable `AccountManager`, potential governance take-over, or a compromised implementation) the likelihood of a hostile callback is non-zero, and the impact ranges from accounting corruption to fund theft / double staking.",
+      "Recommendation": ""
+    },
+    {
+      "Issue": "Division-by-zero DoS in _getNumPlots",
+      "Severity": "Low",
+      "Contracts": [
+        "LandManager.sol"
+      ],
+      "Description": "WHAT: `_getNumPlots` calculates the number of plots with\n```solidity\nreturn lockManager.getLockedWeightedValue(_account) / PRICE_PER_PLOT;\n```\nIf `PRICE_PER_PLOT` is ever set to `0` in `ConfigStorage`, every call to `_getNumPlots` reverts with a division-by-zero error.\n\nHOW: `PRICE_PER_PLOT` is loaded in `_reconfigure()` from an external, upgradeable `ConfigStorage` contract.  An admin mistake or malicious upgrade can set the value to zero, instantly breaking:\n* `stakeMunchable` (plot-range check)\n* `_farmPlots` (dirty-flag logic)\n* Any other place the helper is used\nresulting in a complete denial of service for core protocol functions.\n\nWHY: No explicit non-zero validation is performed after loading the parameter, violating invariant `inv-8` from the project documentation.",
+      "Recommendation": ""
+    },
+    {
+      "Issue": "Off-by-one error allows farming on non-existent plots",
+      "Severity": "Low",
+      "Contracts": [
+        "LandManager.sol"
+      ],
+      "Description": "WHAT:  In `_farmPlots` the contract tries to detect when a landlord has **reduced** the number of plots below a toiler’s current plot and mark that toiler as `dirty`:\n```solidity\nif (_getNumPlots(landlord) < _toiler.plotId) {\n    // mark dirty\n}\n```\n\nHOW:  Valid plot IDs are `0 … totalPlots-1`.  Suppose a Munchable is on `plotId == 5` while the landlord previously had 6 plots (`totalPlots == 6`).  If the landlord’s locked value now drops to 5 plots (`totalPlots == 5`), the correct check should invalidate the toiler, yet `5 < 5` is **false** and the `dirty` flag is never set.  The Munchable will continue to generate Schnibbles on a plot that no longer exists, effectively leaking rewards and tax revenue.\n\nWHY:  The comparison should be `>=` (or `>-1`) instead of the strict `<`.  This logic flaw violates invariant `inv-22` (dirty flag must be set when plot count decreases).",
+      "Recommendation": ""
+    },
+    {
+      "Issue": "Negative bonus can revert farming (unchecked cast)",
+      "Severity": "Low",
+      "Contracts": [
+        "LandManager.sol"
+      ],
+      "Description": "WHAT:  Bonus calculation converts a signed result to unsigned without bounds checking:\n```solidity\nschnibblesTotal = uint256(\n    (int256(schnibblesTotal) + (int256(schnibblesTotal) * finalBonus)) / 100\n);\n```\nIf `finalBonus` is less than `-100`, the numerator becomes negative and the down-cast to `uint256` reverts, halting the `farmPlots` loop and blocking staking / unstaking via the `forceFarmPlots` modifier.\n\nHOW:  `finalBonus` is the sum of two configurable arrays (`REALM_BONUSES`, `RARITY_BONUSES`).  A mis-configured `ConfigStorage` can easily set a realm bonus to e.g. `-200`, triggering the revert for all affected tokens.\n\nWHY:  There is no sanity check that the combined bonus yields a non-negative percentage.  A single bad config value creates a protocol-wide denial of service condition.",
+      "Recommendation": ""
+    }
+  ]
+}

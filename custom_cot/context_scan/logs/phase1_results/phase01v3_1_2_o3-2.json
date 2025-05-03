@@ -1,0 +1,49 @@
+{
+  "findings": [
+    {
+      "Issue": "State desynchronisation when moving a stake – plotId in toilerState never updated",
+      "Severity": "High",
+      "Contracts": [
+        "LandManager.sol"
+      ],
+      "Description": "WHAT:\nCalling ```transferToUnoccupiedPlot()``` moves the staking position to a new plot, but the internal bookkeeping stored in ```toilerState[tokenId].plotId``` is **not** updated to the new ```plotId```.  \n\nHOW:\n```solidity\n// LandManager.sol  (function transferToUnoccupiedPlot)\n...\nuint256 oldPlotId = _toiler.plotId;\n...\ntoilerState[tokenId].latestTaxRate = plotMetadata[_toiler.landlord].currentTaxRate; // <-- plotId is NEVER updated\nplotOccupied[_toiler.landlord][oldPlotId] = Plot({ occupied: false, tokenId: 0 });\nplotOccupied[_toiler.landlord][plotId]   = Plot({ occupied: true,  tokenId: tokenId });\n...\n```\nWHY IT MATTERS:\n•  Any subsequent call to ```unstakeMunchable(tokenId)``` will rely on the **out-of-date** ```plotId```. The function will clear the *old* plot while the *new* plot stays marked as occupied, then zero-out ```toilerState```.  \n•  The Munchable NFT is transferred back to its owner, yet ```plotOccupied[landlord][newPlotId]``` still references the now-unstaked token, rendering the plot permanently blocked.  \n•  Landlords lose the ability to let that plot, and further protocol logic that iterates plots will behave inconsistently.  \nImpact: permanent denial-of-service of individual plots and accounting inconsistencies across the protocol.  \nLikelihood: high – every successful call to ```transferToUnoccupiedPlot``` triggers the bug.",
+      "Recommendation": ""
+    },
+    {
+      "Issue": "Re-entrancy window in stakeMunchable – external NFT transfer executed before state mutation",
+      "Severity": "Medium",
+      "Contracts": [
+        "LandManager.sol"
+      ],
+      "Description": "WHAT:\n```stakeMunchable()``` performs ```munchNFT.transferFrom(mainAccount, address(this), tokenId)``` **before** updating all internal mappings that mark the token as staked.  \n\nHOW:\n```solidity\n// LandManager.sol (function stakeMunchable)\n...\nif (!munchNFT.isApprovedForAll(...) && ... ) revert NotApprovedError();\n\nmunchNFT.transferFrom(mainAccount, address(this), tokenId); // <-- EXTERNAL CALL\n\n// state updates only after this point\nplotOccupied[landlord][plotId] = ...;\n...\n```\nA malicious or non-standard ERC-721 implementation can execute arbitrary code during ```transferFrom```.  Because the LandManager’s internal mappings are still in their **pre-stake** state, the attacker can re-enter functions such as ```stakeMunchable```, ```unstakeMunchable```, or ```farmPlots``` and create inconsistent state, double-stake the same token, or bypass occupancy checks.  \n\nWHY IT MATTERS:\n•  Potential for double-staking / multiple plot occupation with one NFT.  \n•  Possibility of corrupting accounting or blocking future legitimate operations.  \nImpact: medium (game-logic corruption, reward manipulation).  \nLikelihood: medium (requires malicious ERC-721, but such tokens are common in adversarial settings).",
+      "Recommendation": ""
+    },
+    {
+      "Issue": "Signed-to-unsigned cast enables massive reward minting when bonus is negative",
+      "Severity": "Medium",
+      "Contracts": [
+        "LandManager.sol"
+      ],
+      "Description": "WHAT:\n```_farmPlots()``` computes schnibbles using an intermediate **int256** and then converts the result to **uint256** without checking that the value is non-negative.  \n\nHOW:\n```solidity\n// LandManager.sol (function _farmPlots)\n...\nint256 finalBonus = int16(REALM_BONUSES[...]) + int16(int8(RARITY_BONUSES[...]));\n\nschnibblesTotal = uint256(\n   ( int256(schnibblesTotal) + (int256(schnibblesTotal) * finalBonus) ) / 100\n);\n```\nIf ```finalBonus``` is ≤ -101 the numerator becomes negative; casting this negative ```int256``` to ```uint256``` wraps it into a very large positive number (2²⁵⁶ – x).   Attackers controlling NFT attributes or configurable bonus arrays can therefore mint astronomically high schnibble rewards.\n\nWHY IT MATTERS:\n•  Catastrophic inflation of the in-game currency.  \n•  Drains any treasury or reward reserve that honours ```unfedSchnibbles```.  \nImpact: high.  \nLikelihood: low-to-medium (depends on configurable bonus arrays, but mis-configuration or malicious upgrade can realise it).",
+      "Recommendation": ""
+    },
+    {
+      "Issue": "Off-by-one check lets players stake 11 (not 10) munchables",
+      "Severity": "Low",
+      "Contracts": [
+        "LandManager.sol"
+      ],
+      "Description": "WHAT:\nThe length check preceding ```munchablesStaked.push(tokenId);``` uses a strict greater-than comparison:\n```solidity\nif (munchablesStaked[mainAccount].length > 10) revert TooManyStakedMunchiesError();\n```\nWhen the length is exactly **10**, the condition is false, the push succeeds, and the final length becomes **11**, breaking invariant ctx3 (max 10 staked).  \n\nWHY IT MATTERS:\nMinor economic imbalance and broken invariant relied upon by off-chain components or future contract logic.",
+      "Recommendation": ""
+    },
+    {
+      "Issue": "PRICE_PER_PLOT can be zero – division by zero in _getNumPlots freezes core functions",
+      "Severity": "Low",
+      "Contracts": [
+        "LandManager.sol"
+      ],
+      "Description": "WHAT:\n```_getNumPlots()``` performs:\n```solidity\nreturn lockManager.getLockedWeightedValue(_account) / PRICE_PER_PLOT;\n```\nIf the config storage accidentally sets ```PRICE_PER_PLOT``` to **0**, every call reverts with a division-by-zero, blocking:\n• ```stakeMunchable```,\n• ```transferToUnoccupiedPlot```,\n• any logic indirectly querying plot counts.\n\nWHY IT MATTERS:\nWhile configuration mistakes are outside direct attacker control, a mis-configured deployment or malicious admin upgrade could permanently brick core gameplay.",
+      "Recommendation": ""
+    }
+  ]
+}

@@ -1,0 +1,40 @@
+{
+  "findings": [
+    {
+      "Issue": "Stale plotId after transfer freezes plots and breaks unstake logic",
+      "Severity": "High",
+      "Contracts": [
+        "LandManager.sol"
+      ],
+      "Description": "WHAT: `transferToUnoccupiedPlot()` never updates `toilerState[tokenId].plotId` to the new plot id.  \n\nHOW: After the occupancy mappings are moved, only `latestTaxRate` is touched:\n```solidity\n// LandManager.sol  line ~160\n toilerState[tokenId].latestTaxRate = plotMetadata[_toiler.landlord]\n     .currentTaxRate;\n // <missing> toilerState[tokenId].plotId = plotId;\n```  \nBecause `plotId` is not overwritten, `toilerState` still references the **old** plot.  When the owner later calls `unstakeMunchable`, the contract clears `plotOccupied[_toiler.landlord][_toiler.plotId]` with that stale id, leaving the **new** plot marked as occupied while the NFT has already been withdrawn.  The new plot becomes permanently blocked, rewards calculation keeps using an invalid plot id, and protocol invariants 14-16 & 10-13 are violated.\n\nWHY it matters: Anyone who transfers their Munchable can brick a landlord’s plot and desynchronise accounting, creating denial-of-service for new tenants and corrupt reward distribution.  Impact is high and the bug is trivially reachable.\n",
+      "Recommendation": ""
+    },
+    {
+      "Issue": "Off-by-one error lets a player stake 11 Munchables (limit should be 10)",
+      "Severity": "Medium",
+      "Contracts": [
+        "LandManager.sol"
+      ],
+      "Description": "WHAT: The maximum of 10 staked Munchables per player (invariant-4) is enforced with the wrong comparison.\n```solidity\nif (munchablesStaked[mainAccount].length > 10)\n    revert TooManyStakedMunchiesError();\n```\nHOW: When the length is exactly 10 the check passes and `push()` is executed, bringing the length to 11.  Subsequent stakes revert, but the limit has already been exceeded.\n\nWHY it matters: The protocol assumes at most 10 NFTs for gas-bounded loops and balanced reward calculus. Exceeding the cap can enlarge loops in `_farmPlots`, break gas assumptions, and give an unfair farming advantage.\n",
+      "Recommendation": ""
+    },
+    {
+      "Issue": "Dirty-flag boundary test off by one when plot count shrinks",
+      "Severity": "Low",
+      "Contracts": [
+        "LandManager.sol"
+      ],
+      "Description": "WHAT: In `_farmPlots` the contract decides whether a `ToilerState` is \"dirty\" with\n```solidity\nif (_getNumPlots(landlord) < _toiler.plotId) {\n    ...\n}\n```\n`plotId` is zero-based, while `_getNumPlots` returns the total count.  When `plotId` equals the new maximum (e.g., 2 plots left, `plotId == 2`) the condition is false although the plot id is already out of range.\n\nWHY it matters: The stale `plotId` is treated as valid, rewards continue to accrue, and later operations may revert or corrupt state.  Although the impact is limited to landlords who reduce their locked balance by exactly one plot, it still violates invariants 18 & 21.\n",
+      "Recommendation": ""
+    },
+    {
+      "Issue": "MIN_TAX_RATE and MAX_TAX_RATE loaded from address keys, blocking tax updates",
+      "Severity": "Low",
+      "Contracts": [
+        "LandManager.sol"
+      ],
+      "Description": "WHAT: `_reconfigure()` reads\n```solidity\nMIN_TAX_RATE = IConfigStorage(configStorage).getUint(StorageKey.LockManager);\nMAX_TAX_RATE = IConfigStorage(configStorage).getUint(StorageKey.AccountManager);\n```\nBoth storage keys are also used earlier to fetch **addresses** of the respective managers.  Unless the config contract stores separate uint values under the same keys, the uint read will be the raw 20-byte address enlarged to 32 bytes, typically a number far above 1e18.\n\nHOW: With such bounds, any realistic `newTaxRate` fails:\n```solidity\nif (newTaxRate < MIN_TAX_RATE || newTaxRate > MAX_TAX_RATE) revert;\n```\nTherefore landlords can never call `updateTaxRate`, contrary to business logic and invariant-1.\n\nWHY it matters: Mis-configuration or upgrade can silently disable the tax-rate feature and break the economic model of the protocol.\n",
+      "Recommendation": ""
+    }
+  ]
+}

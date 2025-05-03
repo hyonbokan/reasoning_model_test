@@ -1,0 +1,40 @@
+{
+  "findings": [
+    {
+      "Issue": "plotId is never updated in transferToUnoccupiedPlot – state desynchronisation & reward mis-calculation",
+      "Severity": "Medium",
+      "Contracts": [
+        "LandManager.sol"
+      ],
+      "Description": "WHAT: when a staked Munchable is moved to another plot by calling ```transferToUnoccupiedPlot```, the contract clears the old plot and marks the new one as occupied, but **forgets to update the cached plotId that lives in the ToilerState struct**.\n\nHOW:\n```solidity\n// LandManager.sol : transferToUnoccupiedPlot\n...\nplotOccupied[_toiler.landlord][oldPlotId] = Plot({ ... });\nplotOccupied[_toiler.landlord][plotId]  = Plot({ ... });\n\n// only latestTaxRate is changed\ntoilerState[tokenId].latestTaxRate = plotMetadata[_toiler.landlord].currentTaxRate;\n//  --->  toilerState[tokenId].plotId   IS NOT UPDATED  <---\n```\n\nWHY it matters:\n• Subsequent calls to `_farmPlots` will read a *stale* plotId and can mistakenly believe the token sits on a non-existing plot.  As soon as the landlord changes the amount of land, the check\n```solidity\nif (_getNumPlots(landlord) < _toiler.plotId) { ... }\n```\nwill evaluate incorrectly, marking the toiler `dirty` and **permanently preventing any further Schnibbles farming for that token** (economic loss / griefing).\n• Events `FarmPlotTaken`/`FarmPlotLeave` will carry wrong IDs, hampering off-chain accounting.\n\n",
+      "Recommendation": ""
+    },
+    {
+      "Issue": "Unchecked array index when computing realm / rarity bonus causes out-of-bounds revert (DoS vector)",
+      "Severity": "Medium",
+      "Contracts": [
+        "LandManager.sol"
+      ],
+      "Description": "WHAT: `_farmPlots` directly indexes the `REALM_BONUSES` and `RARITY_BONUSES` arrays with values coming from player/NFT metadata without verifying that the indices are within array bounds.\n\nHOW:\n```solidity\nfinalBonus = int16(\n  REALM_BONUSES[(uint256(immutableAttributes.realm) * 5) + uint256(landlordMetadata.snuggeryRealm)]\n) + int16( int8(RARITY_BONUSES[uint256(immutableAttributes.rarity)]) );\n```\nIf `immutableAttributes.realm`, `landlordMetadata.snuggeryRealm`, or `immutableAttributes.rarity` are larger than the array size, the call reverts with `Panic(0x32)` and **the whole transaction aborts**.\n\nWHY it matters:\nA malicious (or simply mis-configured) AccountManager can set `snuggeryRealm` / `rarity` to an out-of-range value and brick every function that carries the `forceFarmPlots` modifier (`stakeMunchable`, `unstakeMunchable`, `transferToUnoccupiedPlot`, `farmPlots`).  This represents a protocol-wide denial of service.\n\n",
+      "Recommendation": ""
+    },
+    {
+      "Issue": "Re-entrancy window opened by external call in forceFarmPlots modifier",
+      "Severity": "Medium",
+      "Contracts": [
+        "LandManager.sol"
+      ],
+      "Description": "WHAT: The `forceFarmPlots` modifier calls `_farmPlots` **before** the body of functions such as `stakeMunchable` and `unstakeMunchable`.  `_farmPlots` in turn makes external calls to an unconstrained contract (`accountManager.updatePlayer`).  No re-entrancy guard is used.\n\nHOW:\n```solidity\nmodifier forceFarmPlots(address _account) {\n    _farmPlots(_account);        // external calls inside\n    _;                           // state-changing logic executes afterwards\n}\n```\nBecause state changes of the main function haven’t happened yet, a malicious `AccountManager` implementation (or an attacker who manages to gain control of it) can re-enter the same entry-point and:\n• bypass the `TooManyStakedMunchies` cap (length check passes before the first `push`),\n• call `unstakeMunchable` on a token that is still considered staked,\n• execute other privileged calls in an unexpected state.\n\nWHY it matters: although the official deployment will use a trusted `AccountManager`, governance keys or upgrade mistakes could swap it for a malicious implementation, turning this into a high-impact exploit path.\n\nMitigations: adopt OpenZeppelin’s `ReentrancyGuard` or move `_farmPlots` logic *after* critical state mutations (Checks-Effects-Interactions).\n",
+      "Recommendation": ""
+    },
+    {
+      "Issue": "Division by zero if PRICE_PER_PLOT is mis-configured",
+      "Severity": "Low",
+      "Contracts": [
+        "LandManager.sol"
+      ],
+      "Description": "WHAT: `_getNumPlots` divides by `PRICE_PER_PLOT` loaded from ConfigStorage without any non-zero validation.\n```solidity\nfunction _getNumPlots(address _account) internal view returns (uint256) {\n    return lockManager.getLockedWeightedValue(_account) / PRICE_PER_PLOT; // <- can revert\n}\n```\n\nWHY it matters: an accidental configuration that sets `PRICE_PER_PLOT` to 0 bricks every path that queries the number of plots (including `stakeMunchable`, `_farmPlots`, etc.), effectively halting the protocol.\n\n",
+      "Recommendation": ""
+    }
+  ]
+}

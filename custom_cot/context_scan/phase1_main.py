@@ -6,7 +6,7 @@ import os
 import sys
 from dotenv import load_dotenv
 from openai import OpenAI
-from schema.phase_0_schemas.phase_0_schema_v2 import ContextSummaryOutput
+from schema.phase_0_schemas.phase_0_schema_v5 import ContextSummaryOutput
 from schema.phase_1_schemas.phase_1_schema_free import FinalAuditReport
 from pydantic import ValidationError, BaseModel
 
@@ -17,13 +17,13 @@ O4_MINI  = "o4-mini"
 O3 = "o3-2025-04-16"
 # ───────────────────────── Configuration ─────────────────────────
 MODEL = O3
-PROMPT_FILE_SYSTEM = "utils/prompts/phase1_v1_sys_prompt.py"
+PROMPT_FILE_SYSTEM = "utils/prompts/phase1_free_v3_sys_prompt.py"
 # INPUT_FILE_FULL_CONTEXT = "utils/inputs/phase0_full_context.md"
-PHASE = "phase1_free"
+PHASE = "phase0v5_syspromt_freev3"
 
 OUTPUT_DIR_PHASE1 = "logs/phase1_results"
 
-INPUT_PHASE0_OUTPUT_FILE = "logs/phase0_results/phase0_schema_v2/phase0_v2_gpt-4.1-2025-04-14_20250501_161337.json"
+INPUT_PHASE0_OUTPUT_FILE = "logs/phase0_results/schema_v5/phase0_v5_gpt-4.1-2025-04-14_20250503_233642.json"
 INPUT_RAW_CODE_FILE = "utils/contracts/LandManager.sol"
 
 # --- Load prompts and input ---
@@ -87,19 +87,16 @@ def perform_phase1_analysis(
     print(f"Starting Phase 1 analysis using model: {MODEL}...")
     start_time = time.time()
 
-    # Serialize the Phase 0 context summary to pass to the model
-    # Use model_dump_json for Pydantic v2+
-    phase0_context_json = phase0_context.model_dump_json(indent=2)
+    phase0_json = phase0_context.model_dump_json(indent=2)
 
     # Construct the messages for the API call
     messages = [
-        {"role": "system", "content": SYSTEM_PROMPT_PHASE1},
-        # Provide the structured context summary from Phase 0
-        {"role": "user", "content": f"Here is the structured context summary from Phase 0:\n```json\n{phase0_context_json}\n```"},
-        # Provide the raw code for analysis
-        {"role": "user", "content": f"Here is the raw Solidity code to analyze:\n```solidity\n{raw_code}\n```"},
-        # Final instruction
-        {"role": "user", "content": "Perform a deep vulnerability analysis based on the provided context and code. Focus on logic flaws, state inconsistencies, calculation errors, and invariant violations. Populate the `VulnerabilityDetectionOutput` schema with your findings."},
+        {"role": "system",    "content": SYSTEM_PROMPT_PHASE1},
+        # phase-0 context as assistant memory
+        {"role": "assistant", "content": f"PHASE-0 CONTEXT:\n```json\n{phase0_json}\n```"},
+        # user query with the code base
+        {"role": "user",      "content": f"Here are the Solidity sources:\n```solidity\n{raw_code}\n```"},
+        {"role": "user",      "content": "Identify vulnerabilities and return the JSON report."}
     ]
 
     try:

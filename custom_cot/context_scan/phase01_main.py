@@ -5,7 +5,7 @@ import time
 import os
 from dotenv import load_dotenv
 from openai import OpenAI
-from schema.phase_0_schemas.phase_0_schema_v5 import ContextSummaryOutput
+from schema.phase01_schemas.phase_01_schema_v1 import ContextSummaryOutput
 from pydantic import ValidationError
 
 # ------------ models & paths -------------------------------------------------
@@ -14,11 +14,11 @@ GPT_4_1  = "gpt-4.1-2025-04-14"
 O4_MINI  = "o4-mini"
 O3 = "o3-2025-04-16"
 # ───────────────────────── Configuration ─────────────────────────
-MODEL = GPT_4_1
-PROMPT_FILE_SYSTEM = "utils/prompts/phase0_v5_sys_prompt.py"
+MODEL = O3
+PROMPT_FILE_SYSTEM = "utils/prompts/phase01_v1_sys_prompt.py"
 INPUT_FILE_FULL_CONTEXT = "utils/inputs/phase0_full_context.md"
-PHASE = "phase0_v5"
-OUTPUT_DIR_PHASE0 = "logs/phase0_results/schema_v5"
+PHASE = "phase01_v1"
+OUTPUT_DIR_PHASE0 = "logs/phase01_results"
 
 # --- Load prompts and input ---
 try:
@@ -39,7 +39,7 @@ client = OpenAI(api_key=openai_api_key)
 
 # ───────────────── Function for Phase 0 Analysis ─────────────────
 def perform_phase0_analysis() -> ContextSummaryOutput | None:
-    print(f"Starting Phase 0 analysis using model: {MODEL}...")
+    print(f"Starting {PHASE} analysis using model: {MODEL}...")
     start_time = time.time()
 
     # Construct the messages for the API call
@@ -53,7 +53,7 @@ def perform_phase0_analysis() -> ContextSummaryOutput | None:
             model=MODEL,
             messages=messages,
             response_format=ContextSummaryOutput,
-            temperature=0
+            # temperature=0
         )
 
         # Access the parsed Pydantic object
@@ -107,8 +107,9 @@ if __name__ == "__main__":
             with open(output_filename, "w", encoding="utf-8") as f:
                 # Use model_dump_json for Pydantic v2+
                 f.write(phase0_result.model_dump_json(indent=2))
-            print(f"\n✅ Successfully saved Phase 0 output to: {output_filename}")
+            print(f"\n✅ Successfully saved {PHASE} output to: {output_filename}")
             print(f"   - Contracts Summarized: {len(phase0_result.analyzed_contracts)}")
+            print(f"   - Candidates Identified: {len(phase0_result.seed_findings)}")
         except Exception as e:
             print(f"\nError saving output JSON: {e}")
     else:
