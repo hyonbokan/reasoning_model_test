@@ -17,13 +17,13 @@ O4_MINI  = "o4-mini"
 O3 = "o3-2025-04-16"
 # ───────────────────────── Configuration ─────────────────────────
 MODEL = O3
-PROMPT_FILE_SYSTEM = "utils/prompts/phase1_free_v4_sys_prompt.py"
+PROMPT_FILE_SYSTEM = "utils/prompts/phase1_free_sys_prompt.py"
 # INPUT_FILE_FULL_CONTEXT = "utils/inputs/phase0_full_context.md"
-PHASE = "phase0v6_syspromt_free_v4"
+PHASE = "phase0v6_2_syspromt_free_v1"
 
 OUTPUT_DIR_PHASE1 = "logs/phase1_results"
 
-INPUT_PHASE0_OUTPUT_FILE = "logs/phase0_results/schema_v6/phase0_v6_gpt-4.1-2025-04-14_20250504_005017.json"
+INPUT_PHASE0_OUTPUT_FILE = "logs/phase0_results/schema_v6/phase0_v6_2_gpt-4.1-2025-04-14_20250504_164210.json"
 INPUT_RAW_CODE_FILE = "utils/contracts/LandManager.sol"
 
 # --- Load prompts and input ---
@@ -140,7 +140,7 @@ if __name__ == "__main__":
                 # Use model_dump_json for Pydantic v2+
                 f.write(phase1_result.model_dump_json(indent=2))
             print(f"\n✅ Successfully saved Phase 1 output to: {output_filename}")
-            print(f"   - Vulnerabilities Detected: {len(phase1_result.findings)}")
+            print(f"   - Vulnerabilities Detected: {len(phase1_result.results)}")
         except Exception as e:
             print(f"\nError saving Phase 1 output JSON: {e}")
     else:

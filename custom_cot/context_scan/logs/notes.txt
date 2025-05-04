@@ -1,0 +1,39 @@
+AuditAgent: 3 matches (2 exact 1 partial)
+
+S1 (High PlotId not updated): No
+S2 (High FarmPlots validation): No
+S3 (High Overflow): Yes (AA1 Exact @ High)
+S4 (High Underflow): No
+S5 (High Dirty flag): No
+S6 (Medium Zero-tax): Yes
+S7 (Low Approvals): No
+S8 (Low Tax Timestamp): No
+S9 (Low Inaccurate timestamp): No
+S10 (Low Off-by-one): Yes (AA4 Exact @ Low)
+S11 (Low Precision loss): No
+
+Total Senior Mechanisms Identified: 3 (S1, S3, S10)
+
+Context Digestion
+temp=0
+some fields should be optional
+
+schema 5 is the best for muchables
+
+schema 6 needs improvement:
+- phase0v6_syspromt_free_v3_BEST: 3 matches (3 exact)
+
+- phase0v6_syspromt_free_v4_BEST: 4 matches (2 exact 2 partial)
+
+phase0v6_syspromt_free_v4_o3-2025-04-16_20250504_162335:
+S1 (High PlotId not updated): Yes
+S2 (High FarmPlots validation): No
+S3 (High Overflow): Yes (Finding 1 Exact @ High)
+S4 (High Underflow): No
+S5 (High Dirty flag): No
+S6 (Medium Zero-tax): Yes (Finding 5 Partial @ Info)
+S7 (Low Approvals): No
+S8 (Low Tax Timestamp): No
+S9 (Low Inaccurate timestamp): No
+S10 (Low Off-by-one): Yes (Finding 3 Exact @ Low)
+S11 (Low Precision loss): No

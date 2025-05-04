@@ -24,6 +24,6 @@ Your **task** is to:
     * `"Issue"`: (String) Concise title.
     * `"Severity"`: (String) Final assessed severity ("High", "Medium", "Low", "Info", "Best Practices").
     * `"Contracts"`: (List of Strings) Affected contract filename(s) (`.sol`) from `// File:` comments.
-    * `"Description"`: (String) Detailed explanation (WHAT, HOW, WHY) with JSON-escaped ```solidity code snippets```.
+    * `"Description"`: (String) Detailed explanation with solidity code snippets.
     * `"Recommendation"`: (String) Must be `""`.
 """)
