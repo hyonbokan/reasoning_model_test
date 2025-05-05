@@ -6,7 +6,7 @@ import os
 import sys
 from dotenv import load_dotenv
 from openai import OpenAI
-from schema.phase_0_schemas.phase_0_schema_v6 import ContextSummaryOutput
+from schema.phase_0_schemas.phase_0_schema_v6_tight import ContextSummaryOutput
 from schema.phase_1_schemas.phase_1_schema_free import FinalAuditReport
 from pydantic import ValidationError, BaseModel
 
@@ -19,11 +19,11 @@ O3 = "o3-2025-04-16"
 MODEL = O3
 PROMPT_FILE_SYSTEM = "utils/prompts/phase1_free_sys_prompt.py"
 # INPUT_FILE_FULL_CONTEXT = "utils/inputs/phase0_full_context.md"
-PHASE = "phase0v6_2_syspromt_free_v1"
+PHASE = "phase0v6_tight_syspromt_free_v1"
 
 OUTPUT_DIR_PHASE1 = "logs/phase1_results"
 
-INPUT_PHASE0_OUTPUT_FILE = "logs/phase0_results/schema_v6/phase0_v6_2_gpt-4.1-2025-04-14_20250504_164210.json"
+INPUT_PHASE0_OUTPUT_FILE = "logs/phase0_results/schema_v6/phase0_v6_tight_gpt-4.1-2025-04-14_20250505_082951.json"
 INPUT_RAW_CODE_FILE = "utils/contracts/LandManager.sol"
 
 # --- Load prompts and input ---
@@ -93,10 +93,10 @@ def perform_phase1_analysis(
     messages = [
         {"role": "system",    "content": SYSTEM_PROMPT_PHASE1},
         # phase-0 context as assistant memory
-        {"role": "assistant", "content": f"PHASE-0 CONTEXT:\n```json\n{phase0_json}\n```"},
+        {"role": "system", "content": f"PHASE-0 CONTEXT:\n```json\n{phase0_json}\n```"},
         # user query with the code base
         {"role": "user",      "content": f"Here are the Solidity sources:\n```solidity\n{raw_code}\n```"},
-        {"role": "user",      "content": "Identify vulnerabilities and return the JSON report."}
+        # {"role": "user",      "content": "Identify vulnerabilities and return the JSON report."}
     ]
 
     try:

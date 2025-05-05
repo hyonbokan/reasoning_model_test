@@ -37,3 +37,57 @@ S8 (Low Tax Timestamp): No
 S9 (Low Inaccurate timestamp): No
 S10 (Low Off-by-one): Yes (Finding 3 Exact @ Low)
 S11 (Low Precision loss): No
+
+
+
+{
+  "repo_name": "munchables",
+  "benchmark_name": "phase0v6_tight_syspromt_free_v1",
+  "results": [
+    {
+      "Issue": "Reentrancy via external ERC721.transferFrom before state updates in stakeMunchable",
+      "Severity": "High",
+      "Contracts": [
+        "LandManager.sol"
+      ],
+      "Description": "Function \"stakeMunchable\" performs the external call\n```solidity\nmunchNFT.transferFrom(mainAccount, address(this), tokenId);\n```\nBEFORE it writes the critical state variables:\n```solidity\nplotOccupied[landlord][plotId] = ...;\nmunchablesStaked[mainAccount].push(tokenId);\nmunchableOwner[tokenId] = mainAccount;\ntoilerState[tokenId] = ...;\n```\nIf the MunchNFT contract is malicious or upgradeable, it can re-enter LandManager during the transfer (e.g., by calling back into stakeMunchable, unstakeMunchable, etc.). Because the state has not yet been updated, the attacker can:\n• stake multiple NFTs into the same unoccupied plot, ending with mapping inconsistencies (plotOccupied shows token-A while toilerState for token-B also claims the same plot);\n• exceed the intended 10-NFT limit;\n• generally violate invariants inv-5, inv-6, inv-14, inv-19.\nThis breaks the checks-effects-interactions rule and enables loss of accounting integrity or locked assets.",
+      "Recommendation": ""
+    },
+    {
+      "Issue": "toilerState.plotId not updated in transferToUnoccupiedPlot",
+      "Severity": "Medium",
+      "Contracts": [
+        "LandManager.sol"
+      ],
+      "Description": "\"transferToUnoccupiedPlot\" moves an NFT to a new plot but forgets to update the stored plot id:\n```solidity\n// latestTaxRate is updated, but plotId isn’t\ntoilerState[tokenId].latestTaxRate = ...;\n// missing:  toilerState[tokenId].plotId = plotId;\n```\nAfter the call, plotOccupied reflects the NEW plot, while toilerState still points to the OLD one. Subsequent operations (unstakeMunchable, _farmPlots, dirty-flag checks) act on stale data, causing:\n• incorrect reward accounting;\n• attempts to clear / reuse the wrong plot (leading to double-occupancy or locked NFTs);\n• violation of invariants inv-14 and inv-16.",
+      "Recommendation": ""
+    },
+    {
+      "Issue": "Off-by-one check allows 11 NFTs per user",
+      "Severity": "Low",
+      "Contracts": [
+        "LandManager.sol"
+      ],
+      "Description": "The limit is intended to be 10 staked NFTs, but the guard uses a strict “greater than” comparison:\n```solidity\nif (munchablesStaked[mainAccount].length > 10) revert TooManyStakedMunchiesError();\n```\nWhen a user has exactly 10 staked NFTs, the length is 10, the condition is false, and they can stake an 11th token, violating invariant inv-4.",
+      "Recommendation": ""
+    },
+    {
+      "Issue": "Division-by-zero DoS if PRICE_PER_PLOT mis-configured",
+      "Severity": "Low",
+      "Contracts": [
+        "LandManager.sol"
+      ],
+      "Description": "\"_getNumPlots\" directly divides by the config value:\n```solidity\nreturn lockManager.getLockedWeightedValue(_account) / PRICE_PER_PLOT;\n```\nIf an admin (or bug) sets PRICE_PER_PLOT to 0 in ConfigStorage, every call path that uses _getNumPlots (stakeMunchable, transferToUnoccupiedPlot, _farmPlots) reverts, rendering the contract unusable. No safeguard ensures the parameter is non-zero, breaching invariant inv-8.",
+      "Recommendation": ""
+    },
+    {
+      "Issue": "Dirty flag edge case: uses < instead of ≤ in _farmPlots",
+      "Severity": "Info",
+      "Contracts": [
+        "LandManager.sol"
+      ],
+      "Description": "The code checks\n```solidity\nif (_getNumPlots(landlord) < _toiler.plotId) {\n    // mark dirty\n}\n```\nPlot IDs are zero-based. If a landlord reduces their plots from N to N-1, a token staked on the former highest plot (id N-1) becomes invalid, but the comparison `N-1 < N-1` is false, so the dirty flag is not set. Farming continues using out-of-range plot ids, violating invariant inv-22.",
+      "Recommendation": ""
+    }
+  ]
+}

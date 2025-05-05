@@ -5,7 +5,7 @@ import time
 import os
 from dotenv import load_dotenv
 from openai import OpenAI
-from schema.phase_0_schemas.phase_0_schema_v6 import ContextSummaryOutput
+from schema.phase_0_schemas.phase_0_schema_v6_tight import ContextSummaryOutput
 from pydantic import ValidationError
 
 # ------------ models & paths -------------------------------------------------
@@ -15,9 +15,9 @@ O4_MINI  = "o4-mini"
 O3 = "o3-2025-04-16"
 # ───────────────────────── Configuration ─────────────────────────
 MODEL = GPT_4_1
-PROMPT_FILE_SYSTEM = "utils/prompts/phase0_v6_2_sys_prompt.py"
+PROMPT_FILE_SYSTEM = "utils/prompts/phase0_v6_tight_sys_prompt.py"
 INPUT_FILE_FULL_CONTEXT = "utils/inputs/phase0_full_context.md"
-PHASE = "phase0_v6_2"
+PHASE = "phase0_v6_tight"
 OUTPUT_DIR_PHASE0 = "logs/phase0_results/schema_v6"
 
 # --- Load prompts and input ---
