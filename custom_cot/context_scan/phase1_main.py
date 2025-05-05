@@ -94,7 +94,7 @@ def perform_phase1_analysis(
     # Construct the messages for the API call
     messages = [
         {"role": "system",    "content": SYSTEM_PROMPT_PHASE1},
-        {"role": "system", "content": f"PHASE-0 CONTEXT:\n```json\n{phase0_json}\n```"},
+        {"role": "user", "content": f"PHASE-0 CONTEXT:\n```json\n{phase0_json}\n```"},
         # user query with the code base
         {"role": "user",      "content": f"Here are the Solidity sources:\n```solidity\n{raw_code}\n```"},
     ]
