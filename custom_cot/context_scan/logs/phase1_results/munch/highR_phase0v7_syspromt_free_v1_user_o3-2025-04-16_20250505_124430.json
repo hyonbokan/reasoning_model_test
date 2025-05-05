@@ -1,0 +1,49 @@
+{
+  "results": [
+    {
+      "Issue": "Negative bonus can revert farming, DoS for staker & landlord",
+      "Severity": "High",
+      "Contracts": [
+        "LandManager.sol"
+      ],
+      "Description": "In ```_farmPlots``` the Schnibble calculation first computes an **int256** amount and later converts it back to **uint256**:\n```solidity\nfinalBonus = int16(REALM_BONUSES[...]) + int16(int8(RARITY_BONUSES[...]));\n...\nschnibblesTotal = uint256((int256(schnibblesTotal) + (int256(schnibblesTotal)*finalBonus))/100);\n```\nIf **finalBonus ≤ -100**, the inner sum becomes **≤ 0**. Converting a negative **int256** to **uint256** triggers a Solidity panic (0x1) and reverts the transaction. Any Munchable whose realm-/rarity-combination or a mis-configured REALM_BONUSES array yields such a bonus will permanently brick:\n• ```stakeMunchable``` – guarded by `forceFarmPlots`, will revert → cannot stake/unstake.\n• ```farmPlots``` itself reverts → rewards for all other tokens of that player are blocked.\nThis is a protocol-wide DoS leveraged by either bad configuration or a single malicious attribute combination.",
+      "Recommendation": ""
+    },
+    {
+      "Issue": "Tax rate > 1e18 can underflow renter rewards",
+      "Severity": "Medium",
+      "Contracts": [
+        "LandManager.sol"
+      ],
+      "Description": "```_farmPlots``` splits Schnibbles as\n```solidity\nschnibblesLandlord = (schnibblesTotal * _toiler.latestTaxRate) / 1e18;\nrenterMetadata.unfedSchnibbles += schnibblesTotal - schnibblesLandlord; // <-- subtraction\n```\nThe code assumes `_toiler.latestTaxRate ≤ 1e18` (i.e. ≤100 %). Nothing enforces this:\n• `DEFAULT_TAX_RATE`, `MIN_TAX_RATE`, `MAX_TAX_RATE` are loaded from `ConfigStorage` without upper bound.\n• `updateTaxRate` only checks `MIN_TAX_RATE ≤ newTaxRate ≤ MAX_TAX_RATE`.\nIf any of those values exceeds **1e18**, `schnibblesLandlord` can become larger than `schnibblesTotal`; the subtraction underflows and reverts. Every subsequent call that farms that token will fail, locking the user out (DoS).",
+      "Recommendation": ""
+    },
+    {
+      "Issue": "Division-by-zero if PRICE_PER_PLOT mis-configured",
+      "Severity": "Medium",
+      "Contracts": [
+        "LandManager.sol"
+      ],
+      "Description": "```_getNumPlots``` uses\n```solidity\nreturn lockManager.getLockedWeightedValue(_account) / PRICE_PER_PLOT;\n```\nNo check guarantees that `PRICE_PER_PLOT` ≠ 0. A zero value (wrong `ConfigStorage` entry) causes every function that calls `_getNumPlots` (e.g. `stakeMunchable`, `transferToUnoccupiedPlot`, `farmPlots`) to revert, effectively halting the protocol.",
+      "Recommendation": ""
+    },
+    {
+      "Issue": "Maximum of 10 staked munchables off-by-one",
+      "Severity": "Low",
+      "Contracts": [
+        "LandManager.sol"
+      ],
+      "Description": "`stakeMunchable` enforces the limit with\n```solidity\nif (munchablesStaked[mainAccount].length > 10) revert TooManyStakedMunchiesError();\n```\nWhen the player already has **10** tokens staked, the condition is false, allowing an 11ᵗʰ stake and making the array length **11**. This breaks the documented limit (invariant 4) and UI/logic that expect a hard cap of ten.",
+      "Recommendation": ""
+    },
+    {
+      "Issue": "Dirty-flag check off-by-one, stale plots not marked",
+      "Severity": "Info",
+      "Contracts": [
+        "LandManager.sol"
+      ],
+      "Description": "In `_farmPlots` a plot is marked dirty when the landlord reduces the number of plots below the toiler’s current `plotId`:\n```solidity\nif (_getNumPlots(landlord) < _toiler.plotId) {\n    ...\n}\n```\nBecause plot IDs are 0-based, the correct check should be `<=`. Otherwise a staker on the last valid plot (e.g. `plotId == totalPlotsAvail-1`) will **not** be flagged dirty when the landlord removes exactly one plot, leading to inconsistent bookkeeping.",
+      "Recommendation": ""
+    }
+  ]
+}

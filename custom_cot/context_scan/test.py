@@ -6,9 +6,7 @@ import os
 import sys
 from dotenv import load_dotenv
 from openai import OpenAI
-from schema.phase_0_schemas.phase_0_schema_v7_2 import ContextSummaryOutput
 from schema.phase_1_schemas.phase_1_schema_free import FinalAuditReport
-from pydantic import ValidationError, BaseModel
 
 # ------------ models & paths -------------------------------------------------
 GPT_4O   = "gpt-4o-2024-08-06"
@@ -17,56 +15,19 @@ O4_MINI  = "o4-mini"
 O3 = "o3-2025-04-16"
 # ───────────────────────── Configuration ─────────────────────────
 MODEL = O3
-PROMPT_FILE_SYSTEM = "utils/prompts/phase1_free_sys_prompt.py"
+PROMPT_FILE_SYSTEM = "utils/prompts/munch_org_system_prompt.md"
 # INPUT_FILE_FULL_CONTEXT = "utils/inputs/phase0_full_context.md"
-PHASE = "highR_phase0v7_2_syspromt_free_v1_system"
+PHASE = "org_test_retry"
 
-OUTPUT_DIR_PHASE1 = "logs/phase1_results"
-
-INPUT_PHASE0_OUTPUT_FILE = "logs/phase0_results/backd/schema_v7/phase0_v7_2_gpt-4.1-2025-04-14_20250505_140811.json"
-# INPUT_PHASE0_OUTPUT_FILE = "logs/phase0_results/munch/schema_v7/phase0_v7_2_gpt-4.1-2025-04-14_20250505_144954.json"
-INPUT_RAW_CODE_FILE = "utils/contracts/Backed.sol"
-# INPUT_RAW_CODE_FILE = "utils/contracts/LandManager.sol"
-
-# --- Load prompts and input ---
-try:
-    RAW_CONTRACT_CODE = pathlib.Path(INPUT_RAW_CODE_FILE).read_text()
-    if not RAW_CONTRACT_CODE.strip():
-        raise ValueError("Raw code file is empty.")
-except Exception as e:
-    print(f"Error loading raw Solidity code: {e}")
-    print(f"Please ensure the file exists at: {INPUT_RAW_CODE_FILE}")
-    sys.exit(1)
+OUTPUT_DIR_PHASE1 = "logs/test"
 
 try:
-    SYSTEM_PROMPT_PHASE1 = pathlib.Path(PROMPT_FILE_SYSTEM).read_text()
-    if not SYSTEM_PROMPT_PHASE1.strip():
+    SYSTEM_PROMPT = pathlib.Path(PROMPT_FILE_SYSTEM).read_text()
+    if not SYSTEM_PROMPT.strip():
         raise ValueError("System prompt file is empty.")
 except Exception as e:
     print(f"Error loading system prompt: {e}")
     print(f"Please ensure the file exists at: {PROMPT_FILE_SYSTEM}")
-    sys.exit(1)
-    
-# --- Load Phase 0 Results ---
-try:
-    with open(INPUT_PHASE0_OUTPUT_FILE, 'r', encoding='utf-8') as f:
-        phase0_data = json.load(f)
-        # Validate and parse the loaded data using the Phase 0 schema
-        phase0_summary: ContextSummaryOutput = ContextSummaryOutput.model_validate(phase0_data)
-    print(f"Successfully loaded and validated Phase 0 output from: {INPUT_PHASE0_OUTPUT_FILE}")
-except FileNotFoundError:
-    print(f"Error: Phase 0 output file not found at {INPUT_PHASE0_OUTPUT_FILE}")
-    print("Please ensure the Phase 0 script ran successfully and update the path.")
-    sys.exit(1)
-except json.JSONDecodeError:
-    print(f"Error: Could not decode JSON from {INPUT_PHASE0_OUTPUT_FILE}")
-    sys.exit(1)
-except ValidationError as e:
-    print(f"Error: Phase 0 output file does not match ContextSummaryOutput schema:")
-    print(e)
-    sys.exit(1)
-except Exception as e:
-    print(f"An unexpected error occurred loading Phase 0 output: {e}")
     sys.exit(1)
     
 # ───────────────────────── OpenAI Client ─────────────────────────
@@ -78,10 +39,7 @@ if not openai_api_key:
 client = OpenAI(api_key=openai_api_key)
 
 # ───────────────── Function for Phase 1 Analysis ─────────────────
-def perform_phase1_analysis(
-    phase0_context: ContextSummaryOutput,
-    raw_code: str
-) -> FinalAuditReport | None:
+def perform_phase1_analysis():
     """
     Performs the Phase 1 vulnerability detection using the reasoning model,
     structured context from Phase 0, and raw code.
@@ -89,14 +47,9 @@ def perform_phase1_analysis(
     print(f"Starting Phase 1 analysis using model: {MODEL}...")
     start_time = time.time()
 
-    phase0_json = phase0_context.model_dump_json(indent=2)
-
     # Construct the messages for the API call
     messages = [
-        {"role": "system",    "content": SYSTEM_PROMPT_PHASE1},
-        {"role": "system", "content": f"PHASE-0 CONTEXT:\n```json\n{phase0_json}\n```"},
-        # user query with the code base
-        {"role": "user",      "content": f"Here are the Solidity sources:\n```solidity\n{raw_code}\n```"},
+        {"role": "user",    "content": SYSTEM_PROMPT},
     ]
 
     try:
@@ -123,7 +76,7 @@ def perform_phase1_analysis(
 
 # ───────────────────────── Main Execution ──────────────────────────
 if __name__ == "__main__":
-    phase1_result = perform_phase1_analysis(phase0_summary, RAW_CONTRACT_CODE)
+    phase1_result = perform_phase1_analysis()
 
     # Save the structured output if successful
     if phase1_result:

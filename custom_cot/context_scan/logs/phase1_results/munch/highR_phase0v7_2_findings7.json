@@ -1,0 +1,67 @@
+{
+  "results": [
+    {
+      "Issue": "transferToUnoccupiedPlot does not update toilerState.plotId, leading to inconsistent occupancy mapping",
+      "Severity": "Medium",
+      "Contracts": [
+        "LandManager.sol"
+      ],
+      "Description": "When a player moves his NFT to another plot, the contract correctly clears the old Plot struct and sets the new one, but **fails to synchronise the `plotId` stored in `toilerState`**:\n\n```solidity\nfunction transferToUnoccupiedPlot(uint256 tokenId, uint256 plotId) ... {\n    ...\n    uint256 oldPlotId = _toiler.plotId;\n    ...\n    toilerState[tokenId].latestTaxRate = plotMetadata[_toiler.landlord].currentTaxRate; // <-- plotId NOT updated\n    plotOccupied[_toiler.landlord][oldPlotId] = Plot({ occupied: false, tokenId: 0 });\n    plotOccupied[_toiler.landlord][plotId]  = Plot({ occupied: true,  tokenId: tokenId });\n}\n```\n\nAfter the first transfer, `toilerState[tokenId].plotId` still points to the **original** plot. A subsequent transfer will once again clear that original plot instead of the current one, leaving *multiple* plots marked as occupied by the same token. This breaks invariant *inv16* and can be abused to grief landlords by permanently blocking an arbitrary number of plots.",
+      "Recommendation": ""
+    },
+    {
+      "Issue": "Off-by-one in maximum staked NFTs per user allows 11 tokens instead of 10",
+      "Severity": "Low",
+      "Contracts": [
+        "LandManager.sol"
+      ],
+      "Description": "`stakeMunchable` checks the limit **before** pushing the new token but uses a strict `>` comparison:\n\n```solidity\nif (munchablesStaked[mainAccount].length > 10)\n    revert TooManyStakedMunchiesError();\n...\nmunchablesStaked[mainAccount].push(tokenId); // length can now become 11\n```\n\nWhen a player already has 10 staked NFTs, the condition is false, the function proceeds, and the array length becomes 11. This violates invariant *inv4* and increases the worst-case loop size in `_farmPlots`.",
+      "Recommendation": ""
+    },
+    {
+      "Issue": "NFT transfers executed without re-entrancy protection can corrupt state",
+      "Severity": "Low",
+      "Contracts": [
+        "LandManager.sol"
+      ],
+      "Description": "Both `stakeMunchable` and `unstakeMunchable` call `munchNFT.transferFrom` **before** or **after** critical state changes without a `nonReentrant` guard:\n\n```solidity\n// stake\nmunchNFT.transferFrom(mainAccount, address(this), tokenId);\n...\n// unstake (state cleared first)\nmunchNFT.transferFrom(address(this), mainAccount, tokenId);\n```\n\nA malicious or non-standard ERC-721 implementation could call back into LandManager during the transfer, re-entering functions such as `stakeMunchable`, `unstakeMunchable`, or `transferToUnoccupiedPlot` while state is in an inconsistent phase, leading to double-staking or other invariance violations. Although MunchNFT is assumed trusted (ctx2), lack of a guard leaves the door open if any other collection is integrated in the future.",
+      "Recommendation": ""
+    },
+    {
+      "Issue": "Possible division by zero in _getNumPlots if PRICE_PER_PLOT is mis-configured",
+      "Severity": "Low",
+      "Contracts": [
+        "LandManager.sol"
+      ],
+      "Description": "`_getNumPlots` divides by `PRICE_PER_PLOT` which is loaded from external config without a sanity check:\n\n```solidity\nfunction _getNumPlots(address _account) internal view returns (uint256) {\n    return lockManager.getLockedWeightedValue(_account) / PRICE_PER_PLOT; // ↙ potential /0\n}\n```\n\nIf an administrator erroneously sets `PRICE_PER_PLOT` to zero, every call that relies on `_getNumPlots` will revert, effectively bricking staking, farming and tax-updates.",
+      "Recommendation": ""
+    },
+    {
+      "Issue": "Negative bonus values can make Schnibbles calculation revert",
+      "Severity": "Low",
+      "Contracts": [
+        "LandManager.sol"
+      ],
+      "Description": "Reward calculation assumes `(1 + finalBonus)` is positive:\n\n```solidity\nfinalBonus = int16(...REALM_BONUSES[...]) + int16(int8(RARITY_BONUSES[...]));\n...\nschnibblesTotal = uint256(\n    (int256(schnibblesTotal) + (int256(schnibblesTotal) * finalBonus)) / 100\n);\n```\n\nIf administrators configure `REALM_BONUSES` so that `finalBonus < -1`, the inner expression becomes negative, and the cast back to `uint256` underflows, reverting the entire `farmPlots` call. This provides a denial-of-service vector via misconfiguration.",
+      "Recommendation": ""
+    },
+    {
+      "Issue": "uint8 loop counter in _farmPlots overflows when >255 NFTs are staked",
+      "Severity": "Info",
+      "Contracts": [
+        "LandManager.sol"
+      ],
+      "Description": "`_farmPlots` uses a `uint8` index:\n\n```solidity\nfor (uint8 i = 0; i < staked.length; i++) { ... }\n```\n\nIf, through future parameter changes, a player is allowed to stake more than 255 NFTs, `i++` would overflow and revert. While the current (buggy) limit is 11, using `uint256` is safer and future-proof.",
+      "Recommendation": ""
+    },
+    {
+      "Issue": "Upgradeable contract lacks storage gap, risking storage collisions on future upgrades",
+      "Severity": "Best Practices",
+      "Contracts": [
+        "LandManager.sol"
+      ],
+      "Description": "OpenZeppelin’s UUPS guidance recommends reserving an unused storage space:\n\n```solidity\nuint256[50] private __gap;\n```\n\nWithout it, adding new state variables in a future implementation can overwrite existing storage, leading to unpredictable behaviour.",
+      "Recommendation": ""
+    }
+  ]
+}

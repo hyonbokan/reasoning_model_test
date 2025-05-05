@@ -1,0 +1,49 @@
+{
+  "results": [
+    {
+      "Issue": "Off-by-one staking limit & uint8 loop overflow can break invariant",
+      "Severity": "Medium",
+      "Contracts": [
+        "LandManager.sol"
+      ],
+      "Description": "In `stakeMunchable` the limit check is performed **before** the new token is pushed:\n```solidity\nif (munchablesStaked[mainAccount].length > 10)\n    revert TooManyStakedMunchiesError();\n...\nmunchablesStaked[mainAccount].push(tokenId);   // now length may be 11\n```\nConsequently a user can have **11** (or more) NFTs staked, violating invariant *inv4* (max-10 rule).\n\n`_farmPlots` later iterates with a **uint8** counter:\n```solidity\nfor (uint8 i = 0; i < staked.length; i++) {\n    ...\n}\n```\nIf a user manages to stake >255 NFTs (possible once the first check is bypassed repeatedly) the counter overflows at `i == 255` and the loop reverts, permanently DOS-ing `farmPlots`, `stakeMunchable`, `unstakeMunchable`, etc.  Even with fewer tokens, the economic cap of 10 is already broken.",
+      "Recommendation": ""
+    },
+    {
+      "Issue": "Division-by-zero risk when PRICE_PER_PLOT is mis-configured",
+      "Severity": "Low",
+      "Contracts": [
+        "LandManager.sol"
+      ],
+      "Description": "`_getNumPlots` performs:\n```solidity\nreturn lockManager.getLockedWeightedValue(_account) / PRICE_PER_PLOT;\n```\n`PRICE_PER_PLOT` is fetched from the configurable storage in `_reconfigure` but **never validated to be non-zero**.  A faulty or malicious config update could set it to `0`, causing every call that touches `_getNumPlots` (staking, farming, transferring, tax updates) to revert and effectively freeze the LandManager forever (denial-of-service).",
+      "Recommendation": ""
+    },
+    {
+      "Issue": "Off-by-one dirty-plot check lets NFTs farm on non-existent plots",
+      "Severity": "Medium",
+      "Contracts": [
+        "LandManager.sol"
+      ],
+      "Description": "When the landlord’s plot count shrinks, LandManager should mark existing occupants as *dirty*:\n```solidity\nif (_getNumPlots(landlord) < _toiler.plotId) {\n    timestamp = plotMetadata[landlord].lastUpdated;\n    toilerState[tokenId].dirty = true;\n}\n```\nPlot IDs are zero-based, so after the landlord goes from 5 to 4 plots the highest valid ID becomes **3**.  An NFT sitting on plot **4** should become dirty, but the current comparison (`<`) fails because `4 < 4` is false.  The token continues to earn Schnibbles on a plot that no longer exists, breaking economic correctness (*inv22*) and letting stakers harvest unearned rewards.",
+      "Recommendation": ""
+    },
+    {
+      "Issue": "Staker can harvest with 0% tax if landlord never initialised metadata",
+      "Severity": "Low",
+      "Contracts": [
+        "LandManager.sol"
+      ],
+      "Description": "`stakeMunchable` sets the initial tax snapshot with:\n```solidity\nlatestTaxRate: plotMetadata[landlord].currentTaxRate,\n```\nIf the landlord never called `triggerPlotMetadata` / `updatePlotMetadata`, `currentTaxRate` is the default value **0**.  The staker can therefore stake and immediately call `farmPlots`, keeping 100 % of the Schnibbles until the landlord later initialises metadata (if ever).  Landlords receive no revenue for that interval.",
+      "Recommendation": ""
+    },
+    {
+      "Issue": "External call re-entrancy possible in _farmPlots (no guard)",
+      "Severity": "Low",
+      "Contracts": [
+        "LandManager.sol"
+      ],
+      "Description": "`_farmPlots` updates internal state and then performs an **external** call inside the same loop:\n```solidity\naccountManager.updatePlayer(landlord, landlordMetadata); // external, non-view\n```\nNeither `LandManager` nor `BaseBlastManagerUpgradeable` (in the provided code) uses `nonReentrant`.  A compromised or upgraded `AccountManager` could call back into `LandManager` (e.g. `stakeMunchable`) while the first `_farmPlots` execution is still in progress, potentially:\n• causing inconsistent `toilerState` updates,\n• bypassing staking limits again,\n• double-emitting events.\n\nAlthough `AccountManager` is assumed trusted (*ctx1*), adding a re-entrancy guard is a standard defensive practice.",
+      "Recommendation": ""
+    }
+  ]
+}

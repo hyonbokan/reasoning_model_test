@@ -12,34 +12,9 @@ S9 (Low Inaccurate timestamp): No
 S10 (Low Off-by-one): Yes (AA4 Exact @ Low)
 S11 (Low Precision loss): No
 
-Total Senior Mechanisms Identified: 3 (S1, S3, S10)
-
-Context Digestion
-temp=0
-some fields should be optional
-
-schema 5 is the best for muchables
-
-schema 6 needs improvement:
-- phase0v6_syspromt_free_v3_BEST: 3 matches (3 exact)
-
-- phase0v6_syspromt_free_v4_BEST: 4 matches (2 exact 2 partial)
-
-phase0v6_syspromt_free_v4_o3-2025-04-16_20250504_162335:
-S1 (High PlotId not updated): Yes
-S2 (High FarmPlots validation): No
-S3 (High Overflow): Yes (Finding 1 Exact @ High)
-S4 (High Underflow): No
-S5 (High Dirty flag): No
-S6 (Medium Zero-tax): Yes (Finding 5 Partial @ Info)
-S7 (Low Approvals): No
-S8 (Low Tax Timestamp): No
-S9 (Low Inaccurate timestamp): No
-S10 (Low Off-by-one): Yes (Finding 3 Exact @ Low)
-S11 (Low Precision loss): No
 
 
-
+5 matches
 {
   "repo_name": "munchables",
   "benchmark_name": "phase0v6_tight_syspromt_free_v1",
@@ -87,6 +62,60 @@ S11 (Low Precision loss): No
         "LandManager.sol"
       ],
       "Description": "The code checks\n```solidity\nif (_getNumPlots(landlord) < _toiler.plotId) {\n    // mark dirty\n}\n```\nPlot IDs are zero-based. If a landlord reduces their plots from N to N-1, a token staked on the former highest plot (id N-1) becomes invalid, but the comparison `N-1 < N-1` is false, so the dirty flag is not set. Farming continues using out-of-range plot ids, violating invariant inv-22.",
+      "Recommendation": ""
+    }
+  ]
+}
+
+
+4 matches:
+{
+  "repo_name": "munchables",
+  "benchmark_name": "phase0v6_prompt_tight2_syspromt_free_v1_user",
+  "results": [
+    {
+      "Issue": "plotId not updated in transferToUnoccupiedPlot causes double-occupancy/mis-accounting",
+      "Severity": "Medium",
+      "Contracts": [
+        "LandManager.sol"
+      ],
+      "Description": "In ```transferToUnoccupiedPlot()``` the contract updates the *Plot* mapping for the old and new plot IDs but **forgets to update the stored toiler state**:\n```solidity\n// state mutated -------------------------------------------------\nplotOccupied[_toiler.landlord][oldPlotId] = Plot({occupied:false,tokenId:0});\nplotOccupied[_toiler.landlord][plotId]  = Plot({occupied:true ,tokenId:tokenId});\n// MISSING -------------------------------------------------------\n// toilerState[tokenId].plotId = plotId;\n```\nConsequences:\n• `toilerState[tokenId].plotId` still points to the previous plot, violating invariants 14 & 16.\n• Subsequent calls to `_farmPlots()` use the wrong plot id, allowing the landlord to reduce the total number of plots without the dirty flag being set, or enabling another renter to stake a second NFT into the old plot (``plotOccupied`` shows it as free).\n• Reward/tax calculations and occupancy checks become inconsistent, resulting in potential over- or under-payment and double-occupancy of land.\n",
+      "Recommendation": ""
+    },
+    {
+      "Issue": "Off-by-one lets a player stake 11 (not 10) Munchables",
+      "Severity": "Low",
+      "Contracts": [
+        "LandManager.sol"
+      ],
+      "Description": "The maximum NFTs a player should stake is 10 (invariant-4).  The check in ```stakeMunchable()``` is performed **before** the new token is appended and uses a strict *>* comparison:\n```solidity\nif (munchablesStaked[mainAccount].length > 10)\n        revert TooManyStakedMunchiesError();\n...\nmunchablesStaked[mainAccount].push(tokenId);\n```\nWhen a user already has exactly 10 tokens staked, `length` equals 10, so the check passes and the 11th token is pushed, bypassing the intended cap.\n",
+      "Recommendation": ""
+    },
+    {
+      "Issue": "Dirty-flag check uses '<' instead of '>=' resulting in stale state",
+      "Severity": "Low",
+      "Contracts": [
+        "LandManager.sol"
+      ],
+      "Description": "Inside `_farmPlots()` the contract tries to mark a toiler as *dirty* when the landlord’s plot count shrinks below the toiler’s plot id:\n```solidity\nif (_getNumPlots(landlord) < _toiler.plotId) {\n    timestamp = plotMetadata[landlord].lastUpdated;\n    toilerState[tokenId].dirty = true;\n}\n```\nBecause plot IDs are 0-based, the condition should be **`>=`** (or `>`).  Example: a toiler on plot **4** becomes invalid when the landlord drops from 5→4 plots; now `numPlots == 4`, the comparison returns *false*, leaving the state clean and continuing to accrue rewards from a non-existent plot.\n",
+      "Recommendation": ""
+    },
+    {
+      "Issue": "Division-by-zero / complete DoS if PRICE_PER_PLOT mis-configured",
+      "Severity": "Medium",
+      "Contracts": [
+        "LandManager.sol"
+      ],
+      "Description": "`_getNumPlots()` divides the landlord’s locked value by `PRICE_PER_PLOT` which is loaded from `ConfigStorage` during `_reconfigure()`:\n```solidity\nPRICE_PER_PLOT = IConfigStorage(configStorage).getUint(StorageKey.NFTOverlord);\n...\nreturn lockManager.getLockedWeightedValue(_account) / PRICE_PER_PLOT;\n```\nIf an administrator (maliciously or accidentally) sets `PRICE_PER_PLOT` to **0**, every call that eventually executes `_getNumPlots()` will revert with a division-by-zero error.  This bricks:\n• staking / unstaking (they call `_getNumPlots` directly or via `_farmPlots`),\n• farming, and\n• any function using the `forceFarmPlots` modifier.\nThus the whole LandManager becomes unusable.\n",
+      "Recommendation": ""
+    },
+    {
+      "Issue": "External call in _farmPlots allows re-entrancy before state updates",
+      "Severity": "Low",
+      "Contracts": [
+        "LandManager.sol"
+      ],
+      "Description": "The `forceFarmPlots` modifier invokes `_farmPlots()` **before** any state changes of the wrapped function (e.g. `stakeMunchable`).  Inside `_farmPlots()` the contract makes an external call:\n```solidity\naccountManager.updatePlayer(landlord, landlordMetadata);\n```\nA malicious or compromised `AccountManager` implementation could call back into `LandManager` (e.g. another `stakeMunchable`) while the outer function hasn’t yet updated occupancy mappings.  This breaks the Checks-Effects-Interactions pattern and can lead to inconsistent state such as double-staking the same plot.\n\nAlthough the current security assumptions mark `AccountManager` as trusted, following the pattern and adding a re-entrancy guard (or moving farming logic after state updates) would harden the contract against future upgrades or compromise.\n",
       "Recommendation": ""
     }
   ]

@@ -1,0 +1,49 @@
+{
+  "results": [
+    {
+      "Issue": "Off-by-one allows 11 (not 10) NFTs to be staked per player",
+      "Severity": "Medium",
+      "Contracts": [
+        "LandManager.sol"
+      ],
+      "Description": "The intended cap (see invariant 4) is 10 staked Munchables per player, however the check in `stakeMunchable` is:\n```solidity\nif (munchablesStaked[mainAccount].length > 10)\n    revert TooManyStakedMunchiesError();\n```\nBecause the length is tested **before** the new token is pushed, a player can already have 10 tokens staked and still pass the `> 10` condition, ending up with **11** after the push:\n```solidity\n// length == 10  -> passes guard\nmunchablesStaked[mainAccount].push(tokenId); // length becomes 11\n```\nThis breaks the documented invariant, gives a player a 10 % advantage in Schnibbles farming, and may unbalance game economics.",
+      "Recommendation": ""
+    },
+    {
+      "Issue": "toilerState.plotId not updated on plot transfer",
+      "Severity": "Medium",
+      "Contracts": [
+        "LandManager.sol"
+      ],
+      "Description": "`transferToUnoccupiedPlot` moves the occupancy mappings but forgets to update the canonical record stored in `toilerState`:\n```solidity\n// latestTaxRate updated, but plotId is not\ntoilerState[tokenId].latestTaxRate = plotMetadata[_toiler.landlord].currentTaxRate;\n// missing: toilerState[tokenId].plotId = plotId;\n```\nConsequences:\n•  `toilerState[tokenId].plotId` remains the old value, violating invariant 16.\n•  Subsequent calls that rely on `plotId` (e.g. re-transfer, farming dirty-flag logic) operate on stale data, potentially causing incorrect Schnibbles calculations, unintended dirty flags, or reverting because the stored plot no longer exists.\n•  Old plot is marked free, so **two plots can appear occupied (mapping) while the internal state believes only the old one is used**, breaking consistency.",
+      "Recommendation": ""
+    },
+    {
+      "Issue": "Incorrect dirty-flag comparison may miss out-of-range plots",
+      "Severity": "Low",
+      "Contracts": [
+        "LandManager.sol"
+      ],
+      "Description": "Inside `_farmPlots` the contract tries to mark a staked token dirty if its stored `plotId` no longer fits within the landlord’s current number of plots:\n```solidity\nif (_getNumPlots(landlord) < _toiler.plotId) {\n    timestamp = plotMetadata[landlord].lastUpdated;\n    toilerState[tokenId].dirty = true;\n}\n```\nBecause valid plot indices are `0 … numPlots-1`, the correct test should be `<=` (less-than-or-equal). When `plotId == numPlots` (already out of range) the condition is **false** and the token is **not** marked dirty, leading to silent state corruption and skipped reward accrual logic.",
+      "Recommendation": ""
+    },
+    {
+      "Issue": "Entire Schnibbles reward divided by 100 due to operator precedence",
+      "Severity": "Low",
+      "Contracts": [
+        "LandManager.sol"
+      ],
+      "Description": "Reward calculation in `_farmPlots` is meant to increase the base reward by a percentage bonus, but the parentheses cause the whole amount to be divided by 100:\n```solidity\nschnibblesTotal = uint256(\n    (int256(schnibblesTotal) + (int256(schnibblesTotal) * finalBonus)) / 100\n);\n```\nMathematically this computes `(base + base*bonus)/100`, yielding only **1 %** of the intended value when `bonus = 0`. Players receive drastically fewer Schnibbles than expected, impacting game economics.",
+      "Recommendation": ""
+    },
+    {
+      "Issue": "Missing re-entrancy guard around external ERC-721 transfers",
+      "Severity": "Low",
+      "Contracts": [
+        "LandManager.sol"
+      ],
+      "Description": "`stakeMunchable` and `unstakeMunchable` call `munchNFT.transferFrom` **before** or **after** critical state changes and the contract lacks a `nonReentrant` guard. A malicious `MunchNFT` implementation could re-enter `LandManager`, e.g. calling `stakeMunchable` again during the first call, bypassing array-length or ownership checks based on still-incomplete state. Although the official MunchNFT is assumed trustworthy (assumption-2), guarding against unexpected implementations is a prudent defensive measure.",
+      "Recommendation": ""
+    }
+  ]
+}

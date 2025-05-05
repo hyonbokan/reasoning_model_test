@@ -1,0 +1,31 @@
+{
+  "results": [
+    {
+      "Issue": "`transferToUnoccupiedPlot` does not update `toilerState.plotId` leaving the new plot permanently locked",
+      "Severity": "High",
+      "Contracts": [
+        "LandManager.sol"
+      ],
+      "Description": "When a staked Munchable is moved to a different plot the contract updates the occupancy maps, but it forgets to update the cached plot id stored inside `toilerState`.  \n\n```solidity\nfunction transferToUnoccupiedPlot(uint256 tokenId,uint256 plotId) ... {\n    ...\n    // tax-rate is refreshed, but the plot id is **not**\n    toilerState[tokenId].latestTaxRate = plotMetadata[_toiler.landlord].currentTaxRate;\n    \n    // old plot freed\n    plotOccupied[_toiler.landlord][oldPlotId] = Plot({occupied:false,tokenId:0});\n    // new plot taken\n    plotOccupied[_toiler.landlord][plotId]      = Plot({occupied:true, tokenId:tokenId});\n    // missing →  toilerState[tokenId].plotId = plotId;\n}\n```\n\nConsequences:\n1. `toilerState.plotId` still points to the *old* plot.  \n2. When the user later calls `unstakeMunchable`, the function frees the **wrong** plot:\n   ```solidity\n   plotOccupied[_toiler.landlord][_toiler.plotId] = Plot({occupied:false,tokenId:0});\n   ```\n   – the *old* plot (already empty) is cleared, while the *new* plot remains marked as `occupied = true` with the dangling `tokenId`.\n3. The landlord loses one plot forever because it appears occupied, yet no Munchable is actually staked on it. No one can ever take that plot again, resulting in a permanent denial-of-service of land capacity and in lost Schnibbles income for the landlord.\n4. All reward calculations for that Munchable still rely on the outdated plot id, so later `farmPlots` executions may mark the toiler as `dirty`, stopping reward accrual for the player as well.\n\nBecause a single malicious or inattentive user can lock any landlord’s plot indefinitely and there is no administrative way to unlock it, the impact is very high, while the attack is trivial to execute (just call `transferToUnoccupiedPlot` once and then `unstakeMunchable`).",
+      "Recommendation": ""
+    },
+    {
+      "Issue": "Off-by-one allows staking 11 Munchables although the documented limit is 10",
+      "Severity": "Low",
+      "Contracts": [
+        "LandManager.sol"
+      ],
+      "Description": "The maximum amount of Munchables a player should be able to stake is ten, but the check inside `stakeMunchable` uses a strict greater-than comparison **before** the new token is pushed:\n\n```solidity\nif (munchablesStaked[mainAccount].length > 10)\n    revert TooManyStakedMunchiesError();\n...\nmunchablesStaked[mainAccount].push(tokenId);   // ← length becomes length+1 afterwards\n```\n\nScenario:\n1. A player already has 10 tokens staked (`length == 10`).  \n2. The condition `10 > 10` evaluates to **false**, so the transaction proceeds.  \n3. After the `push`, `length` is now **11** – exceeding the intended cap.\n\nAlthough the next staking attempt will revert, one extra Munchable can continuously generate Schnibbles, giving that player an unfair advantage and potentially upsetting the in-game economy that assumes a hard cap of ten.",
+      "Recommendation": ""
+    },
+    {
+      "Issue": "No re-entrancy protection around external calls",
+      "Severity": "Best Practices",
+      "Contracts": [
+        "LandManager.sol"
+      ],
+      "Description": "Several state-changing functions perform external calls *before* all internal state is finalised without using a re-entrancy guard:\n\n```solidity\n// stakeMunchable – external token transfer before writing state\na) munchNFT.transferFrom(mainAccount, address(this), tokenId);\n\n// unstakeMunchable – external token transfer after clearing storage\nb) munchNFT.transferFrom(address(this), mainAccount, tokenId);\n\n// _farmPlots – multiple external calls inside the loop\nc) nftAttributesManager.getImmutableAttributes(tokenId);\nd) accountManager.updatePlayer(landlord, landlordMetadata);\n```\n\nIf either `munchNFT`, `nftAttributesManager`, or `accountManager` is malicious (or upgraded to malicious implementations), they can re-enter functions such as `stakeMunchable`, `unstakeMunchable`, or `farmPlots` while the contract is in an inconsistent state.  Typical exploits include double-staking, harvesting multiple times, or bypassing access checks.\n\nWhile the current ecosystem contracts may be benign, relying on their good behaviour is risky, especially because the system is upgradeable through `ConfigStorage`. Adding a standard `ReentrancyGuard` and following the Checks-Effects-Interactions pattern would future-proof the code.",
+      "Recommendation": ""
+    }
+  ]
+}

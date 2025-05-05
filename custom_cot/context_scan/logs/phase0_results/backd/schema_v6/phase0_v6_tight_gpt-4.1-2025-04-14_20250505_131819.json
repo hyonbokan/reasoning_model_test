@@ -1,0 +1,1203 @@
+{
+  "analyzed_contracts": [
+    {
+      "id": "Authorization.sol",
+      "file_name": "Authorization.sol",
+      "core_purpose_raw": "Authorization provides a base for role-based access control, delegating role checks to an external RoleManager contract. It is used as a parent for contracts that require RBAC enforcement.",
+      "core_purpose_digest": "RBAC base contract delegating role checks to RoleManager.",
+      "upgradeability_pattern": null,
+      "consumed_interfaces": [
+        "IRoleManager"
+      ],
+      "compiler_version": "0.8.10",
+      "identified_roles": [
+        "GOVERNANCE"
+      ],
+      "key_state_vars": [
+        "__roleManager"
+      ],
+      "key_functions": [
+        "_roleManager"
+      ],
+      "external_dependencies": [
+        "AuthorizationBase",
+        "IRoleManager"
+      ],
+      "security_notes": [],
+      "static_findings": [],
+      "config_params": [],
+      "flag_trackers": []
+    },
+    {
+      "id": "RoleManager.sol",
+      "file_name": "RoleManager.sol",
+      "core_purpose_raw": "RoleManager manages roles and permissions for the protocol, including governance, pool, vault, and custom roles. It uses OpenZeppelin's EnumerableSet for tracking members and enforces access control for critical functions.",
+      "core_purpose_digest": "Manages protocol roles and permissions using EnumerableSet.",
+      "upgradeability_pattern": null,
+      "consumed_interfaces": [
+        "IAddressProvider",
+        "IRoleManager"
+      ],
+      "compiler_version": "0.8.10",
+      "identified_roles": [
+        "CONTROLLER",
+        "GAUGE_ZAP",
+        "GOVERNANCE",
+        "MAINTENANCE",
+        "POOL",
+        "POOL_FACTORY",
+        "VAULT"
+      ],
+      "key_state_vars": [
+        "_roleMembers",
+        "_roles",
+        "addressProvider"
+      ],
+      "key_functions": [
+        "addGaugeZap",
+        "addGovernor",
+        "getRoleMember",
+        "getRoleMemberCount",
+        "grantRole",
+        "hasRole",
+        "removeGaugeZap",
+        "renounceGovernance",
+        "revokeRole"
+      ],
+      "external_dependencies": [
+        "EnumerableSet",
+        "IAddressProvider"
+      ],
+      "security_notes": [
+        "Always check the return value of EnumerableSet.add/remove with require() to avoid silent failures.",
+        "Role management is critical for protocol security; improper role assignment or revocation can lead to privilege escalation or loss of control."
+      ],
+      "static_findings": [],
+      "config_params": [],
+      "flag_trackers": [
+        {
+          "name": "GOVERNANCE",
+          "expected_setters": [
+            "grantRole",
+            "addGovernor",
+            "renounceGovernance"
+          ],
+          "observed_setters": [
+            "_grantRole",
+            "_revokeRole"
+          ],
+          "note": "Tracks governance membership; must always have at least one governor."
+        }
+      ]
+    },
+    {
+      "id": "AddressProvider.sol",
+      "file_name": "AddressProvider.sol",
+      "core_purpose_raw": "AddressProvider acts as a central registry for contract addresses and configuration keys in the protocol. It manages pools, vaults, staker vaults, fee handlers, and supports two-phase commit for config changes. It is upgradeable via OpenZeppelin Initializable.",
+      "core_purpose_digest": "Central registry for contract addresses and configs; manages pools/vaults.",
+      "upgradeability_pattern": "UUPS",
+      "consumed_interfaces": [
+        "IAddressProvider",
+        "IGasBank",
+        "IStakerVault",
+        "IOracleProvider"
+      ],
+      "compiler_version": "0.8.10",
+      "identified_roles": [
+        "CONTROLLER",
+        "GOVERNANCE",
+        "POOL",
+        "POOL_FACTORY"
+      ],
+      "key_state_vars": [
+        "_actions",
+        "_addressKeyMetas",
+        "_stakerVaults",
+        "_tokenToPools",
+        "_vaults",
+        "_whiteListedFeeHandlers"
+      ],
+      "key_functions": [
+        "addPool",
+        "addStakerVault",
+        "executeAddress",
+        "freezeAddress",
+        "initializeAddress",
+        "prepareAddress",
+        "removePool"
+      ],
+      "external_dependencies": [
+        "AuthorizationBase",
+        "ILiquidityPool",
+        "IStakerVault",
+        "Preparable"
+      ],
+      "security_notes": [
+        "Uses OpenZeppelin Initializable for upgradeability; ensure initialize is called only once.",
+        "Two-phase commit for config changes mitigates accidental or malicious instant changes."
+      ],
+      "static_findings": [],
+      "config_params": [
+        {
+          "name": "ROLE_MANAGER_KEY",
+          "storage_key": "AddressProviderKeys._ROLE_MANAGER_KEY",
+          "load_site": {
+            "id": "AddressProvider.sol:initialize",
+            "file": "AddressProvider.sol",
+            "element_name": "initialize",
+            "unique_snippet": "AddressProviderMeta.Meta memory meta = AddressProviderMeta.Meta(true, true);\n_addressKeyMetas.set(AddressProviderKeys._ROLE_MANAGER_KEY, meta.toUInt());\n_setConfig(AddressProviderKeys._ROLE_MANAGER_KEY, roleManager);"
+          },
+          "downstream_uses": [
+            "AddressProvider.sol:_roleManager"
+          ],
+          "role": "address_key"
+        }
+      ],
+      "flag_trackers": []
+    },
+    {
+      "id": "BkdLocker.sol",
+      "file_name": "BkdLocker.sol",
+      "core_purpose_raw": "BkdLocker allows users to lock governance tokens (BKD) for boosted rewards and voting power. It manages user balances, boost factors, fee distribution, and supports migration of reward tokens. It enforces withdrawal delays and boost schedules.",
+      "core_purpose_digest": "BKD token locker for boosted rewards, voting, and fee distribution.",
+      "upgradeability_pattern": null,
+      "consumed_interfaces": [
+        "IBkdLocker",
+        "IMigrationContract"
+      ],
+      "compiler_version": "0.8.10",
+      "identified_roles": [
+        "GOVERNANCE"
+      ],
+      "key_state_vars": [
+        "balances",
+        "boostFactors",
+        "govToken",
+        "rewardToken",
+        "totalLocked",
+        "totalLockedBoosted"
+      ],
+      "key_functions": [
+        "claimFees",
+        "computeNewBoost",
+        "depositFees",
+        "executeUnlocks",
+        "lock",
+        "lockFor",
+        "prepareUnlock",
+        "userCheckpoint"
+      ],
+      "external_dependencies": [
+        "Authorization",
+        "IERC20",
+        "Preparable"
+      ],
+      "security_notes": [
+        "Uses SafeERC20 for all token transfers to prevent non-standard ERC20 issues.",
+        "Withdrawal delay and boost factor logic must be carefully reviewed for correct enforcement."
+      ],
+      "static_findings": [],
+      "config_params": [
+        {
+          "name": "startBoost",
+          "storage_key": "_START_BOOST",
+          "load_site": {
+            "id": "BkdLocker.sol:initialize",
+            "file": "BkdLocker.sol",
+            "element_name": "initialize",
+            "unique_snippet": "_setConfig(_START_BOOST, startBoost);"
+          },
+          "downstream_uses": [
+            "BkdLocker.sol:computeNewBoost"
+          ],
+          "role": "lower_bound"
+        },
+        {
+          "name": "maxBoost",
+          "storage_key": "_MAX_BOOST",
+          "load_site": {
+            "id": "BkdLocker.sol:initialize",
+            "file": "BkdLocker.sol",
+            "element_name": "initialize",
+            "unique_snippet": "_setConfig(_MAX_BOOST, maxBoost);"
+          },
+          "downstream_uses": [
+            "BkdLocker.sol:computeNewBoost"
+          ],
+          "role": "upper_bound"
+        },
+        {
+          "name": "increasePeriod",
+          "storage_key": "_INCREASE_PERIOD",
+          "load_site": {
+            "id": "BkdLocker.sol:initialize",
+            "file": "BkdLocker.sol",
+            "element_name": "initialize",
+            "unique_snippet": "_setConfig(_INCREASE_PERIOD, increasePeriod);"
+          },
+          "downstream_uses": [
+            "BkdLocker.sol:computeNewBoost"
+          ],
+          "role": "misc"
+        },
+        {
+          "name": "withdrawDelay",
+          "storage_key": "_WITHDRAW_DELAY",
+          "load_site": {
+            "id": "BkdLocker.sol:initialize",
+            "file": "BkdLocker.sol",
+            "element_name": "initialize",
+            "unique_snippet": "_setConfig(_WITHDRAW_DELAY, withdrawDelay);"
+          },
+          "downstream_uses": [
+            "BkdLocker.sol:prepareUnlock"
+          ],
+          "role": "misc"
+        }
+      ],
+      "flag_trackers": []
+    },
+    {
+      "id": "Controller.sol",
+      "file_name": "Controller.sol",
+      "core_purpose_raw": "Controller coordinates protocol components, manages staker vaults and pools, and enforces minimum staked BKD for keepers. It interacts with the InflationManager for reward distribution and supports two-phase commit for config changes.",
+      "core_purpose_digest": "Coordinates protocol, manages vaults/pools, enforces keeper staking.",
+      "upgradeability_pattern": null,
+      "consumed_interfaces": [
+        "IController",
+        "IAddressProvider",
+        "IInflationManager"
+      ],
+      "compiler_version": "0.8.10",
+      "identified_roles": [
+        "GOVERNANCE",
+        "POOL_FACTORY"
+      ],
+      "key_state_vars": [
+        "addressProvider",
+        "inflationManager"
+      ],
+      "key_functions": [
+        "addStakerVault",
+        "canKeeperExecuteAction",
+        "executeKeeperRequiredStakedBKD",
+        "prepareKeeperRequiredStakedBKD",
+        "removePool"
+      ],
+      "external_dependencies": [
+        "Authorization",
+        "IInflationManager",
+        "Preparable"
+      ],
+      "security_notes": [
+        "Enforces minimum staked BKD for keepers; critical for protocol safety.",
+        "Relies on two-phase commit for config changes to prevent instant parameter changes."
+      ],
+      "static_findings": [],
+      "config_params": [
+        {
+          "name": "KEEPER_REQUIRED_STAKED_BKD",
+          "storage_key": "_KEEPER_REQUIRED_STAKED_BKD",
+          "load_site": {
+            "id": "Controller.sol:prepareKeeperRequiredStakedBKD",
+            "file": "Controller.sol",
+            "element_name": "prepareKeeperRequiredStakedBKD",
+            "unique_snippet": "_prepare(_KEEPER_REQUIRED_STAKED_BKD, amount);"
+          },
+          "downstream_uses": [
+            "Controller.sol:canKeeperExecuteAction"
+          ],
+          "role": "lower_bound"
+        }
+      ],
+      "flag_trackers": []
+    },
+    {
+      "id": "RewardHandler.sol",
+      "file_name": "RewardHandler.sol",
+      "core_purpose_raw": "RewardHandler burns accumulated fees and distributes them to BKD lockers. It interacts with FeeBurner and BkdLocker, and uses SafeERC20 for all token operations.",
+      "core_purpose_digest": "Burns fees and distributes to BKD lockers.",
+      "upgradeability_pattern": null,
+      "consumed_interfaces": [
+        "IRewardHandler",
+        "IFeeBurner",
+        "IBkdLocker"
+      ],
+      "compiler_version": "0.8.10",
+      "identified_roles": [],
+      "key_state_vars": [
+        "addressProvider",
+        "controller"
+      ],
+      "key_functions": [
+        "burnFees"
+      ],
+      "external_dependencies": [
+        "Authorization",
+        "IBkdLocker",
+        "IFeeBurner",
+        "Preparable"
+      ],
+      "security_notes": [
+        "Uses SafeERC20 for all token transfers.",
+        "Approves infinite allowance only if not already set."
+      ],
+      "static_findings": [],
+      "config_params": [],
+      "flag_trackers": []
+    },
+    {
+      "id": "StakerVault.sol",
+      "file_name": "StakerVault.sol",
+      "core_purpose_raw": "StakerVault manages staking of LP tokens from Backd pools. It tracks user balances, supports staking/unstaking, and interacts with gauges for reward distribution. It is not ERC20-compliant and should not be integrated as such.",
+      "core_purpose_digest": "Manages staking of LP tokens; not ERC20-compliant.",
+      "upgradeability_pattern": "UUPS",
+      "consumed_interfaces": [
+        "IStakerVault",
+        "IController",
+        "IInflationManager"
+      ],
+      "compiler_version": "0.8.10",
+      "identified_roles": [
+        "GOVERNANCE",
+        "POOL_FACTORY"
+      ],
+      "key_state_vars": [
+        "_allowances",
+        "actionLockedBalances",
+        "addressProvider",
+        "balances",
+        "controller",
+        "inflationManager",
+        "token"
+      ],
+      "key_functions": [
+        "approve",
+        "stake",
+        "stakeFor",
+        "transfer",
+        "transferFrom",
+        "unstake",
+        "unstakeFor"
+      ],
+      "external_dependencies": [
+        "Authorization",
+        "IERC20",
+        "Pausable",
+        "Preparable"
+      ],
+      "security_notes": [
+        "Not ERC20-compliant; do not integrate as ERC20.",
+        "Uses SafeERC20 for all token transfers.",
+        "Pause functionality allows only withdraw/unstake when paused."
+      ],
+      "static_findings": [],
+      "config_params": [
+        {
+          "name": "lpGauge",
+          "storage_key": "_LP_GAUGE",
+          "load_site": {
+            "id": "StakerVault.sol:initializeLpGauge",
+            "file": "StakerVault.sol",
+            "element_name": "initializeLpGauge",
+            "unique_snippet": "_setConfig(_LP_GAUGE, _lpGauge);"
+          },
+          "downstream_uses": [
+            "StakerVault.sol:getLpGauge"
+          ],
+          "role": "address_key"
+        }
+      ],
+      "flag_trackers": []
+    },
+    {
+      "id": "AmmGauge.sol",
+      "file_name": "AmmGauge.sol",
+      "core_purpose_raw": "AmmGauge manages staking and reward distribution for AMM LP tokens. It tracks user balances, supports staking/unstaking, and calculates claimable rewards based on inflation rates.",
+      "core_purpose_digest": "Manages AMM LP staking and reward distribution.",
+      "upgradeability_pattern": null,
+      "consumed_interfaces": [
+        "IAmmGauge",
+        "IController"
+      ],
+      "compiler_version": "0.8.10",
+      "identified_roles": [
+        "GAUGE_ZAP"
+      ],
+      "key_state_vars": [
+        "ammStakedIntegral",
+        "ammToken",
+        "balances",
+        "controller",
+        "totalStaked"
+      ],
+      "key_functions": [
+        "claimRewards",
+        "poolCheckpoint",
+        "stake",
+        "stakeFor",
+        "unstake",
+        "unstakeFor"
+      ],
+      "external_dependencies": [
+        "Authorization"
+      ],
+      "security_notes": [
+        "Uses SafeERC20 for all token transfers.",
+        "Gauge can be killed; rewards can still be claimed after shutdown."
+      ],
+      "static_findings": [],
+      "config_params": [],
+      "flag_trackers": []
+    },
+    {
+      "id": "BkdToken.sol",
+      "file_name": "BkdToken.sol",
+      "core_purpose_raw": "BkdToken is the ERC20 implementation for the protocol's governance token. Only the designated minter can mint new tokens.",
+      "core_purpose_digest": "ERC20 governance token with restricted minting.",
+      "upgradeability_pattern": null,
+      "consumed_interfaces": [
+        "IBkdToken"
+      ],
+      "compiler_version": "0.8.10",
+      "identified_roles": [
+        "MINTER"
+      ],
+      "key_state_vars": [
+        "minter"
+      ],
+      "key_functions": [
+        "mint"
+      ],
+      "external_dependencies": [
+        "ERC20"
+      ],
+      "security_notes": [
+        "Only minter can mint; enforced by require(msg.sender == minter)."
+      ],
+      "static_findings": [],
+      "config_params": [],
+      "flag_trackers": [
+        {
+          "name": "minter",
+          "expected_setters": [
+            "constructor"
+          ],
+          "observed_setters": [
+            "constructor"
+          ],
+          "note": "Only minter can mint new BKD tokens."
+        }
+      ]
+    },
+    {
+      "id": "FeeBurner.sol",
+      "file_name": "FeeBurner.sol",
+      "core_purpose_raw": "FeeBurner converts accumulated protocol fees (in various tokens) into a single target LP token by burning, swapping, and depositing. It interacts with pools and a swapper router, and uses SafeERC20 for all token operations.",
+      "core_purpose_digest": "Converts protocol fees to target LP token via burn/swap/deposit.",
+      "upgradeability_pattern": null,
+      "consumed_interfaces": [
+        "IFeeBurner",
+        "ILiquidityPool",
+        "ISwapperRouter"
+      ],
+      "compiler_version": "0.8.10",
+      "identified_roles": [],
+      "key_state_vars": [
+        "_addressProvider"
+      ],
+      "key_functions": [
+        "burnToTarget"
+      ],
+      "external_dependencies": [
+        "ILiquidityPool",
+        "ISwapperRouter",
+        "SafeERC20"
+      ],
+      "security_notes": [
+        "Uses SafeERC20 for all token transfers.",
+        "Approves infinite allowance only if not already set."
+      ],
+      "static_findings": [],
+      "config_params": [],
+      "flag_trackers": []
+    },
+    {
+      "id": "InflationManager.sol",
+      "file_name": "InflationManager.sol",
+      "core_purpose_raw": "InflationManager controls the distribution of BKD token rewards across LPs, keepers, and AMM participants. It manages gauges, pool weights, and interacts with the Minter for inflation rate updates. Supports two-phase commit for weight changes.",
+      "core_purpose_digest": "Manages BKD inflation distribution and gauge weights.",
+      "upgradeability_pattern": null,
+      "consumed_interfaces": [
+        "IInflationManager",
+        "IStakerVault",
+        "IKeeperGauge",
+        "IAmmGauge"
+      ],
+      "compiler_version": "0.8.10",
+      "identified_roles": [
+        "CONTROLLER",
+        "GOVERNANCE",
+        "INFLATION_MANAGER"
+      ],
+      "key_state_vars": [
+        "addressProvider",
+        "minter",
+        "totalAmmTokenWeight",
+        "totalKeeperPoolWeight",
+        "totalLpPoolWeight"
+      ],
+      "key_functions": [
+        "executeAmmTokenWeight",
+        "executeKeeperPoolWeight",
+        "executeLpPoolWeight",
+        "mintRewards",
+        "prepareAmmTokenWeight",
+        "prepareKeeperPoolWeight",
+        "prepareLpPoolWeight"
+      ],
+      "external_dependencies": [
+        "Authorization",
+        "Minter",
+        "Preparable"
+      ],
+      "security_notes": [
+        "Two-phase commit for weight changes; only authorized roles can execute.",
+        "Critical for correct and fair reward distribution."
+      ],
+      "static_findings": [],
+      "config_params": [
+        {
+          "name": "keeperWeight",
+          "storage_key": "_KEEPER_WEIGHT_KEY",
+          "load_site": {
+            "id": "InflationManager.sol:prepareKeeperPoolWeight",
+            "file": "InflationManager.sol",
+            "element_name": "prepareKeeperPoolWeight",
+            "unique_snippet": "_prepare(key, newPoolWeight);"
+          },
+          "downstream_uses": [
+            "InflationManager.sol:executeKeeperPoolWeight"
+          ],
+          "role": "multiplier"
+        },
+        {
+          "name": "lpWeight",
+          "storage_key": "_LP_WEIGHT_KEY",
+          "load_site": {
+            "id": "InflationManager.sol:prepareLpPoolWeight",
+            "file": "InflationManager.sol",
+            "element_name": "prepareLpPoolWeight",
+            "unique_snippet": "_prepare(key, newPoolWeight);"
+          },
+          "downstream_uses": [
+            "InflationManager.sol:executeLpPoolWeight"
+          ],
+          "role": "multiplier"
+        },
+        {
+          "name": "ammWeight",
+          "storage_key": "_AMM_WEIGHT_KEY",
+          "load_site": {
+            "id": "InflationManager.sol:prepareAmmTokenWeight",
+            "file": "InflationManager.sol",
+            "element_name": "prepareAmmTokenWeight",
+            "unique_snippet": "_prepare(key, newTokenWeight);"
+          },
+          "downstream_uses": [
+            "InflationManager.sol:executeAmmTokenWeight"
+          ],
+          "role": "multiplier"
+        }
+      ],
+      "flag_trackers": []
+    },
+    {
+      "id": "KeeperGauge.sol",
+      "file_name": "KeeperGauge.sol",
+      "core_purpose_raw": "KeeperGauge tracks and distributes rewards to keepers based on reported fees and epochs. It supports reward claiming, epoch advancement, and can be killed by the InflationManager.",
+      "core_purpose_digest": "Tracks/distributes keeper rewards by epoch and reported fees.",
+      "upgradeability_pattern": null,
+      "consumed_interfaces": [
+        "IKeeperGauge",
+        "IController"
+      ],
+      "compiler_version": "0.8.10",
+      "identified_roles": [
+        "GAUGE_ZAP",
+        "INFLATION_MANAGER"
+      ],
+      "key_state_vars": [
+        "controller",
+        "epoch",
+        "keeperRecords",
+        "perPeriodTotalFees",
+        "pool"
+      ],
+      "key_functions": [
+        "advanceEpoch",
+        "claimRewards",
+        "poolCheckpoint",
+        "reportFees"
+      ],
+      "external_dependencies": [
+        "Authorization"
+      ],
+      "security_notes": [
+        "Only whitelisted fee handlers can report fees.",
+        "Gauge can be killed; rewards can still be claimed after shutdown."
+      ],
+      "static_findings": [],
+      "config_params": [],
+      "flag_trackers": []
+    },
+    {
+      "id": "LpGauge.sol",
+      "file_name": "LpGauge.sol",
+      "core_purpose_raw": "LpGauge manages reward distribution for LP stakers in a vault. It tracks user shares, supports reward claiming, and interacts with the InflationManager for reward minting.",
+      "core_purpose_digest": "Manages LP staker rewards and shares.",
+      "upgradeability_pattern": null,
+      "consumed_interfaces": [
+        "ILpGauge",
+        "IRewardsGauge",
+        "IController",
+        "IStakerVault"
+      ],
+      "compiler_version": "0.8.10",
+      "identified_roles": [
+        "GAUGE_ZAP"
+      ],
+      "key_state_vars": [
+        "controller",
+        "inflationManager",
+        "perUserShare",
+        "poolStakedIntegral",
+        "stakerVault"
+      ],
+      "key_functions": [
+        "claimRewards",
+        "poolCheckpoint",
+        "userCheckpoint"
+      ],
+      "external_dependencies": [
+        "Authorization"
+      ],
+      "security_notes": [
+        "Only beneficiary or GAUGE_ZAP can claim rewards.",
+        "Relies on stakerVault for balance tracking."
+      ],
+      "static_findings": [],
+      "config_params": [],
+      "flag_trackers": []
+    },
+    {
+      "id": "Minter.sol",
+      "file_name": "Minter.sol",
+      "core_purpose_raw": "Minter mints BKD tokens according to the protocol's inflation schedule. It enforces supply caps, supports non-inflationary minting, and interacts with the InflationManager for reward distribution.",
+      "core_purpose_digest": "Mints BKD tokens per inflation schedule; enforces supply caps.",
+      "upgradeability_pattern": null,
+      "consumed_interfaces": [
+        "IMinter",
+        "IBkdToken",
+        "IController"
+      ],
+      "compiler_version": "0.8.10",
+      "identified_roles": [
+        "GOVERNANCE"
+      ],
+      "key_state_vars": [
+        "controller",
+        "currentInflationAmountAmm",
+        "currentInflationAmountKeeper",
+        "currentInflationAmountLp",
+        "token",
+        "totalAvailableToNow",
+        "totalMintedToNow"
+      ],
+      "key_functions": [
+        "executeInflationRateUpdate",
+        "mint",
+        "mintNonInflationTokens",
+        "startInflation"
+      ],
+      "external_dependencies": [
+        "Authorization",
+        "BkdToken",
+        "ReentrancyGuard"
+      ],
+      "security_notes": [
+        "Enforces totalMintedToNow <= totalAvailableToNow to prevent over-minting.",
+        "Only InflationManager can call mint."
+      ],
+      "static_findings": [],
+      "config_params": [],
+      "flag_trackers": [
+        {
+          "name": "totalMintedToNow",
+          "expected_setters": [
+            "mint",
+            "mintNonInflationTokens"
+          ],
+          "observed_setters": [
+            "_mint"
+          ],
+          "note": "Tracks total minted tokens; must not exceed available supply."
+        }
+      ]
+    },
+    {
+      "id": "VestedEscrow.sol",
+      "file_name": "VestedEscrow.sol",
+      "core_purpose_raw": "VestedEscrow manages vesting of reward tokens for users, supporting linear vesting schedules, claims, and admin/fundAdmin roles. It supports airdropped tokens and tracks claimed/locked balances.",
+      "core_purpose_digest": "Manages linear vesting and claims for reward tokens.",
+      "upgradeability_pattern": null,
+      "consumed_interfaces": [
+        "IVestedEscrow"
+      ],
+      "compiler_version": "0.8.10",
+      "identified_roles": [
+        "admin",
+        "fundAdmin"
+      ],
+      "key_state_vars": [
+        "admin",
+        "endTime",
+        "fundAdmin",
+        "initialLocked",
+        "rewardToken",
+        "startTime",
+        "totalClaimed"
+      ],
+      "key_functions": [
+        "claim",
+        "fund",
+        "initializeUnallocatedSupply"
+      ],
+      "external_dependencies": [
+        "ReentrancyGuard"
+      ],
+      "security_notes": [
+        "Uses SafeERC20 for all token transfers.",
+        "Admin/fundAdmin can fund and set roles."
+      ],
+      "static_findings": [],
+      "config_params": [],
+      "flag_trackers": []
+    },
+    {
+      "id": "VestedEscrowRevocable.sol",
+      "file_name": "VestedEscrowRevocable.sol",
+      "core_purpose_raw": "VestedEscrowRevocable extends VestedEscrow to allow admin to revoke vesting for a recipient, transferring unvested tokens to the treasury.",
+      "core_purpose_digest": "Vesting contract with admin revocation to treasury.",
+      "upgradeability_pattern": null,
+      "consumed_interfaces": [
+        "IVestedEscrowRevocable"
+      ],
+      "compiler_version": "0.8.10",
+      "identified_roles": [
+        "admin"
+      ],
+      "key_state_vars": [
+        "revokedTime",
+        "treasury"
+      ],
+      "key_functions": [
+        "claim",
+        "revoke"
+      ],
+      "external_dependencies": [
+        "VestedEscrow"
+      ],
+      "security_notes": [
+        "Admin can revoke vesting; unvested tokens go to treasury.",
+        "Treasury cannot be revoked."
+      ],
+      "static_findings": [],
+      "config_params": [],
+      "flag_trackers": []
+    },
+    {
+      "id": "CvxMintAmount.sol",
+      "file_name": "CvxMintAmount.sol",
+      "core_purpose_raw": "CvxMintAmount provides a utility to calculate the amount of CVX tokens to mint based on CRV earned, using a cliff-based supply schedule.",
+      "core_purpose_digest": "Utility for CVX mint calculation based on cliffs.",
+      "upgradeability_pattern": null,
+      "consumed_interfaces": [],
+      "compiler_version": "0.8.10",
+      "identified_roles": [],
+      "key_state_vars": [],
+      "key_functions": [
+        "getCvxMintAmount"
+      ],
+      "external_dependencies": [],
+      "security_notes": [],
+      "static_findings": [],
+      "config_params": [],
+      "flag_trackers": []
+    },
+    {
+      "id": "Preparable.sol",
+      "file_name": "Preparable.sol",
+      "core_purpose_raw": "Preparable implements two-phase commit logic for configuration changes, enforcing a minimum delay before changes can be executed. Used as a base for config management in protocol contracts.",
+      "core_purpose_digest": "Two-phase commit logic for config changes.",
+      "upgradeability_pattern": null,
+      "consumed_interfaces": [
+        "IPreparable"
+      ],
+      "compiler_version": "0.8.10",
+      "identified_roles": [],
+      "key_state_vars": [
+        "currentAddresses",
+        "currentUInts256",
+        "deadlines",
+        "pendingAddresses",
+        "pendingUInts256"
+      ],
+      "key_functions": [
+        "_executeAddress",
+        "_executeUInt256",
+        "_prepare",
+        "_setConfig"
+      ],
+      "external_dependencies": [],
+      "security_notes": [
+        "Enforces minimum delay for config changes; prevents instant parameter changes."
+      ],
+      "static_findings": [],
+      "config_params": [],
+      "flag_trackers": []
+    },
+    {
+      "id": "PoolMigrationZap.sol",
+      "file_name": "PoolMigrationZap.sol",
+      "core_purpose_raw": "PoolMigrationZap assists users in migrating their balances from old Backd pools to new ones. It handles token transfers, pool interactions, and uses SafeERC20 for all token operations.",
+      "core_purpose_digest": "Assists migration from old to new Backd pools.",
+      "upgradeability_pattern": null,
+      "consumed_interfaces": [
+        "IPoolMigrationZap",
+        "IAddressProvider",
+        "ILiquidityPool"
+      ],
+      "compiler_version": "0.8.10",
+      "identified_roles": [],
+      "key_state_vars": [
+        "_underlyingNewPools"
+      ],
+      "key_functions": [
+        "migrate",
+        "migrateAll"
+      ],
+      "external_dependencies": [
+        "SafeERC20"
+      ],
+      "security_notes": [
+        "Uses SafeERC20 for all token transfers.",
+        "Requires withdrawal fee to be zero for migration."
+      ],
+      "static_findings": [],
+      "config_params": [],
+      "flag_trackers": []
+    }
+  ],
+  "project_context": {
+    "overall_goal_raw": "The Backd Protocol is a decentralized finance (DeFi) platform that provides a comprehensive ecosystem for liquidity provision, staking, and yield generation. The protocol is built around several key components: Liquidity Pools, Staker Vaults, Vaults and Strategies, BKD Token, Inflation Management, Tokenomics and Rewards, Governance and Access Control, Fee Management.",
+    "overall_goal_digest": "DeFi protocol for liquidity, staking, yield, and BKD token rewards.",
+    "actors_capabilities": [
+      "Governance: controls parameters and upgrades",
+      "Keepers: maintain protocol, receive rewards",
+      "Liquidity Providers: supply assets to pools and AMMs",
+      "Strategies: generate yield",
+      "Users: deposit assets, stake LP tokens, lock BKD"
+    ],
+    "core_assets": [
+      "AMM LP tokens",
+      "BKD token",
+      "Liquidity pool tokens",
+      "Staker vaults"
+    ],
+    "critical_interactions": [
+      "LiquidityPool.deposit/depositFor: deposit assets",
+      "LiquidityPool.redeem: withdraw assets",
+      "StakerVault.stake/stakeFor: stake LP tokens",
+      "StakerVault.unstake/unstakeFor: unstake LP tokens",
+      "BkdLocker.lock/lockFor: lock BKD tokens",
+      "BkdLocker.prepareUnlock/executeUnlocks: unlock BKD tokens",
+      "BkdLocker.claimFees: claim fees",
+      "KeeperGauge.reportFees/claimRewards: keeper rewards",
+      "LpGauge.claimRewards: LP staker rewards",
+      "AmmGauge.stake/unstake/claimRewards: AMM staking/rewards",
+      "InflationManager.executeKeeperPoolWeight/executeLpPoolWeight/executeAmmTokenWeight: update inflation weights",
+      "RewardHandler.burnFees: burn/distribute fees",
+      "Controller.addStakerVault/removePool: manage components"
+    ],
+    "key_assumptions": [
+      {
+        "id": "ctx-1",
+        "source": "docs",
+        "context_type": "security_assumption",
+        "details": "Only authorized roles (governance, controller, inflation manager) can execute critical functions such as minting, role assignment, and config changes."
+      },
+      {
+        "id": "ctx-2",
+        "source": "docs",
+        "context_type": "security_assumption",
+        "details": "All token transfers use SafeERC20 to prevent issues with non-standard ERC20 tokens."
+      },
+      {
+        "id": "ctx-3",
+        "source": "docs",
+        "context_type": "security_assumption",
+        "details": "EnumerableSet add/remove operations are always checked with require() to avoid silent failures."
+      },
+      {
+        "id": "ctx-4",
+        "source": "docs",
+        "context_type": "security_assumption",
+        "details": "Upgradeable contracts use OpenZeppelin Initializable/UUPS patterns and enforce single initialization."
+      }
+    ],
+    "invariants": [
+      {
+        "id": "inv-1",
+        "description": "After grantRole, the account must be recorded as a member of the role",
+        "related_code": [
+          "RoleManager.sol:grantRole"
+        ],
+        "origin": "check"
+      },
+      {
+        "id": "inv-2",
+        "description": "After revokeRole, the account must no longer be a member of the role",
+        "related_code": [
+          "RoleManager.sol:revokeRole"
+        ],
+        "origin": "check"
+      },
+      {
+        "id": "inv-3",
+        "description": "getRoleMember must return a valid non-zero address for each index less than getRoleMemberCount",
+        "related_code": [
+          "RoleManager.sol:getRoleMember"
+        ],
+        "origin": "check"
+      },
+      {
+        "id": "inv-4",
+        "description": "Each initialized address key must map to a non-zero configured address",
+        "related_code": [
+          "AddressProvider.sol:initializeAddress"
+        ],
+        "origin": "check"
+      },
+      {
+        "id": "inv-5",
+        "description": "safeGetPoolForToken returns zero address when pool not set",
+        "related_code": [
+          "AddressProvider.sol:safeGetPoolForToken"
+        ],
+        "origin": "check"
+      },
+      {
+        "id": "inv-6",
+        "description": "isPool returns true iff the token-to-pool mapping matches",
+        "related_code": [
+          "AddressProvider.sol:isPool"
+        ],
+        "origin": "check"
+      },
+      {
+        "id": "inv-7",
+        "description": "totalLocked equals the sum of all user balances",
+        "related_code": [
+          "BkdLocker.sol:lockFor"
+        ],
+        "origin": "check"
+      },
+      {
+        "id": "inv-8",
+        "description": "totalLockedBoosted equals the sum of each balance scaled by its boost factor",
+        "related_code": [
+          "BkdLocker.sol:_userCheckpoint"
+        ],
+        "origin": "check"
+      },
+      {
+        "id": "inv-9",
+        "description": "Each user boost factor must lie between the configured start and max boosts",
+        "related_code": [
+          "BkdLocker.sol:computeNewBoost"
+        ],
+        "origin": "check"
+      },
+      {
+        "id": "inv-10",
+        "description": "After depositFees, feeIntegral increases exactly by amount/totalLockedBoosted",
+        "related_code": [
+          "BkdLocker.sol:depositFees"
+        ],
+        "origin": "check"
+      },
+      {
+        "id": "inv-11",
+        "description": "Contract token balance must always cover staked balances",
+        "related_code": [
+          "StakerVault.sol:stakeFor"
+        ],
+        "origin": "check"
+      },
+      {
+        "id": "inv-12",
+        "description": "Sum of _poolTotalStaked and strategiesTotalStaked equals total of balances",
+        "related_code": [
+          "StakerVault.sol:stakeFor"
+        ],
+        "origin": "check"
+      },
+      {
+        "id": "inv-13",
+        "description": "Allowances never exceed the owner's staked balance",
+        "related_code": [
+          "StakerVault.sol:transferFrom"
+        ],
+        "origin": "check"
+      },
+      {
+        "id": "inv-14",
+        "description": "totalStaked equals the sum of per-user balances in the AMM gauge",
+        "related_code": [
+          "AmmGauge.sol:stakeFor"
+        ],
+        "origin": "check"
+      },
+      {
+        "id": "inv-15",
+        "description": "ammStakedIntegral never decreases on poolCheckpoint",
+        "related_code": [
+          "AmmGauge.sol:poolCheckpoint"
+        ],
+        "origin": "check"
+      },
+      {
+        "id": "inv-16",
+        "description": "Only the configured minter address can call BkdToken.mint",
+        "related_code": [
+          "BkdToken.sol:mint"
+        ],
+        "origin": "check"
+      },
+      {
+        "id": "inv-17",
+        "description": "burnToTarget returns exactly the LP tokens minted and transferred back to sender",
+        "related_code": [
+          "FeeBurner.sol:burnToTarget"
+        ],
+        "origin": "check"
+      },
+      {
+        "id": "inv-18",
+        "description": "totalKeeperPoolWeight equals the sum of all keeper weight configs",
+        "related_code": [
+          "InflationManager.sol:_executeKeeperPoolWeight"
+        ],
+        "origin": "check"
+      },
+      {
+        "id": "inv-19",
+        "description": "totalLpPoolWeight equals the sum of all lp-pool weight configs",
+        "related_code": [
+          "InflationManager.sol:_executeLpPoolWeight"
+        ],
+        "origin": "check"
+      },
+      {
+        "id": "inv-20",
+        "description": "totalAmmTokenWeight equals the sum of all amm-token weight configs",
+        "related_code": [
+          "InflationManager.sol:_executeAmmTokenWeight"
+        ],
+        "origin": "check"
+      },
+      {
+        "id": "inv-21",
+        "description": "The Minter never mints more than allowed: totalMintedToNow <= totalAvailableToNow",
+        "related_code": [
+          "Minter.sol:_mint"
+        ],
+        "origin": "check"
+      },
+      {
+        "id": "inv-22",
+        "description": "getLpInflationRate is zero before inflation start and non-negative afterwards",
+        "related_code": [
+          "Minter.sol:getLpInflationRate"
+        ],
+        "origin": "check"
+      },
+      {
+        "id": "inv-23",
+        "description": "After executing a prepared uint config, pending and deadline reset to zero",
+        "related_code": [
+          "Preparable.sol:_executeUInt256"
+        ],
+        "origin": "check"
+      },
+      {
+        "id": "inv-24",
+        "description": "Total claimed per user never exceeds their initially locked amount",
+        "related_code": [
+          "VestedEscrow.sol:claim"
+        ],
+        "origin": "check"
+      },
+      {
+        "id": "inv-25",
+        "description": "Revoking a user sends their unvested tokens to the treasury holding contract",
+        "related_code": [
+          "VestedEscrowRevocable.sol:revoke"
+        ],
+        "origin": "check"
+      },
+      {
+        "id": "inv-26",
+        "description": "CvxMintAmount.getCvxMintAmount never exceeds crvEarned",
+        "related_code": [
+          "CvxMintAmount.sol:getCvxMintAmount"
+        ],
+        "origin": "check"
+      }
+    ],
+    "general_security_ctx": [
+      {
+        "id": "sec-1",
+        "source": "docs",
+        "context_type": "best_practice",
+        "details": "Always use SafeERC20 for token transfers to handle non-standard ERC20 tokens."
+      },
+      {
+        "id": "sec-2",
+        "source": "docs",
+        "context_type": "best_practice",
+        "details": "Check return values of EnumerableSet add/remove with require() to avoid silent failures."
+      },
+      {
+        "id": "sec-3",
+        "source": "docs",
+        "context_type": "best_practice",
+        "details": "For upgradeable contracts, use only initializer functions and enforce single initialization."
+      },
+      {
+        "id": "sec-4",
+        "source": "docs",
+        "context_type": "best_practice",
+        "details": "Reserve storage gaps in upgradeable contracts to prevent storage layout collisions."
+      },
+      {
+        "id": "sec-5",
+        "source": "docs",
+        "context_type": "best_practice",
+        "details": "Enforce strong RBAC and multi-sig/timelock for upgrade logic."
+      }
+    ],
+    "static_summary": null
+  }
+}

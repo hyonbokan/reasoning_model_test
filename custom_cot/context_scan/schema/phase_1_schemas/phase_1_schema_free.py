@@ -12,7 +12,7 @@ class FindingOutput(BaseModel):
     Issue: str = Field(..., description="Short, descriptive title of the vulnerability (max ~80 chars recommended).")
     Severity: _SEV = Field(..., description="Final severity level (High, Medium, Low, Info, Best Practices).")
     Contracts: List[str] = Field(..., description="List of affected contract filenames ending in .sol (e.g., ['ContractName.sol']). Must contain at least one entry.")
-    Description: str = Field(..., description="Detailed explanation, and JSON-escaped ```solidity code snippets```. Ensure sufficient detail.")
+    Description: str = Field(..., description="Detailed description of the issue. Example:\n\n```solidity\nfunction vulnerable() {\n    // show exact vulnerable code here\n}\n```\nExplain why this is vulnerable...",)
     Recommendation: Literal[""] = Field(description="Must always be an empty string.")
 
 # --- Top-Level Schema for the Final Audit Report ---

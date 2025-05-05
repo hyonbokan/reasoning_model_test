@@ -1,0 +1,49 @@
+{
+  "results": [
+    {
+      "Issue": "Negative bonus can overflow Schnibbles reward to huge value",
+      "Severity": "High",
+      "Contracts": [
+        "LandManager.sol"
+      ],
+      "Description": "In ```_farmPlots``` the reward is computed as:\n```solidity\nfinalBonus = int16(REALM_BONUSES[ ... ]) + int16(int8(RARITY_BONUSES[ ... ]));\n...\nschnibblesTotal = uint256(\n    (int256(schnibblesTotal) + (int256(schnibblesTotal) * finalBonus)) / 100\n);\n```\n`finalBonus` is **signed** and can legitimately be **negative** if the realm/rarity combination is unfavourable.  When the expression inside the cast evaluates to a negative number the division still yields a negative `int256`.  Casting this negative value to `uint256` does **not** revert – it performs a two-’s-complement cast and turns it into a huge positive number (~2²⁵⁶-x).  An attacker only has to choose an NFT whose bonuses make `finalBonus` negative to mint an astronomically large amount of Schnibbles for both renter and landlord, breaking the token economy.\n\nThe problem arises because no lower-bound check is made on `finalBonus` and because a signed value is cast to unsigned after arithmetic is complete.\n",
+      "Recommendation": ""
+    },
+    {
+      "Issue": "Re-entrancy window in stakeMunchable before state is updated",
+      "Severity": "Medium",
+      "Contracts": [
+        "LandManager.sol"
+      ],
+      "Description": "```stakeMunchable``` calls the external NFT contract **before** it updates any of its own bookkeeping:\n```solidity\n// external call – attacker controlled\nmunchNFT.transferFrom(mainAccount, address(this), tokenId);\n\n// state updates only afterwards\nplotOccupied[landlord][plotId] = ...;\n```\nIf the `munchNFT` contract is malicious (or upgraded) it can call back into `LandManager` during `transferFrom`.  Because the critical state (e.g. `plotOccupied`, `munchablesStaked`, `munchableOwner`, `toilerState`) is *not yet initialised*, the re-entrant call can:\n* stake the same token twice;\n* bypass the «max 10 staked NFTs» limit;\n* obtain inconsistent accounting that later causes unexpected behaviour.\n\nNo re-entrancy guard (`nonReentrant`) is present in `BaseBlastManagerUpgradeable`, and state-before-external-call ordering violates the established checks-effects-interactions pattern.\n",
+      "Recommendation": ""
+    },
+    {
+      "Issue": "Off-by-one allows more than the intended 10 NFTs to be staked",
+      "Severity": "Low",
+      "Contracts": [
+        "LandManager.sol"
+      ],
+      "Description": "The per-player staking limit is documented as 10, but the check is:\n```solidity\nif (munchablesStaked[mainAccount].length > 10) revert TooManyStakedMunchiesError();\n```\nBecause the length is examined **before** the new token is pushed, a player with exactly 10 staked NFTs can stake an *11th* – the length is 10 during the check and becomes 11 afterwards.\n",
+      "Recommendation": ""
+    },
+    {
+      "Issue": "Dirty-flag logic misses boundary case when plot count shrinks to exactly occupied index",
+      "Severity": "Low",
+      "Contracts": [
+        "LandManager.sol"
+      ],
+      "Description": "In ```_farmPlots``` a staked token is marked *dirty* only when\n```solidity\nif (_getNumPlots(landlord) < _toiler.plotId) {\n    ...\n}\n```\nHowever valid plot IDs are **0 … numPlots-1**.  When the landlord reduces his locked balance so that `numPlots == _toiler.plotId` (token now sits on a non-existent plot) the comparison is false and the dirty flag is **not** set.  The renter can continue farming rewards from a plot that technically no longer exists, undermining the economic fairness of the system.\n",
+      "Recommendation": ""
+    },
+    {
+      "Issue": "Use of ERC721 transferFrom instead of safeTransferFrom",
+      "Severity": "Best Practices",
+      "Contracts": [
+        "LandManager.sol"
+      ],
+      "Description": "Both staking and unstaking move NFTs with `transferFrom`.  While this works for EOAs, using `safeTransferFrom` is recommended because it guarantees that the receiving contract implements `IERC721Receiver`, preventing accidental loss of NFTs if the protocol integrates with other contracts in the future.\n",
+      "Recommendation": ""
+    }
+  ]
+}

@@ -1,0 +1,49 @@
+{
+  "results": [
+    {
+      "Issue": "Tax rate not capped to 100%, farming can revert",
+      "Severity": "Medium",
+      "Contracts": [
+        "LandManager.sol"
+      ],
+      "Description": "`updateTaxRate()` only bounds the new rate between `MIN_TAX_RATE` and `MAX_TAX_RATE` but never checks that the chosen value is \u001b[35m<= 1e18\u001b[39m (100 %).\n```solidity\nif (newTaxRate < MIN_TAX_RATE || newTaxRate > MAX_TAX_RATE)\n        revert InvalidTaxRateError();\n```\nLater, `_farmPlots()` computes the landlord share as\n```solidity\nschnibblesLandlord = (schnibblesTotal * _toiler.latestTaxRate) / 1e18;\n```\nIf `_toiler.latestTaxRate` is set above `1e18`, `schnibblesLandlord` becomes larger than `schnibblesTotal`. The next line subtracts this value from `schnibblesTotal` when crediting the renter:\n```solidity\nrenterMetadata.unfedSchnibbles += (schnibblesTotal - schnibblesLandlord); // under-flows\n```\nBecause Solidity 0.8 checks for under-flow, the transaction reverts, permanently blocking `farmPlots()` for every renter staking on that landlord’s plots (denial-of-service).\n",
+      "Recommendation": ""
+    },
+    {
+      "Issue": "Off-by-one when detecting invalidated plots",
+      "Severity": "Low",
+      "Contracts": [
+        "LandManager.sol"
+      ],
+      "Description": "Inside `_farmPlots()` a plot is marked *dirty* when the landlord owns fewer plots than the staked `plotId`:\n```solidity\nif (_getNumPlots(landlord) < _toiler.plotId) {\n    timestamp = plotMetadata[landlord].lastUpdated;\n    toilerState[tokenId].dirty = true;\n}\n```\nValid plot IDs are 0 … `numPlots-1`. When the landlord’s plot count shrinks from *N* to *N-1*, a Munchable staked on plot *N-1* becomes invalid, but the comparison `numPlots < plotId` (e.g. `4 < 4`) is **false**. As a result the plot is **not** flagged dirty and the renter keeps farming rewards from a non-existent plot, violating protocol invariants and creating bookkeeping inconsistencies.",
+      "Recommendation": ""
+    },
+    {
+      "Issue": "Staking limit allows 11 tokens instead of 10",
+      "Severity": "Info",
+      "Contracts": [
+        "LandManager.sol"
+      ],
+      "Description": "`stakeMunchable()` enforces a maximum of 10 staked NFTs per player:\n```solidity\nif (munchablesStaked[mainAccount].length > 10)\n    revert TooManyStakedMunchiesError();\n```\nThe check is performed **before** the new token is pushed. When the current length is exactly 10, the condition is false, the stake succeeds and the length becomes 11, off-by-one from the documented limit.",
+      "Recommendation": ""
+    },
+    {
+      "Issue": "ERC-721 transfer executed before state updates in `stakeMunchable`",
+      "Severity": "Info",
+      "Contracts": [
+        "LandManager.sol"
+      ],
+      "Description": "`stakeMunchable()` calls `munchNFT.transferFrom()` **before** it writes any staking state:\n```solidity\n// external call first\nmunchNFT.transferFrom(mainAccount, address(this), tokenId);\n\n// only afterwards: record occupancy, ownership, toilerState ...\n```\nIf the supplied `MunchNFT` contract is malicious (or is later upgraded), it could re-enter `stakeMunchable` during the transfer hook and exploit the yet-unchanged state. The project assumes (`assumption-3`) that the NFT is trustworthy, nevertheless the safer pattern is checks-effects-interactions.",
+      "Recommendation": ""
+    },
+    {
+      "Issue": "Division-by-zero if `PRICE_PER_PLOT` mis-configured",
+      "Severity": "Info",
+      "Contracts": [
+        "LandManager.sol"
+      ],
+      "Description": "`_getNumPlots()` divides by `PRICE_PER_PLOT` loaded from `ConfigStorage`:\n```solidity\nreturn lockManager.getLockedWeightedValue(_account) / PRICE_PER_PLOT;\n```\nIf an administrator (accidentally or maliciously) sets `PRICE_PER_PLOT` to 0, every call that needs the plot count reverts, effectively bricking staking, farming, and tax updates.",
+      "Recommendation": ""
+    }
+  ]
+}

@@ -1,0 +1,41 @@
+{
+  "results": [
+    {
+      "Issue": "Division-by-zero in KeeperGauge makes claimRewards revert when an epoch has 0 fees",
+      "Severity": "High",
+      "Contracts": [
+        "KeeperGauge.sol"
+      ],
+      "Description": "```solidity\nfor (uint256 i = startEpoch; i < endEpoch; i = i.uncheckedInc()) {\n    totalClaimable += (\n        keeperRecords[beneficiary].feesInPeriod[i]\n            .scaledDiv(perPeriodTotalFees[i])   // <-- division by zero possible\n    ).scaledMul(perPeriodTotalInflation[i]);\n}\n```\nIf `perPeriodTotalFees[i]` equals **0** (e.g. an epoch where no fees were reported but inflation was minted), `scaledDiv` reverts, causing both `claimRewards` and `claimableRewards` to revert for every keeper.  Because `nextEpochToClaim` is **0** for new keepers, the very first call scans all epochs, so a single 0-fee epoch permanently bricks reward claiming for all accounts.\n\nImpact ‑ All keepers are unable to claim their BKD rewards (protocol-wide DoS, breaks invariant *inv18*).\n\nLikelihood ‑ High.  Epochs are advanced by the inflation manager regardless of fees, so a 0-fee epoch is realistic during quiet periods or after `kill()`.",
+      "Recommendation": ""
+    },
+    {
+      "Issue": "StakerVault mis-counts pool/strategy totals on transfers",
+      "Severity": "Medium",
+      "Contracts": [
+        "StakerVault.sol"
+      ],
+      "Description": "`transfer` and `transferFrom` move balances between addresses but **never update** `_poolTotalStaked` or `strategiesTotalStaked`:\n```solidity\nbalances[msg.sender] -= amount;\nbalances[account]   += amount;   // totals unchanged\n```\nScenario:\n1. A strategy address (counted in `strategiesTotalStaked`) sends tokens to a normal user.\n2. `strategiesTotalStaked` still includes the tokens, while the user’s stake is **excluded** from `_poolTotalStaked`.\n3. LP gauges fetch `_poolTotalStaked` to compute integrals, so the user’s stake earns **no inflation** and global accounting is skewed, violating invariant *inv12* (sum of tracked totals should equal real balances).\n\nImpact – Reward distribution and share calculations become incorrect; users can be under-rewarded or over-rewarded.\n\nLikelihood – Medium; transfers between strategies and users are not prevented and can be executed at any time.",
+      "Recommendation": ""
+    },
+    {
+      "Issue": "Unchecked return values of EnumerableSet add/remove may desynchronise role bookkeeping",
+      "Severity": "Low",
+      "Contracts": [
+        "RoleManager.sol"
+      ],
+      "Description": "`_grantRole` / `_revokeRole` ignore the boolean returned by `EnumerableSet`:\n```solidity\n_roleMembers[role].add(account);     // return value not checked\n...\n_roleMembers[role].remove(account);  // return value not checked\n```\nIf `add` fails (duplicate) or `remove` fails (element absent) the mapping `members` is still updated, creating an inconsistent state where `hasRole()` returns **true** but the account is missing from enumeration (`getRoleMember`, `getRoleMemberCount`).  This breaks invariants *inv1–3* and can confuse off-chain tooling or on-chain queries that rely on ordered membership.\n",
+      "Recommendation": ""
+    },
+    {
+      "Issue": "Non-standard allowance pattern may block fee burning on rebasing/strict ERC-20s",
+      "Severity": "Best Practices",
+      "Contracts": [
+        "RewardHandler.sol",
+        "FeeBurner.sol"
+      ],
+      "Description": "Both contracts use the helper below:\n```solidity\nfunction _approve(address token, address spender) internal {\n    if (IERC20(token).allowance(address(this), spender) > 0) return;\n    IERC20(token).safeApprove(spender, type(uint256).max);\n}\n```\nProblems:\n1. If the current allowance is **non-zero but smaller than the amount to spend**, the call is skipped and the subsequent `transferFrom` reverts.\n2. Tokens that require the allowance to be set to **0 before being updated** (e.g. USDT, KNC) will revert on the very first approval.\n\nWhile Backd pools predominantly use standard ERC-20s, following the approved two-step pattern (`approve(0)`, then `approve(MAX)`) and ensuring the allowance covers the spend amount avoids unexpected failures.",
+      "Recommendation": ""
+    }
+  ]
+}
