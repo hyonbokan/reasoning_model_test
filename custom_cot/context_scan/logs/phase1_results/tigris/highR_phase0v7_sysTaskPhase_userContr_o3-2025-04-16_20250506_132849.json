@@ -1,0 +1,42 @@
+{
+  "results": [
+    {
+      "Issue": "Missing re-entrancy protection in Trading contract allows recursive margin withdrawals / multiple position openings",
+      "Severity": "High",
+      "Contracts": [
+        "Trading.sol",
+        "StableVault.sol",
+        "Position.sol"
+      ],
+      "Description": "None of the externally-accessible functions in Trading.sol are guarded by a re-entrancy modifier, yet they perform multiple external calls **before** all critical state is finalised.\n\nExample (initiateMarketOrder):\n```solidity\n// Trading.sol\n_handleDeposit(_tigAsset, _tradeInfo.marginAsset, _tradeInfo.margin, ...); // external call – StableVault.deposit()\n...\nposition.mint(_mintTrade);                                        // external – _safeMint() triggers onERC721Received\n```\n1. `_handleDeposit` calls `StableVault.deposit`, which in turn makes ERC20 `transferFrom` and arbitrary `mintFor` calls. Both tokens and the vault contract are un-trusted and can execute arbitrary code.\n2. `position.mint` uses `_safeMint`, invoking `onERC721Received` on the trader. A malicious trader contract can **re-enter** any Trading function (e.g. `removeMargin`, `initiateMarketOrder`, etc.) while the first call is still on-stack.\n\nBecause Trading keeps **no re-entrancy guard**, the attacker can:\n• call `removeMargin` repeatedly during a single execution and withdraw the freshly minted tigAsset again and again;\n• open multiple positions with inconsistent `blockDelayPassed` or spend the same margin twice;\n• bypass internal invariants that assume a linear control-flow (e.g. `_checkDelay`, funding updates, OI limits).\n\nThe combination of unlimited tigAsset mint authority (`StableToken.isMinter[Trading]=true`) and the ability to recursively invoke fee / withdrawal paths enables full draining of StableVault reserve tokens.",
+      "Recommendation": ""
+    },
+    {
+      "Issue": "Closing fee calculation can underflow – positions become non-closable and funds are frozen",
+      "Severity": "Medium",
+      "Contracts": [
+        "Trading.sol"
+      ],
+      "Description": "`_handleCloseFees` deducts DAO/Burn/Bot fees *based on the **position size***, while the caller provides `_payout` (profit + margin) that can be **much smaller** than the position size for losing trades.\n```solidity\nuint _daoFeesPaid = (_positionSize*_fees.daoFees/DIVISION_CONSTANT)*asset.feeMultiplier/DIVISION_CONSTANT;\n...\n// Final transfer back to trader\npayout_ = _payout - _daoFeesPaid - _burnFeesPaid - _botFeesPaid; // <-- can underflow\n```\nIf `_payout < _daoFeesPaid + …` the subtraction reverts, making the whole close operation impossible (market close, TP/SL, liquidation **all** route through this helper). Traders are then permanently stuck in the position and the protocol/keepers cannot liquidate it, leading to locked collateral and inconsistent OI.",
+      "Recommendation": ""
+    },
+    {
+      "Issue": "Off-by-one bug lets GovNFT mint more than MAX supply",
+      "Severity": "Low",
+      "Contracts": [
+        "GovNFT.sol"
+      ],
+      "Description": "`_mint` pre-increments the `counter` **before** minting, which shifts the first tokenId from 1 to 2 and allows minting id `MAX+1` (10001) even though `MAX` is intended to be the cap.\n```solidity\nfunction _mint(address to, uint256 tokenId) internal override {\n    require(counter <= MAX, \"Exceeds supply\");\n    counter += 1;                 // <-- increment first\n    ...\n    super._mint(to, tokenId);     // tokenId == counter  (already ++)\n}\n```\nAn extra NFT breaks supply assumptions and is blocked by `_bridgeMint` (which caps at 10000), creating cross-chain inconsistencies.",
+      "Recommendation": ""
+    },
+    {
+      "Issue": "crossChain() ignores maxBridge setting – unlimited NFTs can be bridged in one tx",
+      "Severity": "Low",
+      "Contracts": [
+        "GovNFT.sol"
+      ],
+      "Description": "`GovNFT.crossChain` contains a configurable `maxBridge` variable but never enforces it:\n```solidity\nfunction crossChain(..., uint256[] memory tokenId) public payable {\n    require(tokenId.length > 0, \"Not bridging\");\n    // missing: tokenId.length <= maxBridge\n    ...\n}\n```\nA user can pack thousands of IDs, inflating adapter gas (`_gas = 500_000 + gas*tokenId.length`) and exceeding destination gas limits, causing message failures that have to be manually retried.",
+      "Recommendation": ""
+    }
+  ]
+}

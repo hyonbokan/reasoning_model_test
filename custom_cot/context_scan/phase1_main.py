@@ -6,7 +6,7 @@ import os
 import sys
 from dotenv import load_dotenv
 from openai import OpenAI
-from schema.phase_0_schemas.phase_0_schema_v7_2 import ContextSummaryOutput
+from schema.phase_0_schemas.phase_0_schema_v7 import ContextSummaryOutput
 from schema.phase_1_schemas.phase_1_schema_free import FinalAuditReport
 from pydantic import ValidationError, BaseModel
 
@@ -19,13 +19,15 @@ O3 = "o3-2025-04-16"
 MODEL = O3
 PROMPT_FILE_SYSTEM = "utils/prompts/phase1_free_sys_prompt.py"
 # INPUT_FILE_FULL_CONTEXT = "utils/inputs/phase0_full_context.md"
-PHASE = "highR_phase0v7_2_syspromt_free_v1_system"
+PHASE = "highR_phase0v7_sysTaskPhase_userContr"
 
-OUTPUT_DIR_PHASE1 = "logs/phase1_results"
+OUTPUT_DIR_PHASE1 = "logs/phase1_results/tigris"
 
-INPUT_PHASE0_OUTPUT_FILE = "logs/phase0_results/backd/schema_v7/phase0_v7_2_gpt-4.1-2025-04-14_20250505_140811.json"
+INPUT_PHASE0_OUTPUT_FILE = "logs/phase0_results/tigris/schema_v7/phase0_v7_gpt-4.1-2025-04-14_20250506_104237.json"
+# INPUT_PHASE0_OUTPUT_FILE = "logs/phase0_results/backd/schema_v7/phase0_v7_gpt-4.1-2025-04-14_20250505_130142.json"
 # INPUT_PHASE0_OUTPUT_FILE = "logs/phase0_results/munch/schema_v7/phase0_v7_2_gpt-4.1-2025-04-14_20250505_144954.json"
-INPUT_RAW_CODE_FILE = "utils/contracts/Backed.sol"
+# INPUT_RAW_CODE_FILE = "utils/contracts/Backed.sol"
+INPUT_RAW_CODE_FILE = "utils/contracts/Tigris.sol"
 # INPUT_RAW_CODE_FILE = "utils/contracts/LandManager.sol"
 
 # --- Load prompts and input ---
@@ -93,8 +95,9 @@ def perform_phase1_analysis(
 
     # Construct the messages for the API call
     messages = [
-        {"role": "system",    "content": SYSTEM_PROMPT_PHASE1},
-        {"role": "user", "content": f"PHASE-0 CONTEXT:\n```json\n{phase0_json}\n```"},
+        # {"role": "system",    "content": SYSTEM_PROMPT_PHASE1},
+        {"role": "system", "content": f"{SYSTEM_PROMPT_PHASE1}\nPHASE-0 CONTEXT:\n```json\n{phase0_json}\n```"},
+        # {"role": "user", "content": f"PHASE-0 CONTEXT:\n```json\n{phase0_json}\n```"},
         # user query with the code base
         {"role": "user",      "content": f"Here are the Solidity sources:\n```solidity\n{raw_code}\n```"},
     ]

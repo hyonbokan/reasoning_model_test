@@ -1,0 +1,32 @@
+{
+  "results": [
+    {
+      "Issue": "Division-by-zero DoS in KeeperGauge reward calculation",
+      "Severity": "High",
+      "Contracts": [
+        "KeeperGauge.sol"
+      ],
+      "Description": "In `KeeperGauge._calcTotalClaimable` the user’s share for every epoch is computed as follows:\n\n```solidity\n totalClaimable += (\n     keeperRecords[beneficiary].feesInPeriod[i]\n         .scaledDiv(perPeriodTotalFees[i])    // <-- division by 0 possible\n ).scaledMul(perPeriodTotalInflation[i]);\n```\n`perPeriodTotalFees[i]` remains **zero** for any epoch in which no keeper has called `reportFees()`, while `perPeriodTotalInflation[i]` is **always increased** by `poolCheckpoint()`.  As soon as one such zero-fee epoch exists (this can happen naturally or be forced by simply doing nothing) the division reverts.\n\nAll reads (`claimableRewards`) and writes (`claimRewards`) iterate over every epoch, therefore once a zero-fee epoch is present **every call reverts for every user**, permanently locking rewards and blocking `advanceEpoch()` logic – a complete denial-of-service for the gauge (violates invariant-24).\n\nExploitability is trivial: an attacker just lets time pass without reporting any fees, or advances the epoch via `advanceEpoch` before reporting.  No privileged access is required.",
+      "Recommendation": ""
+    },
+    {
+      "Issue": "Anyone can brick RewardHandler.burnFees with 1 wei of ETH",
+      "Severity": "Medium",
+      "Contracts": [
+        "RewardHandler.sol",
+        "FeeBurner.sol"
+      ],
+      "Description": "`RewardHandler.burnFees()` forwards the contract’s ETH balance to `FeeBurner.burnToTarget` together with the list of pool underlyings:\n\n```solidity\nuint256 ethBalance = address(this).balance;\nfeeBurner.burnToTarget{value: ethBalance}(tokens, targetLpToken);\n```\n\nInside `burnToTarget` the function expects `msg.value` **only if** the `tokens_` array contains `address(0)` (representing an ETH pool):\n\n```solidity\nrequire(burningEth_ || msg.value == 0, Error.INVALID_VALUE);\n```\n\nAny external account can send ETH directly to `RewardHandler` (the contract is payable).  If at that moment **no listed pool has ETH as its underlying**, the `tokens_` array sent by `RewardHandler` contains **no** `address(0)`.  Consequently `burningEth_` is never set, the `require` above fails and `burnFees` reverts.\n\nBecause the ETH balance can no longer be withdrawn, _every_ future call to `burnFees` will keep reverting, permanently halting fee burning and distribution to lockers (violates invariant-17).  The attack costs only 1 wei and requires no permissions.",
+      "Recommendation": ""
+    },
+    {
+      "Issue": "Re-entrancy window in StakerVault state updates",
+      "Severity": "Low",
+      "Contracts": [
+        "StakerVault.sol"
+      ],
+      "Description": "Functions `stakeFor`, `unstakeFor`, `transfer` and `transferFrom` call the external pool **before** they update internal accounting:\n\n```solidity\nILiquidityPool pool = addressProvider.getPoolForToken(token);\npool.handleLpTokenTransfer(src, dst, amount); // external, unguarded call\n\n... // balances[ ] and _poolTotalStaked updated afterwards\n```\n\nA malicious or compromised pool (or a pool upgraded to malicious logic) can re-enter any of these StakerVault functions during `handleLpTokenTransfer`, executing them again while the first invocation is still in flight.  Because the state variables (`balances`, `_poolTotalStaked`, `strategiesTotalStaked`, allowances) are modified **after** the external call, this re-entrancy can lead to inconsistent balances, doubled credits, or allowance bypasses, breaking invariants 11–13 and potentially enabling unauthorized withdrawals or reward dilution.\n\nNo re-entrancy guard (`nonReentrant`) is present, and the vault relies on governance whitelisting to assume pools are benign.  A rogue pool listed through governance compromise or an unforeseen upgrade could exploit this window.",
+      "Recommendation": ""
+    }
+  ]
+}

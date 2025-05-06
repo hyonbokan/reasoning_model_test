@@ -1,0 +1,51 @@
+{
+  "results": [
+    {
+      "Issue": "StableVault.withdraw allows draining any ERC20 token",
+      "Severity": "High",
+      "Contracts": [
+        "StableVault.sol"
+      ],
+      "Description": "```solidity\nfunction withdraw(address _token, uint256 _amount) external returns (uint256 _output) {\n    IERC20Mintable(stable).burnFrom(_msgSender(), _amount);\n    _output = _amount/10**(18-IERC20Mintable(_token).decimals());\n    IERC20(_token).transfer(_msgSender(), _output); // <-– no whitelist check\n}\n```\nThe `withdraw` function does **not** verify that `_token` is an allowed asset.  A user that holds `tigAsset` can therefore burn any amount of it and withdraw **any ERC20 held by the vault**, including valuable tokens that were never deposited by that user (e.g. USDC) or even tokens that are *not* whitelisted in the vault.  As long as the vault owns a balance of the chosen token, it can be drained 1-for-1 (after decimal conversion) by the attacker.\n\nImpact: complete loss of all ERC20 balances held by the vault.\nLikelihood: medium – requires the attacker to obtain `tigAsset` (trivial via normal deposit) and the vault to hold the target token (very likely).\n",
+      "Recommendation": ""
+    },
+    {
+      "Issue": "Re-entrancy risk across Trading & Vault functions",
+      "Severity": "Medium",
+      "Contracts": [
+        "Trading.sol",
+        "StableVault.sol"
+      ],
+      "Description": "Neither `Trading` nor `StableVault` use `ReentrancyGuard`.  Several functions call external contracts *before* internal state is finalised, allowing a malicious ERC20 or vault to re-enter:\n\n```solidity\n// Trading.sol::_handleWithdraw\nIERC20(_outputToken).transfer(_trade.trader, ...); // external call\n\n// StableVault.sol::deposit\nIERC20(_token).transferFrom(_msgSender(), address(this), _amount); // external call\n\n// StableVault.sol::withdraw\nIERC20(_token).transfer(_msgSender(), _output); // external call\n```\nDuring these external calls a malicious contract could call back into `Trading.removeMargin`, `initiateCloseOrder`, `deposit`, etc., manipulating the same position/vault state twice and extracting additional funds or bypassing checks such as `_checkDelay` and margin validations.\n",
+      "Recommendation": ""
+    },
+    {
+      "Issue": "Price signature never expires when `validSignatureTimer` is left at default",
+      "Severity": "High",
+      "Contracts": [
+        "TradingExtension.sol",
+        "TradingLibrary.sol"
+      ],
+      "Description": "`validSignatureTimer` is **zero** until the owner sets it.  In `TradingLibrary.verifyPrice` the check becomes:\n\n```solidity\nrequire(block.timestamp <= _priceData.timestamp + 0, \"ExpSig\");\n```\nwhich only enforces that the signed timestamp is **not in the future**.  Old, already-known prices can therefore be replayed indefinitely, letting an attacker craft trades with stale prices to guarantee profit or avoid liquidation.\n",
+      "Recommendation": ""
+    },
+    {
+      "Issue": "Bypassing minimum position size via fee deduction",
+      "Severity": "Medium",
+      "Contracts": [
+        "Trading.sol"
+      ],
+      "Description": "`Trading.addToPosition` validates size **before** trading fees are deducted:\n\n```solidity\ntradingExtension.validateTrade(_trade.asset, _trade.tigAsset,\n                               _trade.margin + _addMargin, _trade.leverage);\n...        \nuint _fee = _handleOpenFees(...);\n// only (_addMargin - _fee) is really added\n```\nAn attacker can supply `_addMargin` just above the `minPositionSize` threshold and choose a high-fee asset so that after `_fee` the net added margin is far smaller than allowed, creating under-sized positions that violate invariant *inv-5*.\n",
+      "Recommendation": ""
+    },
+    {
+      "Issue": "`maxBridge` limit not enforced in GovNFT.crossChain",
+      "Severity": "Low",
+      "Contracts": [
+        "GovNFT.sol"
+      ],
+      "Description": "`maxBridge` is supposed to cap the number of NFTs bridged in a single call, but `crossChain` never checks it:\n\n```solidity\nfunction crossChain(..., uint256[] memory tokenId) public payable {\n    require(tokenId.length > 0, \"Not bridging\");\n    // missing: require(tokenId.length <= maxBridge, \"Too many\");\n```\nA user can supply an unbounded array, causing very large loops (`for (uint i=0; i<tokenId.length; i++)`) and excessive gas consumption / DoS risk.\n",
+      "Recommendation": ""
+    }
+  ]
+}

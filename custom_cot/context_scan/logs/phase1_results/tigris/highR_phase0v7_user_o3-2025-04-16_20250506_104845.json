@@ -1,0 +1,49 @@
+{
+  "results": [
+    {
+      "Issue": "StableVault.deposit/withdraw are externally callable without re-entrancy guard",
+      "Severity": "Medium",
+      "Contracts": [
+        "StableVault.sol"
+      ],
+      "Description": "```solidity\nfunction deposit(address _token, uint256 _amount) public {\n    IERC20(_token).transferFrom(_msgSender(), address(this), _amount); // <-- external call (token)\n    IERC20Mintable(stable).mintFor(_msgSender(), _amount*(10**(18-IERC20Mintable(_token).decimals()))); // <-- external call (stable token)\n}\n\nfunction withdraw(address _token, uint256 _amount) external returns (uint256 _output) {\n    IERC20Mintable(stable).burnFrom(_msgSender(), _amount);           // <-- external call\n    _output = _amount / 10**(18-IERC20Mintable(_token).decimals());\n    IERC20(_token).transfer(_msgSender(), _output);                  // <-- external call\n}\n```\nNeither function is protected by `nonReentrant`.  A malicious ERC20 (or an ERC777‐style token) that is whitelisted in the vault can re-enter the vault during any of the external calls (e.g. inside a `transferFrom`/`transfer` hook) and call `withdraw`/`deposit` again while state is in an inconsistent intermediate phase.  Because the internal accounting (minting/burning of `stable` tokens and `totalLocked` in `Lock.sol`) is only completed **after** the external token calls succeed, an attacker can repeatedly enter and exit, minting additional `stable` tokens or draining underlying collateral without providing the corresponding value.  This would directly break invariant 14 (correct minting on deposit) and can lead to permanent loss of funds held by the vault.",
+      "Recommendation": ""
+    },
+    {
+      "Issue": "Unlimited ERC20 allowance granted to every approved StableVault",
+      "Severity": "Low",
+      "Contracts": [
+        "Trading.sol"
+      ],
+      "Description": "```solidity\nIERC20(_marginAsset).approve(_stableVault, type(uint).max);\n```\n`Trading._handleDeposit` gives each whitelisted vault an **infinite** allowance of every margin token. If the vault implementation is upgraded or a malicious vault is mistakenly whitelisted, it can pull **all** ERC20 that the trading contract ever receives (including users’ margin still held in the contract).  This puts user funds at risk whenever governance control of the vault is compromised.",
+      "Recommendation": ""
+    },
+    {
+      "Issue": "`maxBridge` limit in GovNFT is unused – unlimited bridging can DOS destination chain",
+      "Severity": "Low",
+      "Contracts": [
+        "GovNFT.sol"
+      ],
+      "Description": "`GovNFT.crossChain()` calculates gas assuming a sane array length but never enforces `tokenId.length <= maxBridge`:\n```solidity\nfunction crossChain(..., uint256[] memory tokenId) public payable {\n    require(tokenId.length > 0, \"Not bridging\");\n    // NO check against maxBridge\n    ...\n}\n```\nAn attacker can supply an excessively large `tokenId` array, inflating `adapterParams` gas, exhausting block gas or causing LayerZero to reject the message, effectively creating a denial-of-service for honest bridgers and possibly locking their NFTs on the source chain.",
+      "Recommendation": ""
+    },
+    {
+      "Issue": "`PairsContract.addAsset` ignores `maxBaseFundingRate` upper-bound",
+      "Severity": "Low",
+      "Contracts": [
+        "PairsContract.sol"
+      ],
+      "Description": "`setAssetBaseFundingRate()` enforces `require(_baseFundingRate <= maxBaseFundingRate)` but `addAsset()` does **not** repeat that check:\n```solidity\nfunction addAsset(... , uint256 _baseFundingRate) external onlyOwner {\n    ...\n    _idToAsset[_asset].baseFundingRate = _baseFundingRate; // unchecked value\n}\n```\nA mis-configured or malicious owner can list a new asset with an arbitrarily large `baseFundingRate`, forcing funding calculations in `Position.updateFunding` to explode and rapidly liquidate every open position that uses that asset (violates invariant 10).  Subsequent calls to reduce the rate are still limited, making the value irreversible without a contract upgrade.",
+      "Recommendation": ""
+    },
+    {
+      "Issue": "DAO & burn fee logic in `_handleOpenFees` is inconsistent – tokens never reach GovNFT and burn never happens",
+      "Severity": "Info",
+      "Contracts": [
+        "Trading.sol"
+      ],
+      "Description": "Inside `_handleOpenFees` the contract mints DAO fees to itself **without** giving an allowance to `GovNFT.distribute`, causing the `transferFrom` inside GovNFT to revert and silently swallow the distribution (caught by `try/catch`). Burn fees are *counted* in the math but no `burnFrom` is called, so the \"burn\" share is effectively not burned. Over time this accumulates unaccounted `tigAsset` balance in the `Trading` contract and inflates supply contrary to economic design.",
+      "Recommendation": ""
+    }
+  ]
+}
