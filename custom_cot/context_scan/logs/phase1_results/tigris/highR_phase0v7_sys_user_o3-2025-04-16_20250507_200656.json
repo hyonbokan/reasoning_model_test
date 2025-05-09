@@ -1,0 +1,52 @@
+{
+  "results": [
+    {
+      "Issue": "Re-entrancy windows in Trading deposit / withdraw flows",
+      "Severity": "Medium",
+      "Contracts": [
+        "Trading.sol",
+        "StableVault.sol"
+      ],
+      "Description": "Trading._handleDeposit and _handleWithdraw make a series of external calls (ERC20.transferFrom, StableVault.deposit / withdraw, ERC20.transfer) before any re-entrancy guard is applied. Neither Trading nor StableVault inherit ReentrancyGuard.\n\n```solidity\n// Trading.sol\nIERC20(_marginAsset).transferFrom(_trader, address(this), _margin/_marginDecMultiplier);\nIStableVault(_stableVault).deposit(_marginAsset, _margin/_marginDecMultiplier); // external call\n...\nIStableVault(_stableVault).withdraw(_outputToken, _toMint);                   // external call\n```\n\n```solidity\n// StableVault.sol (no ReentrancyGuard)\nfunction withdraw(address _token, uint256 _amount) external returns (uint256 _output) {\n    IERC20Mintable(stable).burnFrom(_msgSender(), _amount);  // external call to mintable token\n    _output = _amount/10**(18-IERC20Mintable(_token).decimals());\n    IERC20(_token).transfer(_msgSender(), _output);          // external call – may be malicious\n}\n```\nA malicious ERC20 supplied as margin/output token could re-enter Trading via its `transfer` / `transferFrom` hook before the first transaction finishes, manipulating position-related state (blockDelay, proxy approvals, OI updates, etc.) or draining funds. Because no `nonReentrant` modifier (or equivalent) is present, the invariant \"one action per tx per position\" (inv-1, inv-15) can be broken.",
+      "Recommendation": ""
+    },
+    {
+      "Issue": "DAO fee tokens stuck because allowance is never given to GovNFT",
+      "Severity": "Low",
+      "Contracts": [
+        "Trading.sol",
+        "GovNFT.sol"
+      ],
+      "Description": "Trading mints DAO fee tokens to itself and immediately calls `gov.distribute` without approving the GovNFT contract. GovNFT pulls funds with `transferFrom`, but silently returns on failure:\n\n```solidity\n// Trading.sol  _handleOpenFees()\nIStable(_tigAsset).mintFor(address(this), _daoFeesPaid);\ngov.distribute(_tigAsset, IStable(_tigAsset).balanceOf(address(this))); // no approve()\n```\n\n```solidity\n// GovNFT.sol  distribute()\ntry IERC20(_tigAsset).transferFrom(_msgSender(), address(this), _amount) { ... } catch { return; }\n```\nBecause `Trading` never calls `IERC20.approve`, the transfer always fails, fees are **never moved** to GovNFT, and the minted tigAsset remains locked inside the Trading contract. Over time this diverts all DAO rewards.",
+      "Recommendation": ""
+    },
+    {
+      "Issue": "`maxBridge` limit not enforced in GovNFT.crossChain",
+      "Severity": "Low",
+      "Contracts": [
+        "GovNFT.sol"
+      ],
+      "Description": "`maxBridge` is intended to cap the number of NFTs bridged in one transaction but is never checked:\n\n```solidity\nfunction crossChain(..., uint256[] memory tokenId) public payable {\n    require(tokenId.length > 0, \"Not bridging\"); // <-- no maxBridge check\n    for (uint i=0; i<tokenId.length; i++) { ... }\n```\nA user can supply an arbitrarily long `tokenId` array, causing extremely large loops, exceeding block gas limits, or front-running LayerZero quotas. This creates a practical denial-of-service vector for the bridge.",
+      "Recommendation": ""
+    },
+    {
+      "Issue": "Overflow when vault token has >18 decimals",
+      "Severity": "Low",
+      "Contracts": [
+        "StableVault.sol",
+        "Trading.sol"
+      ],
+      "Description": "Both StableVault and Trading compute a decimal conversion factor using `10**(18 - token.decimals())`:\n\n```solidity\nuint _marginDecMultiplier = 10**(18-ExtendedIERC20(_marginAsset).decimals());\n```\nIf a listed token reports `decimals() > 18` (several LSDs and bridged tokens do), `18 - decimals` underflows, producing an astronomically large exponent and reverting every deposit/withdrawal. A malicious token can also use this to grief vault operations.",
+      "Recommendation": ""
+    },
+    {
+      "Issue": "Gas-price gate may freeze limit-order bots",
+      "Severity": "Info",
+      "Contracts": [
+        "TradingExtension.sol"
+      ],
+      "Description": "`TradingExtension._checkGas()` reverts when `tx.gasprice > maxGasPrice` (default 1000 gwei):\n\n```solidity\nif (tx.gasprice > maxGasPrice) revert(\"1\"); // GasTooHigh\n```\nOn roll-ups such as Arbitrum the L1 gasprice component is combined with L2 fees, making the observed `tx.gasprice` volatile and partially attacker-controlled. Sudden spikes can permanently block `executeLimitOrder`, `liquidatePosition`, etc., resulting in stuck or un-liquidatable positions and protocol-wide DoS until the owner updates `maxGasPrice`.",
+      "Recommendation": ""
+    }
+  ]
+}

@@ -71,18 +71,8 @@ class ContextRef(BaseModel):
     id: str = Field(default_factory=_uid)
     source: CtxSource
     context_type: CtxType
-    details: str = Field(..., description="≤200-char gist (‘SafeERC20 prevents missing-return bug’)")
-    code_snippet: Optional[str] = Field(
-        None,
-        description="Single, canonical Solidity snippet (≤40 lines) illustrating "
-                    "the practice / risk.  Use **only** if it clarifies the note."
-    )
-    relevance: Optional[Literal['high','medium','low']] = Field(
-        None, 
-        description="Heuristic flag: how likely is this note to matter in THIS repo? "
-        "E.g. ‘high’ if the contracts actually use EnumerableSet."
-    )
-    
+    details: str = Field(..., description="Exact phrase / sentence copied from input (no paraphrase)")
+
 class InvariantRef(BaseModel):
     """
     Rule that the business logic **must never break**.
@@ -157,24 +147,27 @@ class ConfigParam(BaseModel):
             "- 'misc'        : none of the above"
         )
     )
-
-
-class StaticFinding(BaseModel):
+        
+class AggregateTracker(BaseModel):
+    """
+    Follows a critical project-wide total or cap so Phase-1 can spot
+    missing updates or mismatching sums.
+      • examples: totalLocked, totalShares, openInterest
+    """
     id: str = Field(default_factory=_uid)
-    tool: str = Field(..., description="e.g. Slither")
-    check_id: str = Field(..., description="Tool-specific rule identifier")
-    description: str = Field(..., description="**Verbatim** message from the tool output")
-    severity: SeverityEst
-    code: CodeRef
+    name: str                     # storage var
+    must_increase_on: List[str] = Field(default_factory=list)   # fn names
+    must_decrease_on: List[str] = Field(default_factory=list)
 
-    # helper to create a context quotation if Phase-1 needs it
-    def to_ctx(self) -> ContextRef:
-        return ContextRef(
-            id=self.id,
-            source=CtxSource.STATIC_ANALYSIS,
-            context_type=CtxType.TOOL_NOTE,
-            details=f"{self.tool}:{self.check_id} – {self.description}",
-        )
+class DelayGuard(BaseModel):
+    """
+    Captures time / block delay requirements so Phase-1 can detect
+    bypasses (e.g. updateTpSl vs limitClose in Tigris).
+    """
+    id: str = Field(default_factory=_uid)
+    guard_fn: str                 # e.g. '_checkDelay'
+    delay_type: Literal["block","timestamp"]
+    period: int                   # blocks or seconds
 
 # ════════════════════════════════════════════════════════════════
 #  CONTRACT-LEVEL SUMMARY
@@ -197,10 +190,14 @@ class ContractSummary(BaseModel):
     external_dependencies: List[str] = Field(default_factory=list)
     security_notes:        List[str] = Field(default_factory=list)
 
-    static_findings: List[StaticFinding] = Field(default_factory=list)
+    # static_findings: List[StaticFinding] = Field(default_factory=list)
     config_params:  List[ConfigParam]  = Field(default_factory=list)
     flag_trackers:  List[FlagTracker]  = Field(default_factory=list)
     math_scale_hints: List[MathScaleHint] = Field(default_factory=list)
+    
+    # new entries
+    aggregate_trackers: List[AggregateTracker] = Field(default_factory=list)
+    delay_guards:       List[DelayGuard]       = Field(default_factory=list)
 
     # ── light normalisation ──────────────────────────────
     @model_validator(mode="after")

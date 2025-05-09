@@ -1,0 +1,919 @@
+{
+  "analyzed_contracts": [
+    {
+      "id": "Trading",
+      "file_name": "Trading.sol",
+      "core_purpose_raw": "The Trading contract is the main entry point for users to open, manage, and close leveraged perpetual trading positions. It handles market and limit orders, margin management, liquidation, fee distribution, and integrates with oracles for price verification. It interacts with Position (NFT), PairsContract, StableVault, GovNFT, and TradingExtension contracts to coordinate all trading logic, asset management, and rewards.",
+      "core_purpose_digest": "Main contract for leveraged trading: open/close positions, manage margin, fees, and interact with oracles.",
+      "upgradeability_pattern": null,
+      "consumed_interfaces": [
+        "ITrading",
+        "IPairsContract",
+        "IReferrals",
+        "IPosition",
+        "IGovNFT",
+        "IStableVault"
+      ],
+      "compiler_version": "0.8.0",
+      "identified_roles": [
+        "limit order executor",
+        "liquidator",
+        "owner",
+        "proxy",
+        "referrer",
+        "trader"
+      ],
+      "key_state_vars": [
+        "allowedVault",
+        "blockDelay",
+        "blockDelayPassed",
+        "closeFees",
+        "gov",
+        "limitDelay",
+        "limitOrderPriceRange",
+        "maxWinPercent",
+        "openFees",
+        "pairsContract",
+        "position",
+        "proxyApprovals",
+        "tradingExtension",
+        "vaultFundingPercent"
+      ],
+      "key_functions": [
+        "addMargin",
+        "addToPosition",
+        "approveProxy",
+        "cancelLimitOrder",
+        "executeLimitOrder",
+        "initiateCloseOrder",
+        "initiateLimitOrder",
+        "initiateMarketOrder",
+        "limitClose",
+        "liquidatePosition",
+        "removeMargin",
+        "updateTpSl"
+      ],
+      "external_dependencies": [
+        "Chainlink price feed",
+        "LayerZero endpoint"
+      ],
+      "security_notes": [
+        "Relies on off-chain signed price data; signature and node whitelisting enforced.",
+        "Proxy trading requires explicit approval and timestamp.",
+        "StableVault and margin asset whitelisting enforced.",
+        "Block delay between open/close to prevent same-tx arbitrage.",
+        "Limit order execution requires time delay.",
+        "Fee distribution to DAO, referrers, bots, and burning.",
+        "Max win percent can be set to cap payouts.",
+        "Reentrancy not explicitly guarded in Trading, but StableVault uses ReentrancyGuard."
+      ],
+      "config_params": [
+        {
+          "name": "blockDelay",
+          "storage_key": "blockDelay",
+          "load_site": {
+            "id": "Trading:blockDelay",
+            "file": "Trading.sol",
+            "element_name": "blockDelay",
+            "unique_snippet": "uint public blockDelay;"
+          },
+          "downstream_uses": [
+            "Trading:_checkDelay"
+          ],
+          "role": "misc"
+        },
+        {
+          "name": "maxWinPercent",
+          "storage_key": "maxWinPercent",
+          "load_site": {
+            "id": "Trading:maxWinPercent",
+            "file": "Trading.sol",
+            "element_name": "maxWinPercent",
+            "unique_snippet": "uint public maxWinPercent;"
+          },
+          "downstream_uses": [
+            "Trading:_closePosition"
+          ],
+          "role": "upper_bound"
+        },
+        {
+          "name": "vaultFundingPercent",
+          "storage_key": "vaultFundingPercent",
+          "load_site": {
+            "id": "Trading:vaultFundingPercent",
+            "file": "Trading.sol",
+            "element_name": "vaultFundingPercent",
+            "unique_snippet": "uint public vaultFundingPercent;"
+          },
+          "downstream_uses": [
+            "Trading:_updateFunding"
+          ],
+          "role": "multiplier"
+        },
+        {
+          "name": "limitOrderPriceRange",
+          "storage_key": "limitOrderPriceRange",
+          "load_site": {
+            "id": "Trading:limitOrderPriceRange",
+            "file": "Trading.sol",
+            "element_name": "limitOrderPriceRange",
+            "unique_snippet": "uint public limitOrderPriceRange = 1e8; // 1%"
+          },
+          "downstream_uses": [
+            "Trading:executeLimitOrder"
+          ],
+          "role": "upper_bound"
+        }
+      ],
+      "flag_trackers": [
+        {
+          "name": "paused",
+          "expected_setters": [
+            "TradingExtension.setPaused"
+          ],
+          "observed_setters": [
+            "TradingExtension.setPaused"
+          ],
+          "note": "Blocks trading when true"
+        }
+      ],
+      "math_scale_hints": [
+        {
+          "id": "Trading:pnl",
+          "file": "TradingLibrary.sol",
+          "element_name": "pnl",
+          "op": "mul",
+          "lhs": "_margin",
+          "rhs": "_leverage",
+          "scale": 1,
+          "comment": "Position size calculation uses 1e18 scaling"
+        }
+      ],
+      "aggregate_trackers": [
+        {
+          "id": "oi",
+          "name": "Open Interest",
+          "must_increase_on": [
+            "Trading:initiateMarketOrder",
+            "Trading:addToPosition",
+            "Trading:executeLimitOrder"
+          ],
+          "must_decrease_on": [
+            "Trading:initiateCloseOrder",
+            "Trading:liquidatePosition",
+            "Trading:limitClose"
+          ]
+        }
+      ],
+      "delay_guards": [
+        {
+          "id": "limitDelay",
+          "guard_fn": "executeLimitOrder",
+          "delay_type": "timestamp",
+          "period": 4
+        },
+        {
+          "id": "blockDelay",
+          "guard_fn": "_checkDelay",
+          "delay_type": "block",
+          "period": 0
+        }
+      ]
+    },
+    {
+      "id": "TradingExtension",
+      "file_name": "TradingExtension.sol",
+      "core_purpose_raw": "TradingExtension provides auxiliary logic for the Trading contract, including price signature verification, referral management, position validation, and open interest modification. It enforces trading rules, manages allowed margin assets, and can pause trading. It also supports Chainlink price feed checks as a secondary oracle.",
+      "core_purpose_digest": "Auxiliary contract for price verification, trade validation, referral, and open interest management.",
+      "upgradeability_pattern": null,
+      "consumed_interfaces": [
+        "IPairsContract",
+        "IReferrals",
+        "IPosition"
+      ],
+      "compiler_version": "0.8.0",
+      "identified_roles": [
+        "owner",
+        "protocol"
+      ],
+      "key_state_vars": [
+        "allowedMargin",
+        "chainlinkEnabled",
+        "isNode",
+        "maxGasPrice",
+        "minPositionSize",
+        "paused",
+        "validSignatureTimer"
+      ],
+      "key_functions": [
+        "getVerifiedPrice",
+        "modifyLongOi",
+        "modifyShortOi",
+        "setAllowedMargin",
+        "setMinPositionSize",
+        "setNode",
+        "setPaused",
+        "validateTrade"
+      ],
+      "external_dependencies": [
+        "Chainlink price feed"
+      ],
+      "security_notes": [
+        "Price signatures must be from whitelisted nodes.",
+        "Chainlink price feed can be enabled for price sanity checks.",
+        "Gas price capped for protocol calls.",
+        "Trading can be paused by owner.",
+        "Min position size and allowed margin assets are enforced."
+      ],
+      "config_params": [
+        {
+          "name": "validSignatureTimer",
+          "storage_key": "validSignatureTimer",
+          "load_site": {
+            "id": "TradingExtension:validSignatureTimer",
+            "file": "TradingExtension.sol",
+            "element_name": "validSignatureTimer",
+            "unique_snippet": "uint256 public validSignatureTimer;"
+          },
+          "downstream_uses": [
+            "TradingExtension:getVerifiedPrice"
+          ],
+          "role": "upper_bound"
+        },
+        {
+          "name": "maxGasPrice",
+          "storage_key": "maxGasPrice",
+          "load_site": {
+            "id": "TradingExtension:maxGasPrice",
+            "file": "TradingExtension.sol",
+            "element_name": "maxGasPrice",
+            "unique_snippet": "uint public maxGasPrice = 1000000000000; // 1000 gwei"
+          },
+          "downstream_uses": [
+            "TradingExtension:_checkGas"
+          ],
+          "role": "upper_bound"
+        }
+      ],
+      "flag_trackers": [
+        {
+          "name": "paused",
+          "expected_setters": [
+            "setPaused"
+          ],
+          "observed_setters": [
+            "setPaused"
+          ],
+          "note": "Blocks trading when true"
+        }
+      ],
+      "math_scale_hints": [],
+      "aggregate_trackers": [],
+      "delay_guards": []
+    },
+    {
+      "id": "Position",
+      "file_name": "Position.sol",
+      "core_purpose_raw": "Position is an ERC721Enumerable NFT contract that represents user trading positions as NFTs. It tracks all open positions, limit orders, and manages funding rates, accumulated interest, and position state. Only minter contracts (Trading) can mint, burn, or modify positions. It also manages the logic for updating funding, margin, leverage, and rewards.",
+      "core_purpose_digest": "ERC721 NFT contract for user trading positions, tracking state, funding, and rewards.",
+      "upgradeability_pattern": null,
+      "consumed_interfaces": [
+        "ERC721Enumerable",
+        "IPosition"
+      ],
+      "compiler_version": "0.8.0",
+      "identified_roles": [
+        "minter",
+        "owner"
+      ],
+      "key_state_vars": [
+        "_assetOpenPositions",
+        "_isMinter",
+        "_limitOrders",
+        "_openPositions",
+        "_trades",
+        "accInterestPerOi",
+        "fundingDeltaPerSec",
+        "lastUpdate",
+        "longOi",
+        "shortOi",
+        "vaultFundingPercent"
+      ],
+      "key_functions": [
+        "addToPosition",
+        "burn",
+        "mint",
+        "modifyMargin",
+        "modifySl",
+        "modifyTp",
+        "reducePosition",
+        "setAccInterest",
+        "updateFunding"
+      ],
+      "external_dependencies": [],
+      "security_notes": [
+        "Only minter contracts can modify state.",
+        "ERC721Enumerable ensures safe enumeration and transfer logic.",
+        "Funding and interest calculations are updated on every position change."
+      ],
+      "config_params": [],
+      "flag_trackers": [],
+      "math_scale_hints": [
+        {
+          "id": "Position:updateFunding",
+          "file": "Position.sol",
+          "element_name": "updateFunding",
+          "op": "div",
+          "lhs": "_oiDelta*int256(_baseFundingRate)",
+          "rhs": "31536000",
+          "scale": 1,
+          "comment": "Funding rate per second calculation"
+        }
+      ],
+      "aggregate_trackers": [
+        {
+          "id": "longOi",
+          "name": "Long Open Interest",
+          "must_increase_on": [
+            "mint",
+            "addToPosition"
+          ],
+          "must_decrease_on": [
+            "reducePosition",
+            "burn"
+          ]
+        },
+        {
+          "id": "shortOi",
+          "name": "Short Open Interest",
+          "must_increase_on": [
+            "mint",
+            "addToPosition"
+          ],
+          "must_decrease_on": [
+            "reducePosition",
+            "burn"
+          ]
+        }
+      ],
+      "delay_guards": []
+    },
+    {
+      "id": "PairsContract",
+      "file_name": "PairsContract.sol",
+      "core_purpose_raw": "PairsContract manages the list of tradable assets, their parameters (leverage, fee multipliers, funding rates), and tracks open interest (long/short/max) for each asset and margin token. It allows the owner to add, update, or pause assets and set open interest limits. Only the protocol can modify open interest.",
+      "core_purpose_digest": "Manages tradable assets, their parameters, and open interest tracking.",
+      "upgradeability_pattern": null,
+      "consumed_interfaces": [
+        "IPairsContract"
+      ],
+      "compiler_version": "0.8.0",
+      "identified_roles": [
+        "owner",
+        "protocol"
+      ],
+      "key_state_vars": [
+        "_idToAsset",
+        "_idToOi",
+        "allowedAsset",
+        "maxBaseFundingRate",
+        "protocol"
+      ],
+      "key_functions": [
+        "addAsset",
+        "modifyLongOi",
+        "modifyShortOi",
+        "pauseAsset",
+        "setAssetBaseFundingRate",
+        "setMaxOi",
+        "updateAssetFeeMultiplier",
+        "updateAssetLeverage"
+      ],
+      "external_dependencies": [],
+      "security_notes": [
+        "Only owner can add/update/pause assets.",
+        "Open interest can only be modified by protocol.",
+        "Max open interest enforced on open."
+      ],
+      "config_params": [
+        {
+          "name": "maxBaseFundingRate",
+          "storage_key": "maxBaseFundingRate",
+          "load_site": {
+            "id": "PairsContract:maxBaseFundingRate",
+            "file": "PairsContract.sol",
+            "element_name": "maxBaseFundingRate",
+            "unique_snippet": "uint256 private maxBaseFundingRate = 1e10;"
+          },
+          "downstream_uses": [
+            "PairsContract:setAssetBaseFundingRate"
+          ],
+          "role": "upper_bound"
+        }
+      ],
+      "flag_trackers": [],
+      "math_scale_hints": [],
+      "aggregate_trackers": [
+        {
+          "id": "openInterest",
+          "name": "Open Interest",
+          "must_increase_on": [
+            "modifyLongOi (onOpen)",
+            "modifyShortOi (onOpen)"
+          ],
+          "must_decrease_on": [
+            "modifyLongOi (!onOpen)",
+            "modifyShortOi (!onOpen)"
+          ]
+        }
+      ],
+      "delay_guards": []
+    },
+    {
+      "id": "Referrals",
+      "file_name": "Referrals.sol",
+      "core_purpose_raw": "Referrals manages referral codes and tracks which traders have been referred by which code. It allows users to create codes, and the protocol to set referred relationships. Used for distributing referral rewards in the trading system.",
+      "core_purpose_digest": "Manages referral codes and referred traders for fee distribution.",
+      "upgradeability_pattern": null,
+      "consumed_interfaces": [
+        "IReferrals"
+      ],
+      "compiler_version": "0.8.0",
+      "identified_roles": [
+        "owner",
+        "protocol"
+      ],
+      "key_state_vars": [
+        "_referral",
+        "_referred",
+        "protocol"
+      ],
+      "key_functions": [
+        "createReferralCode",
+        "getReferral",
+        "getReferred",
+        "setReferred"
+      ],
+      "external_dependencies": [],
+      "security_notes": [
+        "Only protocol can set referred relationships.",
+        "Referral code cannot refer self.",
+        "Referral code must be unique."
+      ],
+      "config_params": [],
+      "flag_trackers": [],
+      "math_scale_hints": [],
+      "aggregate_trackers": [],
+      "delay_guards": []
+    },
+    {
+      "id": "GovNFT",
+      "file_name": "GovNFT.sol",
+      "core_purpose_raw": "GovNFT is an ERC721 NFT contract representing governance rights and rewards. Holders receive a share of trading fees, can claim rewards, and can bridge NFTs cross-chain using LayerZero. The contract manages reward distribution, asset whitelisting, and cross-chain minting/burning.",
+      "core_purpose_digest": "ERC721 NFT for governance and fee rewards, with cross-chain bridging via LayerZero.",
+      "upgradeability_pattern": null,
+      "consumed_interfaces": [
+        "ERC721Enumerable",
+        "ILayerZeroReceiver",
+        "IGovNFT"
+      ],
+      "compiler_version": "0.8.0",
+      "identified_roles": [
+        "owner"
+      ],
+      "key_state_vars": [
+        "MAX",
+        "_allowedAsset",
+        "accRewardsPerNFT",
+        "assets",
+        "baseURI",
+        "counter",
+        "endpoint",
+        "isTrustedAddress"
+      ],
+      "key_functions": [
+        "addAsset",
+        "claim",
+        "crossChain",
+        "distribute",
+        "mint",
+        "setAllowedAsset"
+      ],
+      "external_dependencies": [
+        "LayerZero endpoint"
+      ],
+      "security_notes": [
+        "Cross-chain minting/burning only allowed for trusted addresses.",
+        "Reward distribution is per NFT and per asset.",
+        "ERC721Enumerable ensures safe enumeration and transfer logic."
+      ],
+      "config_params": [],
+      "flag_trackers": [],
+      "math_scale_hints": [],
+      "aggregate_trackers": [],
+      "delay_guards": []
+    },
+    {
+      "id": "StableToken",
+      "file_name": "StableToken.sol",
+      "core_purpose_raw": "StableToken is an ERC20 token with permit functionality, used as the protocol's stablecoin. Only minters can mint or burn tokens. Used as margin and settlement asset in the protocol.",
+      "core_purpose_digest": "ERC20 stablecoin with permit, mint/burn restricted to minters.",
+      "upgradeability_pattern": null,
+      "consumed_interfaces": [
+        "ERC20Permit"
+      ],
+      "compiler_version": "0.8.0",
+      "identified_roles": [
+        "minter",
+        "owner"
+      ],
+      "key_state_vars": [
+        "isMinter"
+      ],
+      "key_functions": [
+        "burnFrom",
+        "mintFor",
+        "setMinter"
+      ],
+      "external_dependencies": [],
+      "security_notes": [
+        "Only minters can mint/burn.",
+        "Permit allows gasless approvals."
+      ],
+      "config_params": [],
+      "flag_trackers": [],
+      "math_scale_hints": [],
+      "aggregate_trackers": [],
+      "delay_guards": []
+    },
+    {
+      "id": "StableVault",
+      "file_name": "StableVault.sol",
+      "core_purpose_raw": "StableVault manages deposits and withdrawals of various stablecoins, minting or burning the protocol's stablecoin (tigAsset) in exchange. Only whitelisted tokens can be deposited. Handles decimal conversion for different tokens.",
+      "core_purpose_digest": "Manages stablecoin deposits/withdrawals, minting/burning protocol stablecoin.",
+      "upgradeability_pattern": null,
+      "consumed_interfaces": [
+        "IStableVault"
+      ],
+      "compiler_version": "0.8.0",
+      "identified_roles": [
+        "owner"
+      ],
+      "key_state_vars": [
+        "allowed",
+        "stable",
+        "tokens"
+      ],
+      "key_functions": [
+        "delistToken",
+        "deposit",
+        "listToken",
+        "withdraw"
+      ],
+      "external_dependencies": [],
+      "security_notes": [
+        "Only whitelisted tokens can be deposited.",
+        "Handles decimal conversion for mint/burn.",
+        "ReentrancyGuard used for security."
+      ],
+      "config_params": [],
+      "flag_trackers": [],
+      "math_scale_hints": [],
+      "aggregate_trackers": [],
+      "delay_guards": []
+    },
+    {
+      "id": "Lock",
+      "file_name": "Lock.sol",
+      "core_purpose_raw": "Lock allows users to lock protocol stablecoins to create bonds and earn rewards. It manages the creation, extension, release, and claiming of bond rewards. Integrates with BondNFT and GovNFT for reward distribution and NFT management.",
+      "core_purpose_digest": "Allows users to lock tokens for bonds and rewards, managing bond lifecycle.",
+      "upgradeability_pattern": null,
+      "consumed_interfaces": [
+        "IBondNFT",
+        "IGovNFT"
+      ],
+      "compiler_version": "0.8.0",
+      "identified_roles": [
+        "owner"
+      ],
+      "key_state_vars": [
+        "allowedAssets",
+        "bondNFT",
+        "govNFT",
+        "maxPeriod",
+        "minPeriod",
+        "totalLocked"
+      ],
+      "key_functions": [
+        "claim",
+        "claimDebt",
+        "claimGovFees",
+        "editAsset",
+        "extendLock",
+        "lock",
+        "release"
+      ],
+      "external_dependencies": [],
+      "security_notes": [
+        "Only whitelisted assets can be locked.",
+        "BondNFT and GovNFT contracts must be trusted.",
+        "Owner can retrieve NFTs."
+      ],
+      "config_params": [],
+      "flag_trackers": [],
+      "math_scale_hints": [],
+      "aggregate_trackers": [
+        {
+          "id": "totalLocked",
+          "name": "Total Locked",
+          "must_increase_on": [
+            "lock",
+            "extendLock"
+          ],
+          "must_decrease_on": [
+            "release"
+          ]
+        }
+      ],
+      "delay_guards": []
+    },
+    {
+      "id": "BondNFT",
+      "file_name": "BondNFT.sol",
+      "core_purpose_raw": "BondNFT is an ERC721 NFT contract representing locked bonds. It tracks bond state, rewards, and manages the creation, extension, release, and claiming of bond rewards. Only the manager contract can mint, burn, or modify bonds. Rewards are distributed per share and per epoch.",
+      "core_purpose_digest": "ERC721 NFT for locked bonds, tracking state, rewards, and lifecycle.",
+      "upgradeability_pattern": null,
+      "consumed_interfaces": [
+        "ERC721Enumerable"
+      ],
+      "compiler_version": "0.8.0",
+      "identified_roles": [
+        "manager",
+        "owner"
+      ],
+      "key_state_vars": [
+        "_idToBond",
+        "accRewardsPerShare",
+        "allowedAsset",
+        "assets",
+        "baseURI",
+        "epoch",
+        "manager",
+        "totalBonds",
+        "totalShares"
+      ],
+      "key_functions": [
+        "claim",
+        "claimDebt",
+        "createLock",
+        "distribute",
+        "extendLock",
+        "idToBond",
+        "release"
+      ],
+      "external_dependencies": [],
+      "security_notes": [
+        "Only manager can mint/burn/modify bonds.",
+        "Rewards are distributed per share and per epoch.",
+        "ERC721Enumerable ensures safe enumeration and transfer logic."
+      ],
+      "config_params": [],
+      "flag_trackers": [],
+      "math_scale_hints": [],
+      "aggregate_trackers": [
+        {
+          "id": "totalShares",
+          "name": "Total Bond Shares",
+          "must_increase_on": [
+            "createLock",
+            "extendLock"
+          ],
+          "must_decrease_on": [
+            "release"
+          ]
+        }
+      ],
+      "delay_guards": []
+    }
+  ],
+  "project_context": {
+    "overall_goal_raw": "The TigerSwap protocol is a decentralized perpetual trading platform that allows users to trade various assets with leverage. The protocol enables traders to open long or short positions, set take-profit and stop-loss orders, and manage their positions through a comprehensive set of functions. It uses NFTs to represent positions and governance, supports cross-chain operations, and distributes fees and rewards to stakeholders.",
+    "overall_goal_digest": "Decentralized leveraged trading platform with NFT-based positions, cross-chain support, and fee/reward distribution.",
+    "actors_capabilities": [
+      "Governance: modify protocol parameters and settings.",
+      "Limit Order Executors: execute limit orders for a fee.",
+      "Liquidators: liquidate undercollateralized positions.",
+      "Proxy Wallets: trade on behalf of traders with approval.",
+      "Referrers: refer users and earn a portion of trading fees.",
+      "Traders: open/manage positions, set TP/SL, add/remove margin, approve proxies."
+    ],
+    "core_assets": [
+      "BondNFT",
+      "GovNFT",
+      "Lock",
+      "PairsContract",
+      "Position NFT",
+      "StableToken",
+      "StableVault",
+      "Trading contract"
+    ],
+    "critical_interactions": [
+      "Trading <-> Position: mint/burn/modify position NFTs.",
+      "Trading <-> TradingExtension: price verification, OI management.",
+      "Trading <-> PairsContract: asset parameters, open interest.",
+      "Trading <-> StableVault: margin deposits/withdrawals.",
+      "Trading <-> GovNFT: fee distribution.",
+      "Trading <-> Referrals: referral management.",
+      "Lock <-> BondNFT: bond creation, extension, release.",
+      "Lock <-> GovNFT: claim and distribute rewards.",
+      "GovNFT <-> LayerZero: cross-chain NFT bridging."
+    ],
+    "key_assumptions": [
+      {
+        "id": "assume-1",
+        "source": "docs",
+        "context_type": "security_assumption",
+        "details": "Off-chain price data is signed by whitelisted oracles and verified on-chain."
+      },
+      {
+        "id": "assume-2",
+        "source": "docs",
+        "context_type": "security_assumption",
+        "details": "Only whitelisted stablecoins and vaults can be used for margin and settlement."
+      },
+      {
+        "id": "assume-3",
+        "source": "docs",
+        "context_type": "security_assumption",
+        "details": "Only approved proxies can trade on behalf of traders, with explicit timestamped approval."
+      },
+      {
+        "id": "assume-4",
+        "source": "docs",
+        "context_type": "security_assumption",
+        "details": "ERC721Enumerable is used for NFT enumeration and transfer safety."
+      },
+      {
+        "id": "assume-5",
+        "source": "web_context",
+        "context_type": "security_assumption",
+        "details": "LayerZero cross-chain messaging is isolated per channel and has immutable security settings."
+      },
+      {
+        "id": "assume-6",
+        "source": "web_context",
+        "context_type": "security_assumption",
+        "details": "Chainlink price feeds are upgradeable via multisig; staleness and fallback logic must be handled."
+      }
+    ],
+    "invariants": [
+      {
+        "id": "inv-1",
+        "description": "_handleDeposit preserves tigAsset balance",
+        "related_code": [
+          "Trading:_handleDeposit"
+        ],
+        "origin": "check"
+      },
+      {
+        "id": "inv-2",
+        "description": "Stop-loss price must be valid relative to market price",
+        "related_code": [
+          "Trading:_checkSl"
+        ],
+        "origin": "check"
+      },
+      {
+        "id": "inv-3",
+        "description": "StableVault input must be whitelisted and token allowed",
+        "related_code": [
+          "Trading:_checkVault"
+        ],
+        "origin": "check"
+      },
+      {
+        "id": "inv-4",
+        "description": "Proxy must be approved before trading on behalf",
+        "related_code": [
+          "Trading:_validateProxy"
+        ],
+        "origin": "check"
+      },
+      {
+        "id": "inv-5",
+        "description": "Trade margin*leverage must satisfy minPositionSize",
+        "related_code": [
+          "TradingExtension:validateTrade"
+        ],
+        "origin": "check"
+      },
+      {
+        "id": "inv-6",
+        "description": "Trade leverage within allowed bounds",
+        "related_code": [
+          "TradingExtension:validateTrade"
+        ],
+        "origin": "check"
+      },
+      {
+        "id": "inv-7",
+        "description": "Verified price signature must be from an allowed node",
+        "related_code": [
+          "TradingLibrary:verifyPrice"
+        ],
+        "origin": "check"
+      },
+      {
+        "id": "inv-8",
+        "description": "Price timestamp must be within valid signature window",
+        "related_code": [
+          "TradingLibrary:verifyPrice"
+        ],
+        "origin": "check"
+      },
+      {
+        "id": "inv-9",
+        "description": "updateFunding must set OI exactly to parameters",
+        "related_code": [
+          "Position:updateFunding"
+        ],
+        "origin": "check"
+      },
+      {
+        "id": "inv-10",
+        "description": "fundingDeltaPerSec computed correctly in updateFunding",
+        "related_code": [
+          "Position:updateFunding"
+        ],
+        "origin": "check"
+      },
+      {
+        "id": "inv-11",
+        "description": "mint initializes trade and assigns ownership",
+        "related_code": [
+          "Position:mint"
+        ],
+        "origin": "check"
+      },
+      {
+        "id": "inv-12",
+        "description": "PairsContract.modifyLongOi never exceeds maxOi on open",
+        "related_code": [
+          "PairsContract:modifyLongOi"
+        ],
+        "origin": "check"
+      },
+      {
+        "id": "inv-13",
+        "description": "PairsContract.modifyShortOi never exceeds maxOi on open",
+        "related_code": [
+          "PairsContract:modifyShortOi"
+        ],
+        "origin": "check"
+      },
+      {
+        "id": "inv-14",
+        "description": "StableVault deposit mints correct stable amount",
+        "related_code": [
+          "StableVault:deposit"
+        ],
+        "origin": "check"
+      },
+      {
+        "id": "inv-15",
+        "description": "Limit orders must respect delay before execution",
+        "related_code": [
+          "Trading:executeLimitOrder"
+        ],
+        "origin": "check"
+      }
+    ],
+    "general_security_ctx": [
+      {
+        "id": "ctx-1",
+        "source": "web_context",
+        "context_type": "tooling_note",
+        "details": "LayerZero endpoints are immutable and permissionless; security is per channel, not global."
+      },
+      {
+        "id": "ctx-2",
+        "source": "web_context",
+        "context_type": "tooling_note",
+        "details": "Chainlink feeds are upgradeable by multisig; always check price freshness and use try/catch for fallback."
+      },
+      {
+        "id": "ctx-3",
+        "source": "web_context",
+        "context_type": "best_practice",
+        "details": "On Arbitrum, never use blockhash, coinbase, or difficulty for randomness or timing."
+      },
+      {
+        "id": "ctx-4",
+        "source": "web_context",
+        "context_type": "best_practice",
+        "details": "ERC721Enumerable prevents batch minting and ensures safe enumeration."
+      }
+    ],
+    "static_summary": null
+  }
+}

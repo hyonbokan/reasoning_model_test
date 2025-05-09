@@ -1,0 +1,41 @@
+{
+  "results": [
+    {
+      "Issue": "Missing token allowance in _handleOpenFees reverts all openings when DAO fee > 0",
+      "Severity": "High",
+      "Contracts": [
+        "Trading.sol"
+      ],
+      "Description": "In `Trading._handleOpenFees` the contract mints the DAO‐fee portion of the tigAsset to itself and immediately calls `gov.distribute`, which internally executes `transferFrom(msg.sender, …)`:\n\n```solidity\nIStable(_tigAsset).mintFor(address(this), _daoFeesPaid);\n// no allowance set here\ngov.distribute(_tigAsset, IStable(_tigAsset).balanceOf(address(this))); // GovNFT.distribute -> transferFrom\n```\n\nBecause `Trading` never gives an allowance to the `GovNFT` contract, `transferFrom` reverts as soon as `_daoFeesPaid > 0` (OpenZeppelin ERC20 requires allowance even when the sender equals the holder). As soon as a non-zero DAO fee is configured via `setFees`, every trade opening path that pays open-fees (`initiateMarketOrder`, `initiateLimitOrder`, `addToPosition`, `executeLimitOrder`) will revert, bringing the whole trading system to a halt.",
+      "Recommendation": ""
+    },
+    {
+      "Issue": "Open-interest inflated when executing limit orders (fees not subtracted)",
+      "Severity": "Medium",
+      "Contracts": [
+        "Trading.sol",
+        "PairsContract.sol"
+      ],
+      "Description": "During `Trading.executeLimitOrder` the contract first charges the opening fee and stores it in `_fee`, but the value that is added to open interest **does not reflect that fee deduction**:\n\n```solidity\nuint _fee = _handleOpenFees(...);     // margin reduced later\n...\ntradingExtension.modifyLongOi(..., trade.margin*trade.leverage/1e18);\n...\nposition.executeLimitOrder(_id, trade.price, trade.margin - _fee); // real margin\n```\n\n`trade.margin` still contains the *pre-fee* amount when OI is updated, so open interest inside `PairsContract` ends up higher than the actual position size held by the trader. Consequences:\n• `maxOi` limits can be bypassed.\n• Funding calculations become skewed.\n• Subsequent partial/total closes will under-subtract, gradually corrupting OI accounting system-wide.",
+      "Recommendation": ""
+    },
+    {
+      "Issue": "Strict equality checks with decimal conversion cause unnecessary reverts",
+      "Severity": "Low",
+      "Contracts": [
+        "Trading.sol"
+      ],
+      "Description": "`_handleDeposit` and `_handleWithdraw` assume that the 18-decimals `margin` / `toMint` value is perfectly divisible by `10^(18 - token.decimals())`:\n\n```solidity\nuint _marginDecMultiplier = 10**(18-ExtendedIERC20(_marginAsset).decimals());\nIERC20(_marginAsset).transferFrom(..., _margin/_marginDecMultiplier); // truncates\n...\nif (tigAsset.balanceOf(address(this)) != _balBefore + _margin) revert BadDeposit();\n```\n\nIf the supplied `margin` is not an exact multiple (e.g. USDC has 6 decimals and the trader passes 1 wei more than a 6-decimal multiple), the integer division silently truncates, leading the final balance check to fail and the whole trade to revert. The same precision assumption is used in `_handleWithdraw`, producing `BadWithdraw` reverts. This is a usability/stability issue, especially when margin values are produced off-chain.",
+      "Recommendation": ""
+    },
+    {
+      "Issue": "`maxBridge` limit never enforced in GovNFT.crossChain",
+      "Severity": "Info",
+      "Contracts": [
+        "GovNFT.sol"
+      ],
+      "Description": "`GovNFT` defines a `maxBridge` parameter (default 20) that is supposed to cap the amount of NFTs bridged in one call, yet `crossChain` only requires `tokenId.length > 0`:\n\n```solidity\nfunction crossChain(... uint256[] memory tokenId) public payable {\n    require(tokenId.length > 0, \"Not bridging\");\n    // no check against maxBridge\n```\n\nA user can submit an arbitrarily long array, potentially exhausting gas and blocking the tx processing queue on some networks.",
+      "Recommendation": ""
+    }
+  ]
+}
