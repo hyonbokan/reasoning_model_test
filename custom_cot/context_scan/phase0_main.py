@@ -16,9 +16,9 @@ O3 = "o3-2025-04-16"
 # ───────────────────────── Configuration ─────────────────────────
 MODEL = GPT_4_1
 PROMPT_FILE_SYSTEM = "utils/prompts/phase0_v6_tight_sys_prompt.py"
-INPUT_FILE_FULL_CONTEXT = "utils/inputs/tigris_full_context.md"
+INPUT_FILE_FULL_CONTEXT = "utils/inputs/backd_full_context.md"
 PHASE = "phase0_v8"
-OUTPUT_DIR_PHASE0 = "logs/phase0_results/tigris/schema_v8"
+OUTPUT_DIR_PHASE0 = "logs/phase0_results/backd/schema_v8"
 
 # --- Load prompts and input ---
 try:

@@ -19,15 +19,15 @@ O3 = "o3-2025-04-16"
 MODEL = O3
 PROMPT_FILE_SYSTEM = "utils/prompts/phase1_free_sys_prompt.py"
 # INPUT_FILE_FULL_CONTEXT = "utils/inputs/phase0_full_context.md"
-PHASE = "highR_phase0v8"
+PHASE = "highR_phase0v8_2"
 
-OUTPUT_DIR_PHASE1 = "logs/phase1_results/tigris"
+OUTPUT_DIR_PHASE1 = "logs/phase1_results/backd"
 
-INPUT_PHASE0_OUTPUT_FILE = "logs/phase0_results/tigris/schema_v8/phase0_v8_gpt-4.1_cont10.json"
-# INPUT_PHASE0_OUTPUT_FILE = "logs/phase0_results/backd/schema_v7/phase0_v7_gpt-4.1-2025-04-14_20250505_130142.json"
+# INPUT_PHASE0_OUTPUT_FILE = "logs/phase0_results/tigris/schema_v8/phase0_v8_gpt-4.1_cont10.json"
+INPUT_PHASE0_OUTPUT_FILE = "logs/phase0_results/backd/schema_v7/phase0_v7_gpt-4.1-2025-04-14_20250505_130142.json"
 # INPUT_PHASE0_OUTPUT_FILE = "logs/phase0_results/munch/schema_v7/phase0_v7_2_gpt-4.1-2025-04-14_20250505_144954.json"
-# INPUT_RAW_CODE_FILE = "utils/contracts/Backed.sol"
-INPUT_RAW_CODE_FILE = "utils/contracts/Tigris.sol"
+INPUT_RAW_CODE_FILE = "utils/contracts/Backed.sol"
+# INPUT_RAW_CODE_FILE = "utils/contracts/Tigris.sol"
 # INPUT_RAW_CODE_FILE = "utils/contracts/LandManager.sol"
 
 # --- Load prompts and input ---
