@@ -1,0 +1,51 @@
+{
+  "results": [
+    {
+      "Issue": "Re-entrancy window in StakerVault stake/unstake functions",
+      "Severity": "Medium",
+      "Contracts": [
+        "StakerVault.sol"
+      ],
+      "Description": "Several StakerVault functions make **external calls before internal state is updated**, opening a re-entrancy window.  For example in `unstakeFor`:\n\n```solidity\n// 1. external call to Pool (can execute arbitrary logic)\npool.handleLpTokenTransfer(src, dst, amount);\n\n// 2. external ERC20 call (token contract can execute arbitrary logic)\nIERC20(token).safeTransfer(dst, amount);\n\n// 3. only afterwards …\nbalances[src] -= unstaked;          // state update\n_poolTotalStaked -= unstaked;\n```\n\nBecause `balances`, `_poolTotalStaked`, allowances etc. are updated **after** the external calls, a malicious Pool or non-standard LP token could re-enter the vault and call `unstake` / `transfer` again, leading to inconsistent accounting or double spend attempts.  The contract is **not** protected by `ReentrancyGuard` and uses neither the checks-effects-interactions pattern nor mutexes.\n\nSimilar patterns exist in `stakeFor`, `transfer`, `transferFrom` and the action lock helpers.\n",
+      "Recommendation": ""
+    },
+    {
+      "Issue": "Permanent DoS of RewardHandler.burnFees via unsafe `safeApprove` pattern",
+      "Severity": "High",
+      "Contracts": [
+        "RewardHandler.sol",
+        "BkdLocker.sol"
+      ],
+      "Description": "RewardHandler resets its allowance to the BKD locker on every call:\n\n```solidity\nuint256 burnedAmount = IERC20(targetLpToken).balanceOf(address(this));\nIERC20(targetLpToken).safeApprove(address(bkdLocker), burnedAmount);\nbkdLocker.depositFees(burnedAmount);      // external call may revert\n```\n\nIf `depositFees` reverts (e.g. when `BkdLocker.totalLockedBoosted == 0` at protocol bootstrap), the `safeApprove` has **already executed** leaving a non-zero allowance.  On the next `burnFees` invocation `safeApprove` is called **again with a non-zero allowance**, causing OpenZeppelin’s `safeApprove` to revert (`ERC20: approve from non-zero to non-zero value`).  From that moment on **all future fee burns will revert**, permanently blocking fee distribution until a manual allowance reset (which the contract does not expose).\n",
+      "Recommendation": ""
+    },
+    {
+      "Issue": "Division-by-zero risk when calculating keeper rewards",
+      "Severity": "Medium",
+      "Contracts": [
+        "KeeperGauge.sol"
+      ],
+      "Description": "`_calcTotalClaimable` divides individual fees by the total fees of an epoch:\n\n```solidity\nkeeperRecords[beneficiary].feesInPeriod[i]\n    .scaledDiv(perPeriodTotalFees[i]);\n```\n\nIf `perPeriodTotalFees[i]` is **zero** (e.g. an epoch advanced without any fee reports) the division reverts (or returns an undefined value depending on `ScaledMath`).  Claiming or even *view* calls such as `claimableRewards` will fail, causing a denial-of-service for all keepers.\n",
+      "Recommendation": ""
+    },
+    {
+      "Issue": "Inconsistent role member set due to unchecked EnumerableSet return value",
+      "Severity": "Low",
+      "Contracts": [
+        "RoleManager.sol"
+      ],
+      "Description": "The helpers that update `_roleMembers` ignore the boolean return value of `EnumerableSet.add/remove`:\n\n```solidity\n_roleMembers[role].add(account);   // return value ignored\n_roleMembers[role].remove(account); // return value ignored\n```\n\nIf the operation silently fails (e.g. trying to add an existing member or remove a non-member) the mapping `_roles[role].members` and the EnumerableSet can get out of sync.  Enumeration functions (`getRoleMember`, `getRoleMemberCount`) may then return stale or zero addresses, possibly breaking invariant checks or off-chain tooling.\n",
+      "Recommendation": ""
+    },
+    {
+      "Issue": "Allowance check in FeeBurner/RewardHandler can cause needless reverts",
+      "Severity": "Low",
+      "Contracts": [
+        "FeeBurner.sol",
+        "RewardHandler.sol"
+      ],
+      "Description": "Both contracts rely on the helper:\n\n```solidity\nfunction _approve(address token_, address spender_) internal {\n    if (IERC20(token_).allowance(address(this), spender_) > 0) return;\n    IERC20(token_).safeApprove(spender_, type(uint256).max);\n}\n```\n\nIf the existing allowance is **non-zero but smaller than the amount to be spent** (allowance might have been decreased by a malicious or non-standard token) the function returns early, leaving an insufficient allowance and causing a revert later in the flow (`transferFrom` / `swap`).  This can block fee burning or swapping until a manual allowance reset.\n",
+      "Recommendation": ""
+    }
+  ]
+}

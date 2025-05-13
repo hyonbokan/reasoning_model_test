@@ -4,7 +4,6 @@ from enum   import Enum
 from typing import List, Optional, Literal
 from pydantic import BaseModel, Field, model_validator
 
-
 # ════════════════════════════════════════════════════════════════
 #  ENUMS  –  single source of truth for every literal the LLM may emit
 # ════════════════════════════════════════════════════════════════
@@ -85,8 +84,6 @@ class InvariantRef(BaseModel):
         default_factory=list,
         description="List of CodeRef.id where the invariant is enforced or checked"
     )
-    aggregate_of: Optional[List[str]] = None
-    delay_guard: Optional[bool] = None
     origin: Literal["doc", "check", "assumption"] = Field(
         "doc",
         description=(
@@ -176,8 +173,11 @@ class DelayGuard(BaseModel):
 #  CONTRACT-LEVEL SUMMARY
 # ════════════════════════════════════════════════════════════════
 class ContractSummary(BaseModel):
+    id: str = Field(default_factory=_uid)
     file_name: str                                     # from // File:
-    core_purpose: str                              # copy longest relevant paragraph
+
+    core_purpose_raw: str                              # copy longest relevant paragraph
+    core_purpose_digest: str = Field(..., description="≤120-char human summary")
 
     upgradeability_pattern: Optional[str] = Field(
         None, description="‘UUPS’, ‘Transparent’, ‘Beacon’, or None")
@@ -212,6 +212,7 @@ class ContractSummary(BaseModel):
 # ════════════════════════════════════════════════════════════════
 class ProjectContext(BaseModel):
     overall_goal_raw: str
+    overall_goal_digest: str = Field(..., description="≤120 chars")
 
     actors_capabilities: List[str] = Field(default_factory=list)
     core_assets:         List[str] = Field(default_factory=list)

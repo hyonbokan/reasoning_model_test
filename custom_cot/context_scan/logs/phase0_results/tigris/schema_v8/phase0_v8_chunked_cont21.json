@@ -1,0 +1,1530 @@
+{
+  "analyzed_contracts": [
+    {
+      "id": "Trading.sol",
+      "file_name": "Trading.sol",
+      "core_purpose_raw": "The Trading contract is the main entry point for users to open, modify, and close leveraged perpetual trading positions. It manages market and limit orders, margin adjustments, liquidations, fee distribution, and proxy trading. It interacts with other protocol contracts for price verification, position NFT minting, and asset management. It enforces access control, delay guards, and vault whitelisting for secure trading.",
+      "core_purpose_digest": "Main contract for leveraged trading: manages positions, orders, margin, liquidations, and fee logic.",
+      "upgradeability_pattern": null,
+      "consumed_interfaces": [
+        "ITradingExtension",
+        "IPosition",
+        "IGovNFT",
+        "IPairsContract",
+        "IStableVault",
+        "IERC20"
+      ],
+      "compiler_version": null,
+      "identified_roles": [
+        "limit order executor",
+        "liquidator",
+        "owner",
+        "proxy",
+        "referrer",
+        "trader"
+      ],
+      "key_state_vars": [
+        "allowedVault",
+        "blockDelay",
+        "blockDelayPassed",
+        "closeFees",
+        "gov",
+        "limitDelay",
+        "limitOrderPriceRange",
+        "maxWinPercent",
+        "openFees",
+        "pairsContract",
+        "position",
+        "proxyApprovals",
+        "tradingExtension",
+        "vaultFundingPercent"
+      ],
+      "key_functions": [
+        "addMargin",
+        "addToPosition",
+        "approveProxy",
+        "cancelLimitOrder",
+        "executeLimitOrder",
+        "initiateCloseOrder",
+        "initiateLimitOrder",
+        "initiateMarketOrder",
+        "limitClose",
+        "liquidatePosition",
+        "removeMargin",
+        "setAllowedVault",
+        "setBlockDelay",
+        "setFees",
+        "setLimitOrderPriceRange",
+        "setMaxWinPercent",
+        "setTradingExtension",
+        "updateTpSl"
+      ],
+      "external_dependencies": [
+        "Chainlink price feed",
+        "ERC20",
+        "GovNFT",
+        "LayerZero endpoint",
+        "PairsContract",
+        "Position",
+        "StableVault",
+        "TradingExtension"
+      ],
+      "security_notes": [
+        "Proxy trading requires explicit approval and timestamp.",
+        "Vault and margin asset must be whitelisted.",
+        "Delay guards prevent same-block open/close.",
+        "All price data must be signed by whitelisted nodes and optionally checked against Chainlink.",
+        "Fee distribution logic is complex and must be checked for rounding and overflow.",
+        "Liquidation threshold is enforced on margin.",
+        "Limit order execution requires a minimum delay.",
+        "Reentrancy is not explicitly guarded; relies on external contract safety.",
+        "ERC20 permit is supported for gasless approvals."
+      ],
+      "config_params": [
+        {
+          "name": "blockDelay",
+          "storage_key": "blockDelay",
+          "load_site": {
+            "id": "Trading.sol:blockDelay",
+            "file": "Trading.sol",
+            "element_name": "blockDelay",
+            "unique_snippet": "uint public blockDelay;"
+          },
+          "downstream_uses": [
+            "Trading.sol:_checkDelay"
+          ],
+          "role": "misc"
+        },
+        {
+          "name": "limitOrderPriceRange",
+          "storage_key": "limitOrderPriceRange",
+          "load_site": {
+            "id": "Trading.sol:limitOrderPriceRange",
+            "file": "Trading.sol",
+            "element_name": "limitOrderPriceRange",
+            "unique_snippet": "uint public limitOrderPriceRange = 1e8; // 1%"
+          },
+          "downstream_uses": [
+            "Trading.sol:executeLimitOrder"
+          ],
+          "role": "upper_bound"
+        },
+        {
+          "name": "maxWinPercent",
+          "storage_key": "maxWinPercent",
+          "load_site": {
+            "id": "Trading.sol:maxWinPercent",
+            "file": "Trading.sol",
+            "element_name": "maxWinPercent",
+            "unique_snippet": "uint public maxWinPercent;"
+          },
+          "downstream_uses": [
+            "Trading.sol:_closePosition"
+          ],
+          "role": "upper_bound"
+        },
+        {
+          "name": "vaultFundingPercent",
+          "storage_key": "vaultFundingPercent",
+          "load_site": {
+            "id": "Trading.sol:vaultFundingPercent",
+            "file": "Trading.sol",
+            "element_name": "vaultFundingPercent",
+            "unique_snippet": "uint public vaultFundingPercent;"
+          },
+          "downstream_uses": [
+            "Trading.sol:_updateFunding"
+          ],
+          "role": "multiplier"
+        }
+      ],
+      "flag_trackers": [
+        {
+          "name": "paused",
+          "expected_setters": [
+            "TradingExtension.setPaused"
+          ],
+          "observed_setters": [],
+          "note": "Blocks trading when true"
+        }
+      ],
+      "math_scale_hints": [
+        {
+          "id": "Trading.sol:leverage-mul",
+          "file": "Trading.sol",
+          "element_name": "initiateMarketOrder",
+          "op": "mul",
+          "lhs": "_tradeInfo.margin",
+          "rhs": "_tradeInfo.leverage",
+          "scale": 1,
+          "comment": "Position size calculation uses 1e18 scaling"
+        }
+      ],
+      "aggregate_trackers": [
+        {
+          "id": "oi-long",
+          "name": "Long Open Interest",
+          "must_increase_on": [
+            "TradingExtension.modifyLongOi (on open)"
+          ],
+          "must_decrease_on": [
+            "TradingExtension.modifyLongOi (on close)"
+          ]
+        },
+        {
+          "id": "oi-short",
+          "name": "Short Open Interest",
+          "must_increase_on": [
+            "TradingExtension.modifyShortOi (on open)"
+          ],
+          "must_decrease_on": [
+            "TradingExtension.modifyShortOi (on close)"
+          ]
+        }
+      ],
+      "delay_guards": [
+        {
+          "id": "limitDelay",
+          "guard_fn": "executeLimitOrder",
+          "delay_type": "timestamp",
+          "period": 4
+        },
+        {
+          "id": "blockDelayPassed",
+          "guard_fn": "_checkDelay",
+          "delay_type": "block",
+          "period": 0
+        }
+      ]
+    },
+    {
+      "id": "TradingExtension.sol",
+      "file_name": "TradingExtension.sol",
+      "core_purpose_raw": "TradingExtension provides auxiliary logic for the Trading contract, including price verification (with signature and optional Chainlink check), referral management, position validation, and open interest modification. It enforces minimum position size, margin asset whitelisting, and protocol pausing. It is only callable by the Trading contract.",
+      "core_purpose_digest": "Auxiliary contract for price verification, referral, and position validation. Only callable by Trading.",
+      "upgradeability_pattern": null,
+      "consumed_interfaces": [
+        "IPairsContract",
+        "IReferrals",
+        "IPosition"
+      ],
+      "compiler_version": null,
+      "identified_roles": [
+        "owner",
+        "protocol"
+      ],
+      "key_state_vars": [
+        "allowedMargin",
+        "chainlinkEnabled",
+        "isNode",
+        "maxGasPrice",
+        "minPositionSize",
+        "paused",
+        "validSignatureTimer"
+      ],
+      "key_functions": [
+        "getVerifiedPrice",
+        "modifyLongOi",
+        "modifyShortOi",
+        "setAllowedMargin",
+        "setMinPositionSize",
+        "setNode",
+        "setPaused",
+        "validateTrade"
+      ],
+      "external_dependencies": [
+        "Chainlink price feed",
+        "PairsContract",
+        "Position",
+        "Referrals"
+      ],
+      "security_notes": [
+        "All price data must be signed by whitelisted nodes.",
+        "Chainlink price check is optional but recommended for price sanity.",
+        "Gas price is capped for protocol calls.",
+        "Only the Trading contract can call most functions.",
+        "Paused flag disables trading.",
+        "Minimum position size and allowed margin assets are enforced."
+      ],
+      "config_params": [
+        {
+          "name": "validSignatureTimer",
+          "storage_key": "validSignatureTimer",
+          "load_site": {
+            "id": "TradingExtension.sol:validSignatureTimer",
+            "file": "TradingExtension.sol",
+            "element_name": "validSignatureTimer",
+            "unique_snippet": "uint256 public validSignatureTimer;"
+          },
+          "downstream_uses": [
+            "TradingExtension.sol:getVerifiedPrice"
+          ],
+          "role": "upper_bound"
+        },
+        {
+          "name": "maxGasPrice",
+          "storage_key": "maxGasPrice",
+          "load_site": {
+            "id": "TradingExtension.sol:maxGasPrice",
+            "file": "TradingExtension.sol",
+            "element_name": "maxGasPrice",
+            "unique_snippet": "uint public maxGasPrice = 1000000000000; // 1000 gwei"
+          },
+          "downstream_uses": [
+            "TradingExtension.sol:_checkGas"
+          ],
+          "role": "upper_bound"
+        }
+      ],
+      "flag_trackers": [
+        {
+          "name": "paused",
+          "expected_setters": [
+            "setPaused"
+          ],
+          "observed_setters": [],
+          "note": "Blocks trading when true"
+        }
+      ],
+      "math_scale_hints": [
+        {
+          "id": "TradingExtension.sol:spread-mul",
+          "file": "TradingExtension.sol",
+          "element_name": "getVerifiedPrice",
+          "op": "mul",
+          "lhs": "_price",
+          "rhs": "_spread",
+          "scale": 1,
+          "comment": "Spread is applied as _price += _price * _spread / DIVISION_CONSTANT"
+        }
+      ],
+      "aggregate_trackers": [],
+      "delay_guards": []
+    },
+    {
+      "id": "Position.sol",
+      "file_name": "Position.sol",
+      "core_purpose_raw": "Position is an ERC721Enumerable NFT contract that represents user trading positions as NFTs. It stores all trade data, manages open/close/reduce/add operations, and tracks open interest and funding rates. Only minter contracts (Trading) can mint, burn, or modify positions. It supports funding accrual, margin/leverage changes, and limit order management.",
+      "core_purpose_digest": "ERC721 NFT contract for positions, manages trade data, open interest, and funding. Only minter can modify.",
+      "upgradeability_pattern": null,
+      "consumed_interfaces": [
+        "ERC721Enumerable",
+        "IPosition"
+      ],
+      "compiler_version": null,
+      "identified_roles": [
+        "minter",
+        "owner"
+      ],
+      "key_state_vars": [
+        "_assetOpenPositions",
+        "_assetOpenPositionsIndexes",
+        "_isMinter",
+        "_limitOrderIndexes",
+        "_limitOrders",
+        "_openPositions",
+        "_openPositionsIndexes",
+        "_trades",
+        "accInterestPerOi",
+        "fundingDeltaPerSec",
+        "initId",
+        "lastUpdate",
+        "longOi",
+        "shortOi"
+      ],
+      "key_functions": [
+        "addToPosition",
+        "burn",
+        "mint",
+        "modifyMargin",
+        "modifySl",
+        "modifyTp",
+        "reducePosition",
+        "setMinter",
+        "updateFunding"
+      ],
+      "external_dependencies": [
+        "ERC721Enumerable"
+      ],
+      "security_notes": [
+        "Only whitelisted minter (Trading) can mint/burn/modify positions.",
+        "ERC721Enumerable ensures safe enumeration and prevents batch minting.",
+        "Funding and open interest are tracked per asset and margin asset.",
+        "All state changes are atomic and revert on error.",
+        "No privileged enumeration functions."
+      ],
+      "config_params": [],
+      "flag_trackers": [],
+      "math_scale_hints": [
+        {
+          "id": "Position.sol:fundingDeltaPerSec",
+          "file": "Position.sol",
+          "element_name": "updateFunding",
+          "op": "div",
+          "lhs": "_oiDelta*int256(_baseFundingRate)",
+          "rhs": "DIVISION_CONSTANT*31536000",
+          "scale": 1,
+          "comment": "Funding rate per second calculation"
+        }
+      ],
+      "aggregate_trackers": [
+        {
+          "id": "longOi",
+          "name": "Long Open Interest",
+          "must_increase_on": [
+            "mint (long)",
+            "addToPosition (long)"
+          ],
+          "must_decrease_on": [
+            "reducePosition (long)",
+            "burn (long)"
+          ]
+        },
+        {
+          "id": "shortOi",
+          "name": "Short Open Interest",
+          "must_increase_on": [
+            "mint (short)",
+            "addToPosition (short)"
+          ],
+          "must_decrease_on": [
+            "reducePosition (short)",
+            "burn (short)"
+          ]
+        }
+      ],
+      "delay_guards": []
+    },
+    {
+      "id": "PairsContract.sol",
+      "file_name": "PairsContract.sol",
+      "core_purpose_raw": "PairsContract manages the list of tradable assets, their parameters (leverage, fee multiplier, funding rate), and open interest per asset and margin asset. It enforces max open interest, asset whitelisting, and protocol-only access for OI modification. Only the owner can add/update assets and parameters.",
+      "core_purpose_digest": "Manages tradable assets, their parameters, and open interest. Owner controls asset list and parameters.",
+      "upgradeability_pattern": null,
+      "consumed_interfaces": [
+        "IPairsContract",
+        "IPosition"
+      ],
+      "compiler_version": null,
+      "identified_roles": [
+        "owner",
+        "protocol"
+      ],
+      "key_state_vars": [
+        "_idToAsset",
+        "_idToOi",
+        "allowedAsset",
+        "maxBaseFundingRate",
+        "protocol"
+      ],
+      "key_functions": [
+        "addAsset",
+        "modifyLongOi",
+        "modifyShortOi",
+        "pauseAsset",
+        "setAssetBaseFundingRate",
+        "setAssetChainlinkFeed",
+        "setMaxOi",
+        "updateAssetFeeMultiplier",
+        "updateAssetLeverage"
+      ],
+      "external_dependencies": [],
+      "security_notes": [
+        "Only owner can add/update assets and parameters.",
+        "Only protocol can modify open interest.",
+        "Max open interest is enforced per asset and margin asset.",
+        "Asset whitelisting is enforced for trading."
+      ],
+      "config_params": [
+        {
+          "name": "maxBaseFundingRate",
+          "storage_key": "maxBaseFundingRate",
+          "load_site": {
+            "id": "PairsContract.sol:maxBaseFundingRate",
+            "file": "PairsContract.sol",
+            "element_name": "maxBaseFundingRate",
+            "unique_snippet": "uint256 private maxBaseFundingRate = 1e10;"
+          },
+          "downstream_uses": [
+            "PairsContract.sol:setAssetBaseFundingRate"
+          ],
+          "role": "upper_bound"
+        }
+      ],
+      "flag_trackers": [],
+      "math_scale_hints": [],
+      "aggregate_trackers": [
+        {
+          "id": "PairsContract.sol:longOi",
+          "name": "Long Open Interest",
+          "must_increase_on": [
+            "modifyLongOi (on open)"
+          ],
+          "must_decrease_on": [
+            "modifyLongOi (on close)"
+          ]
+        },
+        {
+          "id": "PairsContract.sol:shortOi",
+          "name": "Short Open Interest",
+          "must_increase_on": [
+            "modifyShortOi (on open)"
+          ],
+          "must_decrease_on": [
+            "modifyShortOi (on close)"
+          ]
+        }
+      ],
+      "delay_guards": []
+    },
+    {
+      "id": "Referrals",
+      "file_name": "Referrals.sol",
+      "core_purpose_raw": "The Referrals contract allows users to create and register referral codes, and for the protocol to set which users have been referred by which code. It manages mappings between referral codes and addresses, and between addresses and the codes they were referred by. Only the protocol can set referred users, and only the owner can set the protocol address. There is a deprecated function for initializing referral data in bulk.",
+      "core_purpose_digest": "Manages referral codes and referred users for the protocol; only protocol/owner can set mappings.",
+      "upgradeability_pattern": null,
+      "consumed_interfaces": [
+        "IReferrals"
+      ],
+      "compiler_version": "0.8.0",
+      "identified_roles": [
+        "owner",
+        "protocol"
+      ],
+      "key_state_vars": [
+        "_referral",
+        "_referred",
+        "protocol"
+      ],
+      "key_functions": [
+        "createReferralCode",
+        "getReferral",
+        "getReferred",
+        "initRefs",
+        "setProtocol",
+        "setReferred"
+      ],
+      "external_dependencies": [
+        "./interfaces/IReferrals.sol",
+        "@openzeppelin/contracts/access/Ownable.sol"
+      ],
+      "security_notes": [
+        "Only protocol can set referred users.",
+        "Owner can set protocol address.",
+        "initRefs is deprecated and only callable once."
+      ],
+      "config_params": [],
+      "flag_trackers": [
+        {
+          "name": "isInit",
+          "expected_setters": [
+            "initRefs"
+          ],
+          "observed_setters": [
+            "initRefs"
+          ],
+          "note": "Prevents re-initialization of referral data."
+        }
+      ],
+      "math_scale_hints": [],
+      "aggregate_trackers": [],
+      "delay_guards": []
+    },
+    {
+      "id": "GovNFT",
+      "file_name": "GovNFT.sol",
+      "core_purpose_raw": "GovNFT is an ERC721Enumerable NFT contract with cross-chain bridging via LayerZero, reward distribution to NFT holders, and multi-asset support. It allows minting, burning, and transferring NFTs, bridging NFTs across chains, and distributing/claiming rewards in various assets. It tracks trusted addresses for cross-chain operations and failed messages for retry. Only the owner can mint, set parameters, and manage assets.",
+      "core_purpose_digest": "ERC721 NFT with cross-chain bridging, multi-asset rewards, and owner-controlled minting/asset management.",
+      "upgradeability_pattern": null,
+      "consumed_interfaces": [
+        "ILayerZeroReceiver",
+        "IGovNFT"
+      ],
+      "compiler_version": "0.8.0",
+      "identified_roles": [
+        "owner"
+      ],
+      "key_state_vars": [
+        "MAX",
+        "_allowedAsset",
+        "accRewardsPerNFT",
+        "assets",
+        "assetsIndex",
+        "baseURI",
+        "counter",
+        "endpoint",
+        "failedMessages",
+        "gas",
+        "isTrustedAddress",
+        "maxBridge",
+        "userDebt",
+        "userPaid"
+      ],
+      "key_functions": [
+        "addAsset",
+        "claim",
+        "crossChain",
+        "distribute",
+        "lzReceive",
+        "mint",
+        "mintMany",
+        "nonblockingLzReceive",
+        "setAllowedAsset"
+      ],
+      "external_dependencies": [
+        "./interfaces/IGovNFT.sol",
+        "./interfaces/ILayerZeroEndpoint.sol",
+        "./interfaces/ILayerZeroReceiver.sol",
+        "./utils/ExcessivelySafeCall.sol",
+        "./utils/MetaContext.sol",
+        "@openzeppelin/contracts/token/ERC20/IERC20.sol",
+        "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol"
+      ],
+      "security_notes": [
+        "Cross-chain minting restricted to trusted addresses.",
+        "Owner controls asset addition and allowed status.",
+        "Failed cross-chain messages can be retried."
+      ],
+      "config_params": [
+        {
+          "name": "maxBridge",
+          "storage_key": "maxBridge",
+          "load_site": {
+            "id": "GovNFT.setMaxBridge",
+            "file": "GovNFT.sol",
+            "element_name": "setMaxBridge",
+            "unique_snippet": "function setMaxBridge(uint256 _max) external onlyOwner { maxBridge = _max; }"
+          },
+          "downstream_uses": [],
+          "role": "upper_bound"
+        }
+      ],
+      "flag_trackers": [],
+      "math_scale_hints": [
+        {
+          "id": "GovNFT.distribute.div",
+          "file": "GovNFT.sol",
+          "element_name": "distribute",
+          "op": "div",
+          "lhs": "_amount",
+          "rhs": "totalSupply()",
+          "scale": 0,
+          "comment": "Distributes rewards per NFT."
+        }
+      ],
+      "aggregate_trackers": [],
+      "delay_guards": []
+    },
+    {
+      "id": "StableToken",
+      "file_name": "StableToken.sol",
+      "core_purpose_raw": "StableToken is an ERC20 token with permit functionality and meta-transaction support. It allows minting and burning by addresses with the minter role, which can be set by the owner. Only minters can mint or burn tokens. The contract supports EIP-2612 permits and meta-tx via MetaContext.",
+      "core_purpose_digest": "ERC20 with permit and meta-tx; mint/burn restricted to owner-set minters.",
+      "upgradeability_pattern": null,
+      "consumed_interfaces": [],
+      "compiler_version": "0.8.0",
+      "identified_roles": [
+        "minter",
+        "owner"
+      ],
+      "key_state_vars": [
+        "isMinter"
+      ],
+      "key_functions": [
+        "burnFrom",
+        "mintFor",
+        "setMinter"
+      ],
+      "external_dependencies": [
+        "./utils/MetaContext.sol",
+        "@openzeppelin/contracts/token/ERC20/extensions/draft-ERC20Permit.sol"
+      ],
+      "security_notes": [
+        "Only minters can mint or burn tokens.",
+        "Owner controls minter status."
+      ],
+      "config_params": [],
+      "flag_trackers": [],
+      "math_scale_hints": [],
+      "aggregate_trackers": [],
+      "delay_guards": []
+    },
+    {
+      "id": "StableVault",
+      "file_name": "StableVault.sol",
+      "core_purpose_raw": "StableVault allows users to deposit allowed tokens and receive a stable asset (tigAsset), or withdraw by burning tigAsset for an allowed token. Only the owner can list or delist tokens. The contract supports deposits with EIP-2612 permit and handles token decimals for minting/burning. It is not upgradeable and uses MetaContext for meta-tx.",
+      "core_purpose_digest": "Vault for swapping allowed tokens and stable asset; owner manages allowed tokens.",
+      "upgradeability_pattern": null,
+      "consumed_interfaces": [
+        "IStableVault"
+      ],
+      "compiler_version": "0.8.0",
+      "identified_roles": [
+        "owner"
+      ],
+      "key_state_vars": [
+        "allowed",
+        "stable",
+        "tokenIndex",
+        "tokens"
+      ],
+      "key_functions": [
+        "delistToken",
+        "deposit",
+        "depositWithPermit",
+        "listToken",
+        "withdraw"
+      ],
+      "external_dependencies": [
+        "./interfaces/IStableVault.sol",
+        "./utils/MetaContext.sol",
+        "@openzeppelin/contracts/security/ReentrancyGuard.sol",
+        "@openzeppelin/contracts/token/ERC20/IERC20.sol"
+      ],
+      "security_notes": [
+        "Only allowed tokens can be deposited/withdrawn.",
+        "Owner controls token listing.",
+        "Handles token decimals for mint/burn."
+      ],
+      "config_params": [],
+      "flag_trackers": [],
+      "math_scale_hints": [
+        {
+          "id": "StableVault.deposit.mul",
+          "file": "StableVault.sol",
+          "element_name": "deposit",
+          "op": "mul",
+          "lhs": "_amount",
+          "rhs": "10**(18-IERC20Mintable(_token).decimals())",
+          "scale": 18,
+          "comment": "Scales deposit to 18 decimals."
+        },
+        {
+          "id": "StableVault.withdraw.div",
+          "file": "StableVault.sol",
+          "element_name": "withdraw",
+          "op": "div",
+          "lhs": "_amount",
+          "rhs": "10**(18-IERC20Mintable(_token).decimals())",
+          "scale": 18,
+          "comment": "Scales withdrawal from 18 decimals."
+        }
+      ],
+      "aggregate_trackers": [],
+      "delay_guards": []
+    },
+    {
+      "id": "Lock",
+      "file_name": "Lock.sol",
+      "core_purpose_raw": "Lock allows users to lock allowed assets for a period to create bond NFTs, claim rewards, extend locks, and release bonds after expiry. It interacts with BondNFT and GovNFT contracts for reward distribution and NFT management. Only the owner can whitelist assets and retrieve NFTs. The contract tracks total locked per asset and enforces min/max lock periods.",
+      "core_purpose_digest": "Manages time-locked bonds for allowed assets, with reward claiming and NFT management.",
+      "upgradeability_pattern": null,
+      "consumed_interfaces": [],
+      "compiler_version": "0.8.0",
+      "identified_roles": [
+        "owner"
+      ],
+      "key_state_vars": [
+        "allowedAssets",
+        "bondNFT",
+        "govNFT",
+        "maxPeriod",
+        "minPeriod",
+        "totalLocked"
+      ],
+      "key_functions": [
+        "claim",
+        "claimDebt",
+        "claimGovFees",
+        "editAsset",
+        "extendLock",
+        "lock",
+        "release",
+        "sendNFTs"
+      ],
+      "external_dependencies": [
+        "./interfaces/IBondNFT.sol",
+        "./interfaces/IGovNFT.sol",
+        "@openzeppelin/contracts/access/Ownable.sol",
+        "@openzeppelin/contracts/token/ERC20/IERC20.sol"
+      ],
+      "security_notes": [
+        "Only allowed assets can be locked.",
+        "Owner controls asset whitelist and NFT retrieval.",
+        "Tracks total locked per asset."
+      ],
+      "config_params": [],
+      "flag_trackers": [],
+      "math_scale_hints": [],
+      "aggregate_trackers": [
+        {
+          "id": "Lock.totalLocked",
+          "name": "totalLocked",
+          "must_increase_on": [
+            "lock"
+          ],
+          "must_decrease_on": [
+            "release"
+          ]
+        }
+      ],
+      "delay_guards": []
+    },
+    {
+      "id": "BondNFT",
+      "file_name": "BondNFT.sol",
+      "core_purpose_raw": "BondNFT is an ERC721Enumerable contract that represents time-locked bond positions as NFTs. Users can lock ERC20 tokens (tigAsset) for a period, receiving a bond NFT that tracks their position, rewards, and expiry. The contract manages reward distribution, bond extension, release, and transfer, with a manager contract controlling sensitive operations. It supports multiple assets, whitelisting, and reward accounting per epoch.",
+      "core_purpose_digest": "ERC721 NFT bonds for time-locked ERC20 deposits, with reward distribution and manager-controlled ops.",
+      "upgradeability_pattern": null,
+      "consumed_interfaces": [
+        "IERC20",
+        "ERC721Enumerable",
+        "Ownable"
+      ],
+      "compiler_version": "0.8.0",
+      "identified_roles": [
+        "manager",
+        "owner",
+        "user"
+      ],
+      "key_state_vars": [
+        "_idToBond",
+        "accRewardsPerShare",
+        "allowedAsset",
+        "assets",
+        "assetsIndex",
+        "baseURI",
+        "bondPaid",
+        "epoch",
+        "manager",
+        "totalBonds",
+        "totalShares",
+        "userDebt"
+      ],
+      "key_functions": [
+        "addAsset",
+        "approveMany",
+        "claim",
+        "claimDebt",
+        "createLock",
+        "distribute",
+        "extendLock",
+        "getAssets",
+        "idToBond",
+        "isExpired",
+        "pending",
+        "release",
+        "safeTransferFromMany",
+        "safeTransferMany",
+        "setAllowedAsset",
+        "setBaseURI",
+        "setManager",
+        "totalAssets"
+      ],
+      "external_dependencies": [
+        "@openzeppelin/contracts/access/Ownable.sol",
+        "@openzeppelin/contracts/token/ERC20/IERC20.sol",
+        "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol"
+      ],
+      "security_notes": [
+        "Only the manager can call sensitive functions (createLock, extendLock, release, claim, claimDebt).",
+        "Bond transfer requires epoch alignment and a 5-minute delay after mint/extension.",
+        "Reward calculations use unchecked math; ensure no overflows.",
+        "ERC20 transfers are used for asset movement; ensure asset contracts are trusted.",
+        "Whitelisting of assets is enforced via allowedAsset mapping."
+      ],
+      "config_params": [
+        {
+          "name": "epoch",
+          "storage_key": "epoch",
+          "load_site": {
+            "id": "BondNFT.sol:epoch",
+            "file": "BondNFT.sol",
+            "element_name": "epoch",
+            "unique_snippet": "mapping(address => uint256) public epoch;"
+          },
+          "downstream_uses": [
+            "BondNFT.sol:createLock",
+            "BondNFT.sol:extendLock",
+            "BondNFT.sol:release",
+            "BondNFT.sol:claim",
+            "BondNFT.sol:distribute",
+            "BondNFT.sol:idToBond",
+            "BondNFT.sol:_transfer"
+          ],
+          "role": "misc"
+        },
+        {
+          "name": "allowedAsset",
+          "storage_key": "allowedAsset",
+          "load_site": {
+            "id": "BondNFT.sol:allowedAsset",
+            "file": "BondNFT.sol",
+            "element_name": "allowedAsset",
+            "unique_snippet": "mapping(address => bool) public allowedAsset;"
+          },
+          "downstream_uses": [
+            "BondNFT.sol:createLock",
+            "BondNFT.sol:distribute"
+          ],
+          "role": "misc"
+        },
+        {
+          "name": "totalShares",
+          "storage_key": "totalShares",
+          "load_site": {
+            "id": "BondNFT.sol:totalShares",
+            "file": "BondNFT.sol",
+            "element_name": "totalShares",
+            "unique_snippet": "mapping(address => uint) public totalShares;"
+          },
+          "downstream_uses": [
+            "BondNFT.sol:createLock",
+            "BondNFT.sol:extendLock",
+            "BondNFT.sol:release",
+            "BondNFT.sol:distribute"
+          ],
+          "role": "misc"
+        }
+      ],
+      "flag_trackers": [
+        {
+          "name": "expired",
+          "expected_setters": [
+            "idToBond"
+          ],
+          "observed_setters": [
+            "idToBond"
+          ],
+          "note": "Indicates if a bond is expired; used in transfer, claim, release logic."
+        }
+      ],
+      "math_scale_hints": [
+        {
+          "id": "BondNFT.sol:rewardsPerShare",
+          "file": "BondNFT.sol",
+          "element_name": "distribute",
+          "op": "div",
+          "lhs": "_amount * 1e18",
+          "rhs": "totalShares[_tigAsset]",
+          "scale": 1,
+          "comment": "Rewards per share are scaled by 1e18 for precision."
+        },
+        {
+          "id": "BondNFT.sol:bondPaid",
+          "file": "BondNFT.sol",
+          "element_name": "_mint",
+          "op": "div",
+          "lhs": "accRewardsPerShare[bond.asset][epoch[bond.asset]] * bond.shares",
+          "rhs": "1e18",
+          "scale": 1,
+          "comment": "Initial bondPaid is calculated with 1e18 scaling."
+        }
+      ],
+      "aggregate_trackers": [
+        {
+          "id": "totalShares",
+          "name": "totalShares",
+          "must_increase_on": [
+            "createLock",
+            "extendLock"
+          ],
+          "must_decrease_on": [
+            "release"
+          ]
+        }
+      ],
+      "delay_guards": [
+        {
+          "id": "BondNFT.sol:transferDelay",
+          "guard_fn": "_transfer",
+          "delay_type": "timestamp",
+          "period": 300
+        }
+      ]
+    },
+    {
+      "id": "MetaContext",
+      "file_name": "MetaContext.sol",
+      "core_purpose_raw": "MetaContext is an Ownable contract that manages trusted forwarders for meta-transactions. It allows the owner to set trusted forwarders, and overrides _msgSender and _msgData to support meta-tx relaying, extracting the real sender from calldata if called by a trusted forwarder.",
+      "core_purpose_digest": "Ownable meta-tx context for trusted forwarders, supporting relayed calls with correct sender.",
+      "upgradeability_pattern": null,
+      "consumed_interfaces": [
+        "Ownable"
+      ],
+      "compiler_version": "0.8.0",
+      "identified_roles": [
+        "owner",
+        "trusted forwarder"
+      ],
+      "key_state_vars": [
+        "_isTrustedForwarder"
+      ],
+      "key_functions": [
+        "_msgData",
+        "_msgSender",
+        "isTrustedForwarder",
+        "setTrustedForwarder"
+      ],
+      "external_dependencies": [
+        "@openzeppelin/contracts/access/Ownable.sol"
+      ],
+      "security_notes": [
+        "Only owner can set trusted forwarders.",
+        "Assembly is used to extract sender from calldata for meta-tx.",
+        "Relies on correct configuration of trusted forwarders."
+      ],
+      "config_params": [],
+      "flag_trackers": [],
+      "math_scale_hints": [],
+      "aggregate_trackers": [],
+      "delay_guards": []
+    },
+    {
+      "id": "IBondNFT",
+      "file_name": "IBondNFT.sol",
+      "core_purpose_raw": "IBondNFT is an interface for the BondNFT contract, specifying external functions for creating, extending, claiming, releasing, and distributing bond NFTs, as well as querying ownership and asset lists.",
+      "core_purpose_digest": "Interface for BondNFT: lock, extend, claim, release, distribute, and query bond NFTs.",
+      "upgradeability_pattern": null,
+      "consumed_interfaces": [],
+      "compiler_version": "0.8.9",
+      "identified_roles": [],
+      "key_state_vars": [],
+      "key_functions": [
+        "claim",
+        "claimDebt",
+        "createLock",
+        "distribute",
+        "extendLock",
+        "getAssets",
+        "ownerOf",
+        "release",
+        "totalAssets"
+      ],
+      "external_dependencies": [],
+      "security_notes": [],
+      "config_params": [],
+      "flag_trackers": [],
+      "math_scale_hints": [],
+      "aggregate_trackers": [],
+      "delay_guards": []
+    },
+    {
+      "id": "IGovNFT",
+      "file_name": "IGovNFT.sol",
+      "core_purpose_raw": "IGovNFT is an interface for a governance NFT contract, allowing reward distribution, batch transfers, claiming, and querying pending rewards for users and assets.",
+      "core_purpose_digest": "Governance NFT interface: distribute, batch transfer, claim, and view pending rewards.",
+      "upgradeability_pattern": null,
+      "consumed_interfaces": [],
+      "compiler_version": "0.8.0",
+      "identified_roles": [],
+      "key_state_vars": [],
+      "key_functions": [
+        "claim",
+        "distribute",
+        "pending",
+        "safeTransferMany"
+      ],
+      "external_dependencies": [],
+      "security_notes": [],
+      "config_params": [],
+      "flag_trackers": [],
+      "math_scale_hints": [],
+      "aggregate_trackers": [],
+      "delay_guards": []
+    },
+    {
+      "id": "ILayerZeroEndpoint",
+      "file_name": "ILayerZeroEndpoint.sol",
+      "core_purpose_raw": "ILayerZeroEndpoint is an interface for LayerZero's cross-chain messaging endpoint, supporting sending and receiving messages, fee estimation, nonce tracking, and configuration for cross-chain communication.",
+      "core_purpose_digest": "LayerZero cross-chain endpoint interface: send/receive messages, fee estimation, config.",
+      "upgradeability_pattern": null,
+      "consumed_interfaces": [
+        "ILayerZeroUserApplicationConfig"
+      ],
+      "compiler_version": "0.8.0",
+      "identified_roles": [],
+      "key_state_vars": [],
+      "key_functions": [
+        "estimateFees",
+        "getChainId",
+        "getConfig",
+        "getInboundNonce",
+        "getOutboundNonce",
+        "getReceiveLibraryAddress",
+        "getReceiveVersion",
+        "getSendLibraryAddress",
+        "getSendVersion",
+        "hasStoredPayload",
+        "isReceivingPayload",
+        "isSendingPayload",
+        "receivePayload",
+        "retryPayload",
+        "send"
+      ],
+      "external_dependencies": [
+        "./ILayerZeroUserApplicationConfig.sol"
+      ],
+      "security_notes": [],
+      "config_params": [],
+      "flag_trackers": [],
+      "math_scale_hints": [],
+      "aggregate_trackers": [],
+      "delay_guards": []
+    },
+    {
+      "id": "ILayerZeroReceiver",
+      "file_name": "ILayerZeroReceiver.sol",
+      "core_purpose_raw": "Defines the interface for LayerZero endpoint to deliver cross-chain messages to the destination contract. The lzReceive function is invoked by the LayerZero endpoint to deliver messages, including source chain ID, source address, nonce, and payload.",
+      "core_purpose_digest": "Interface for receiving cross-chain messages via LayerZero endpoint.",
+      "upgradeability_pattern": null,
+      "consumed_interfaces": [],
+      "compiler_version": "0.8.0",
+      "identified_roles": [],
+      "key_state_vars": [],
+      "key_functions": [
+        "lzReceive"
+      ],
+      "external_dependencies": [],
+      "security_notes": [],
+      "config_params": [],
+      "flag_trackers": [],
+      "math_scale_hints": [],
+      "aggregate_trackers": [],
+      "delay_guards": []
+    },
+    {
+      "id": "ILayerZeroUserApplicationConfig",
+      "file_name": "ILayerZeroUserApplicationConfig.sol",
+      "core_purpose_raw": "Defines the interface for configuring LayerZero messaging library settings for user applications. Functions allow setting config, send version, receive version, and resuming message flow in blocking mode.",
+      "core_purpose_digest": "Interface for configuring LayerZero messaging library and resuming message flow.",
+      "upgradeability_pattern": null,
+      "consumed_interfaces": [],
+      "compiler_version": "0.8.0",
+      "identified_roles": [],
+      "key_state_vars": [],
+      "key_functions": [
+        "forceResumeReceive",
+        "setConfig",
+        "setReceiveVersion",
+        "setSendVersion"
+      ],
+      "external_dependencies": [],
+      "security_notes": [],
+      "config_params": [],
+      "flag_trackers": [],
+      "math_scale_hints": [],
+      "aggregate_trackers": [],
+      "delay_guards": []
+    },
+    {
+      "id": "IPairsContract",
+      "file_name": "IPairsContract.sol",
+      "core_purpose_raw": "Defines the interface for managing trading pairs, assets, and open interest in a trading protocol. Includes asset and open interest structs, and functions for querying and modifying asset and open interest data.",
+      "core_purpose_digest": "Interface for managing trading pairs, assets, and open interest.",
+      "upgradeability_pattern": null,
+      "consumed_interfaces": [],
+      "compiler_version": "0.8.0",
+      "identified_roles": [],
+      "key_state_vars": [],
+      "key_functions": [
+        "allowedAsset",
+        "idToAsset",
+        "idToOi",
+        "modifyLongOi",
+        "modifyShortOi",
+        "setAssetBaseFundingRate"
+      ],
+      "external_dependencies": [],
+      "security_notes": [],
+      "config_params": [],
+      "flag_trackers": [],
+      "math_scale_hints": [],
+      "aggregate_trackers": [],
+      "delay_guards": []
+    },
+    {
+      "id": "IPosition",
+      "file_name": "IPosition.sol",
+      "core_purpose_raw": "Defines the interface for managing trading positions, including trade and mint trade structs, and functions for executing, modifying, and querying positions, as well as updating funding and interest.",
+      "core_purpose_digest": "Interface for managing trading positions and related operations.",
+      "upgradeability_pattern": null,
+      "consumed_interfaces": [],
+      "compiler_version": "0.8.0",
+      "identified_roles": [],
+      "key_state_vars": [],
+      "key_functions": [
+        "addToPosition",
+        "assetOpenPositions",
+        "assetOpenPositionsIndexes",
+        "assetOpenPositionsLength",
+        "burn",
+        "executeLimitOrder",
+        "getCount",
+        "limitOrderIndexes",
+        "limitOrders",
+        "limitOrdersLength",
+        "mint",
+        "modifyMargin",
+        "modifySl",
+        "modifyTp",
+        "ownerOf",
+        "reducePosition",
+        "setAccInterest",
+        "trades",
+        "updateFunding"
+      ],
+      "external_dependencies": [],
+      "security_notes": [],
+      "config_params": [],
+      "flag_trackers": [],
+      "math_scale_hints": [],
+      "aggregate_trackers": [],
+      "delay_guards": []
+    },
+    {
+      "id": "IReferrals",
+      "file_name": "IReferrals.sol",
+      "core_purpose_raw": "Defines the interface for a referral system, allowing creation of referral codes, setting and getting referred traders, and retrieving referral addresses.",
+      "core_purpose_digest": "Interface for referral code management and tracking referred traders.",
+      "upgradeability_pattern": null,
+      "consumed_interfaces": [],
+      "compiler_version": "0.8.0",
+      "identified_roles": [],
+      "key_state_vars": [],
+      "key_functions": [
+        "createReferralCode",
+        "getReferral",
+        "getReferred",
+        "setReferred"
+      ],
+      "external_dependencies": [],
+      "security_notes": [],
+      "config_params": [],
+      "flag_trackers": [],
+      "math_scale_hints": [],
+      "aggregate_trackers": [],
+      "delay_guards": []
+    },
+    {
+      "id": "IStableVault",
+      "file_name": "IStableVault.sol",
+      "core_purpose_raw": "Defines the interface for a stable vault contract, allowing deposits and withdrawals of assets, checking if an address is allowed, and retrieving the stable asset address.",
+      "core_purpose_digest": "Interface for stable vaults: deposit, withdraw, access control, and stable asset address.",
+      "upgradeability_pattern": null,
+      "consumed_interfaces": [],
+      "compiler_version": "0.8.0",
+      "identified_roles": [],
+      "key_state_vars": [],
+      "key_functions": [
+        "allowed",
+        "deposit",
+        "stable",
+        "withdraw"
+      ],
+      "external_dependencies": [],
+      "security_notes": [],
+      "config_params": [],
+      "flag_trackers": [],
+      "math_scale_hints": [],
+      "aggregate_trackers": [],
+      "delay_guards": []
+    },
+    {
+      "id": "ITrading",
+      "file_name": "ITrading.sol",
+      "core_purpose_raw": "Defines the interface for trading operations, including market and limit order initiation, margin management, position management, and liquidation. It also defines data structures for trade information and ERC20 permit data.",
+      "core_purpose_digest": "Interface for trading: order initiation, margin/position management, liquidation, and related structs.",
+      "upgradeability_pattern": null,
+      "consumed_interfaces": [
+        "TradingLibrary"
+      ],
+      "compiler_version": "0.8.0",
+      "identified_roles": [],
+      "key_state_vars": [],
+      "key_functions": [
+        "addMargin",
+        "addToPosition",
+        "cancelLimitOrder",
+        "executeLimitOrder",
+        "initiateCloseOrder",
+        "initiateLimitOrder",
+        "initiateMarketOrder",
+        "limitClose",
+        "liquidatePosition",
+        "removeMargin",
+        "updateTpSl"
+      ],
+      "external_dependencies": [
+        "TradingLibrary"
+      ],
+      "security_notes": [],
+      "config_params": [],
+      "flag_trackers": [],
+      "math_scale_hints": [],
+      "aggregate_trackers": [],
+      "delay_guards": []
+    }
+  ],
+  "project_context": {
+    "overall_goal_raw": "The TigerSwap protocol is a decentralized perpetual trading platform that allows users to trade various assets with leverage. The protocol enables traders to open long or short positions, set take-profit and stop-loss orders, and manage their positions through a comprehensive set of functions. It uses NFTs to represent positions, supports meta-transactions, and distributes fees to governance and liquidity providers.",
+    "overall_goal_digest": "Decentralized leveraged perpetual trading platform with NFT positions, fee distribution, and meta-tx support.",
+    "actors_capabilities": [
+      "Governance: modify protocol parameters and settings.",
+      "Limit Order Executors: execute limit orders for a fee.",
+      "Liquidators: liquidate undercollateralized positions.",
+      "Proxy Wallets: trade on behalf of traders with approval.",
+      "Referrers: refer users and earn a portion of trading fees.",
+      "Traders: open/manage positions, set TP/SL, add/remove margin, approve proxies."
+    ],
+    "core_assets": [
+      "BondNFT",
+      "GovNFT",
+      "Lock",
+      "PairsContract",
+      "Position NFT contract",
+      "StableToken",
+      "StableVault",
+      "Trading contract",
+      "TradingExtension contract"
+    ],
+    "critical_interactions": [
+      "Trading <-> TradingExtension: price verification, OI modification, validation.",
+      "Trading <-> Position: mint/burn/modify position NFTs.",
+      "Trading <-> PairsContract: asset parameters, open interest.",
+      "Trading <-> StableVault: deposit/withdraw stablecoins.",
+      "Trading <-> GovNFT: fee distribution.",
+      "TradingExtension <-> Chainlink: price sanity checks.",
+      "TradingExtension <-> Referrals: referral management.",
+      "Trading/Extension <-> LayerZero: cross-chain communication."
+    ],
+    "key_assumptions": [
+      {
+        "id": "oracle-sig",
+        "source": "docs",
+        "context_type": "security_assumption",
+        "details": "All price data must be signed by a whitelisted node and optionally checked against Chainlink."
+      },
+      {
+        "id": "proxy-approval",
+        "source": "docs",
+        "context_type": "security_assumption",
+        "details": "Proxy wallets must be explicitly approved by traders with a timestamp."
+      },
+      {
+        "id": "vault-whitelist",
+        "source": "docs",
+        "context_type": "security_assumption",
+        "details": "Only whitelisted vaults and margin assets can be used for trading."
+      },
+      {
+        "id": "timelock-delay",
+        "source": "docs",
+        "context_type": "security_assumption",
+        "details": "Delay guards prevent same-block open/close and enforce minimum time before limit order execution."
+      }
+    ],
+    "invariants": [
+      {
+        "id": "inv-1",
+        "description": "_handleDeposit preserves tigAsset balance",
+        "related_code": [
+          "Trading.sol:_handleDeposit"
+        ],
+        "origin": "check"
+      },
+      {
+        "id": "inv-2",
+        "description": "Stop-loss price must be valid relative to market price",
+        "related_code": [
+          "Trading.sol:_checkSl"
+        ],
+        "origin": "check"
+      },
+      {
+        "id": "inv-3",
+        "description": "StableVault input must be whitelisted and token allowed",
+        "related_code": [
+          "Trading.sol:_checkVault"
+        ],
+        "origin": "check"
+      },
+      {
+        "id": "inv-4",
+        "description": "Proxy must be approved before trading on behalf",
+        "related_code": [
+          "Trading.sol:_validateProxy"
+        ],
+        "origin": "check"
+      },
+      {
+        "id": "inv-5",
+        "description": "Trade margin*leverage must satisfy minPositionSize",
+        "related_code": [
+          "TradingExtension.sol:validateTrade"
+        ],
+        "origin": "check"
+      },
+      {
+        "id": "inv-6",
+        "description": "Trade leverage within allowed bounds",
+        "related_code": [
+          "TradingExtension.sol:validateTrade"
+        ],
+        "origin": "check"
+      },
+      {
+        "id": "inv-7",
+        "description": "Verified price signature must be from an allowed node",
+        "related_code": [
+          "TradingLibrary.sol:verifyPrice"
+        ],
+        "origin": "check"
+      },
+      {
+        "id": "inv-8",
+        "description": "Price timestamp must be within valid signature window",
+        "related_code": [
+          "TradingLibrary.sol:verifyPrice"
+        ],
+        "origin": "check"
+      },
+      {
+        "id": "inv-9",
+        "description": "updateFunding must set OI exactly to parameters",
+        "related_code": [
+          "Position.sol:updateFunding"
+        ],
+        "origin": "check"
+      },
+      {
+        "id": "inv-10",
+        "description": "fundingDeltaPerSec computed correctly in updateFunding",
+        "related_code": [
+          "Position.sol:updateFunding"
+        ],
+        "origin": "check"
+      },
+      {
+        "id": "inv-11",
+        "description": "mint initializes trade and assigns ownership",
+        "related_code": [
+          "Position.sol:mint"
+        ],
+        "origin": "check"
+      },
+      {
+        "id": "inv-12",
+        "description": "PairsContract.modifyLongOi never exceeds maxOi on open",
+        "related_code": [
+          "PairsContract.sol:modifyLongOi"
+        ],
+        "origin": "check"
+      },
+      {
+        "id": "inv-13",
+        "description": "PairsContract.modifyShortOi never exceeds maxOi on open",
+        "related_code": [
+          "PairsContract.sol:modifyShortOi"
+        ],
+        "origin": "check"
+      },
+      {
+        "id": "inv-14",
+        "description": "StableVault deposit mints correct stable amount",
+        "related_code": [],
+        "origin": "check"
+      },
+      {
+        "id": "inv-15",
+        "description": "Limit orders must respect delay before execution",
+        "related_code": [
+          "Trading.sol:executeLimitOrder"
+        ],
+        "origin": "check"
+      },
+      {
+        "id": "inv-totalLocked",
+        "description": "totalLocked[asset] must equal the sum of all locked amounts for that asset in Lock.",
+        "related_code": [],
+        "origin": "assumption"
+      },
+      {
+        "id": "inv-maxPeriod",
+        "description": "Lock period must be between minPeriod and maxPeriod.",
+        "related_code": [],
+        "origin": "check"
+      },
+      {
+        "id": "inv-totalShares",
+        "description": "totalShares for each asset equals the sum of all active bond shares for that asset.",
+        "related_code": [
+          "BondNFT.sol:createLock",
+          "BondNFT.sol:extendLock",
+          "BondNFT.sol:release"
+        ],
+        "origin": "check"
+      },
+      {
+        "id": "inv-bond-expiry",
+        "description": "A bond is expired if and only if bond.expireEpoch <= epoch[bond.asset].",
+        "related_code": [
+          "BondNFT.sol:idToBond",
+          "BondNFT.sol:isExpired"
+        ],
+        "origin": "check"
+      }
+    ],
+    "general_security_ctx": [
+      {
+        "id": "layerzero-isolation",
+        "source": "web_context",
+        "context_type": "best_practice",
+        "details": "LayerZero isolates security per application pathway; channel security parameters are immutable except by delegate."
+      },
+      {
+        "id": "chainlink-freshness",
+        "source": "web_context",
+        "context_type": "best_practice",
+        "details": "Chainlink price feeds must be checked for staleness using updatedAt and a strict freshness threshold."
+      },
+      {
+        "id": "chainlink-upgradeability",
+        "source": "web_context",
+        "context_type": "tooling_note",
+        "details": "Chainlink proxy is upgradeable by a Safe multisig; arbitrary changes or censorship are possible with 4 signatures."
+      },
+      {
+        "id": "erc721-enumerable",
+        "source": "web_context",
+        "context_type": "best_practice",
+        "details": "ERC721Enumerable prevents batch minting and ensures atomic enumeration updates."
+      },
+      {
+        "id": "arbitrum-evm-diff",
+        "source": "web_context",
+        "context_type": "tooling_note",
+        "details": "On Arbitrum, blockhash, coinbase, difficulty, and prevrandao are not secure for randomness; block.number is an L1 estimate."
+      },
+      {
+        "id": "ctx-onlyOwner",
+        "source": "code_comment",
+        "context_type": "best_practice",
+        "details": "Functions that change critical configuration are restricted to onlyOwner."
+      },
+      {
+        "id": "ctx-onlyManager",
+        "source": "code_comment",
+        "context_type": "best_practice",
+        "details": "Sensitive functions are restricted to onlyManager modifier."
+      },
+      {
+        "id": "ctx-asset-whitelist",
+        "source": "code_comment",
+        "context_type": "best_practice",
+        "details": "Asset must be whitelisted before it can be locked in a bond."
+      }
+    ],
+    "static_summary": null
+  }
+}

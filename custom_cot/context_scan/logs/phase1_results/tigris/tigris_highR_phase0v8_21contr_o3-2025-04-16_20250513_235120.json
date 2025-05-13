@@ -1,0 +1,49 @@
+{
+  "results": [
+    {
+      "Issue": "Delay guard can be bypassed when blockDelay is left at the default 0",
+      "Severity": "High",
+      "Contracts": [
+        "Trading.sol"
+      ],
+      "Description": "Trading._checkDelay is supposed to stop a position from being opened and closed in the same block.  However the guard only reverts when\n\n```solidity\nif (block.number < _delay.delay) revert(\"0\"); // Wait\n```\n\nand _delay.delay is calculated as `block.number + blockDelay`.\nBecause `blockDelay` is initialised to **0** and there is no constructor value-check, a fresh deployment lets a trader:\n1. open a position (blockDelayPassed[id].delay == current block)\n2. immediately call any closing path (market close, limitClose, liquidation etc.) in the *same* block – the comparison `block.number < _delay.delay` evaluates to *false*.\n\nDoing so removes the intended “same–block price manipulation” protection described in the context summary (Invariant inv-timelock-delay) and allows profit extraction with two different signed prices in a single transaction.",
+      "Recommendation": ""
+    },
+    {
+      "Issue": "Possible under-flow revert in PairsContract when the last position is closed",
+      "Severity": "Medium",
+      "Contracts": [
+        "PairsContract.sol"
+      ],
+      "Description": "When a position is fully (or over-) closed, TradingExtension ultimately calls\n\n```solidity\n_pairsContract.modifyLongOi(_asset, _tigAsset, false, amount);\n```\n\nInside PairsContract:\n\n```solidity\n_idToOi[_asset][_tigAsset].longOi -= _amount; // <-- may revert\nif (_idToOi[_asset][_tigAsset].longOi < 1e9) {\n    _idToOi[_asset][_tigAsset].longOi = 0;\n}\n```\n\nBecause the subtraction executes *before* the zero-flooring logic and is **not** wrapped in `unchecked`, a rounding-error of only 1 wei between the amount added on open and the amount being removed on close will revert and permanently brick the close / liquidation transaction.  The affected trader becomes unable to exit and the whole market side can be DOSed for that tigAsset.",
+      "Recommendation": ""
+    },
+    {
+      "Issue": "maxBridge variable is unused – unlimited NFT bridging can exhaust gas or bypass supply limits",
+      "Severity": "Medium",
+      "Contracts": [
+        "GovNFT.sol"
+      ],
+      "Description": "GovNFT declares an upper bound that should limit the amount of NFTs bridged in one call:\n\n```solidity\nuint256 public maxBridge = 20;\n```\n\nbut `crossChain()` never checks it:\n\n```solidity\nfunction crossChain(..., uint256[] memory tokenId) public payable {\n    require(tokenId.length > 0, \"Not bridging\");\n    // NO check against maxBridge\n    ...\n}\n```\n\nA malicious user can supply an array with hundreds or thousands of tokenIds.  The for-loop burns every NFT first and later re-mints on the destination chain:\n\n```solidity\nfor (uint i = 0; i < tokenId.length; i++) {\n    require(_msgSender() == ownerOf(tokenId[i]), \"Not the owner\");\n    _burn(tokenId[i]);\n}\n```\n\nThe call can easily run out of gas (DOS) or bypass an intended cap on how many NFTs may leave a chain in one transaction, harming cross-chain accounting.",
+      "Recommendation": ""
+    },
+    {
+      "Issue": "Unbounded epoch catch-up loop can DOS BondNFT.distribute after long inactivity",
+      "Severity": "Low",
+      "Contracts": [
+        "BondNFT.sol"
+      ],
+      "Description": "`distribute()` advances `epoch[_tigAsset]` one day at a time until it reaches `block.timestamp / DAY`:\n\n```solidity\nfor (uint i = epoch[_tigAsset]; i < aEpoch; i++) {\n    epoch[_tigAsset] += 1;\n    accRewardsPerShare[_tigAsset][i+1] = accRewardsPerShare[_tigAsset][i];\n}\n```\n\nIf no distribution occurs for a long period (e.g. two years ⇒ ~730 iterations) the transaction will very likely run out of gas, making it impossible to distribute rewards any more and violating invariant `inv-totalShares`.  The loop is unbounded and user-supplied `_amount` does not protect against it.",
+      "Recommendation": ""
+    },
+    {
+      "Issue": "Unlimited token allowance from Trading to StableVault",
+      "Severity": "Low",
+      "Contracts": [
+        "Trading.sol"
+      ],
+      "Description": "During every margin deposit Trading grants StableVault an **infinite** allowance for the user’s margin asset:\n\n```solidity\nIERC20(_marginAsset).approve(_stableVault, type(uint).max);\n```\n\nIf the whitelisted StableVault is upgraded or maliciously replaced (owner control), it can pull *all* margin-asset tokens that happen to be temporarily stored in Trading (e.g. from failed transactions or unexpected transfers).  Minimising allowances after use or setting them to the exact amount would reduce this risk.",
+      "Recommendation": ""
+    }
+  ]
+}
