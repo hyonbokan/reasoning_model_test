@@ -1,0 +1,41 @@
+{
+  "results": [
+    {
+      "Issue": "ILOManager initialize() is publicly callable and allows full ownership takeover",
+      "Severity": "High",
+      "Contracts": [
+        "ILOManager.sol"
+      ],
+      "Description": "The `initialize` function can be invoked by **any** address because it lacks an `onlyOwner` (or similar) modifier.  The very first caller passes arbitrary arguments, becoming the permanent owner and choosing every critical parameter (fees, fee-taker, pool implementation, factory addresses):\n\n```solidity\nfunction initialize(\n        address initialOwner,\n        address _feeTaker,\n        address iloPoolImplementation,\n        address uniV3Factory,\n        address weth9,\n        uint16 platformFee,\n        uint16 performanceFee\n) external override whenNotInitialized() {\n    PLATFORM_FEE = platformFee;\n    PERFORMANCE_FEE = performanceFee;\n    FEE_TAKER = _feeTaker;\n    transferOwnership(initialOwner); // attacker-controlled\n    ...\n}\n```\n\nBecause `whenNotInitialized` only blocks *subsequent* calls, a bot observing deployment can front-run the legitimate initializer and:\n* Flip ownership to itself.\n* Point `ILO_POOL_IMPLEMENTATION` or `FEE_TAKER` to malicious contracts.\n* Set exorbitant fees that later brick the protocol.\n\nThis results in total loss of control over every ILO, pool and user fund managed by `ILOManager`.",
+      "Recommendation": ""
+    },
+    {
+      "Issue": "Re-entrancy in ILOPool.buy due to external token transfer after state mutation",
+      "Severity": "Medium",
+      "Contracts": [
+        "ILOPool.sol"
+      ],
+      "Description": "`buy()` updates bookkeeping **before** it executes an external `transferFrom` on the raise token.  If `RAISE_TOKEN` is an ERC777 or other token with hooks, the attacker can re-enter `buy()` (or other state-changing functions) during the token transfer while the contract state is half-updated:\n\n```solidity\n// effects first\ntotalRaised += raiseAmount;\n_position.raiseAmount += raiseAmount;\n...\n// interaction afterwards – external & re-enterable\nTransferHelper.safeTransferFrom(RAISE_TOKEN, msg.sender, address(this), raiseAmount);\n```\n\nA malicious token can therefore:\n1. Enter `buy()` again, bypassing `hardCap`, `maxCapPerUser`, `totalSold` checks, or\n2. Manipulate `_positions` to mint multiple NFTs.\n\nThis can oversubscribe the sale, break accounting and hinder later launch / refund logic.",
+      "Recommendation": ""
+    },
+    {
+      "Issue": "Fee parameters not bounded – underflow in _deductFees can brick claims",
+      "Severity": "Medium",
+      "Contracts": [
+        "ILOPool.sol",
+        "ILOManager.sol"
+      ],
+      "Description": "`_deductFees` assumes `feeBPS <= 10000` (100 % in basis-points) but no function enforces this:\n\n```solidity\namount0Left = amount0 - FullMath.mulDiv(amount0, feeBPS, BPS); // BPS = 10000\n```\n\nIf `feeBPS` is set to a value greater than 10 000, `FullMath.mulDiv` returns a number larger than `amount0`, the subtraction underflows and *every* call path that reaches `_deductFees` (e.g., `claim`) reverts, permanently freezing funds.  An attacker exploiting the unprotected `initialize()` (see issue #1) can set these malicious fees during takeover.",
+      "Recommendation": ""
+    },
+    {
+      "Issue": "approveAndCall pattern in Vultisig enables allowance phishing / re-entrancy",
+      "Severity": "Low",
+      "Contracts": [
+        "Vultisig.sol"
+      ],
+      "Description": "`approveAndCall` first grants allowance to `spender` and then performs an external call to it:\n\n```solidity\n_approve(msg.sender, spender, amount);\nIApproveAndCallReceiver(spender).receiveApproval(msg.sender, amount, address(this), extraData);\n```\n\nA malicious `spender` can immediately execute `transferFrom` (or trigger re-entrant logic) before control returns, unexpectedly draining the caller’s balance or interacting with the token contract in unsafe order.  The pattern is generally discouraged in favour of safer alternatives such as EIP-2612 permits or pull-based allowances.",
+      "Recommendation": ""
+    }
+  ]
+}

@@ -37,20 +37,6 @@ class SeverityEst(str, Enum):
 def _uid() -> str:               # 8-char primary key
     return uuid.uuid4().hex[:8]
 
-class MathScaleHint(BaseModel):
-    """
-    Records fixed-point arithmetic patterns so Phase-1 can
-    catch silent truncation / rounding errors.
-    """
-    id: str          = Field(default_factory=_uid)
-    file: str        # ContractName.sol
-    element_name: str              # function or modifier
-    op: Literal["mul", "div"]      # operation that may lose precision
-    lhs: str                       # left-hand operand (var name or literal)
-    rhs: str                       # right-hand operand
-    scale: int                     # expected scale (e.g. 1e18, 100, 10_000)
-    comment: Optional[str] = None  # free hint, e.g. "taxRate is 18-dec FP"
-
 class CodeRef(BaseModel):
     """
     Pin-points **one exact location** in the code base.
@@ -84,10 +70,6 @@ class InvariantRef(BaseModel):
         default_factory=list,
         description="List of CodeRef.id where the invariant is enforced or checked"
     )
-    # range_expr: Optional[str] = None   # e.g. "0 < slippagePct <= maxSlippage"
-    
-    numeric_bound: Optional[str] = None
-    
     origin: Literal["doc", "check", "assumption"] = Field(
         "doc",
         description=(
@@ -111,15 +93,13 @@ class FlagTracker(BaseModel):
         default_factory=list,
         description="Functions that ACTUALLY write the flag (grep result)"
     )
-    lifecycle: Literal["init_once", "toggle"] = Field(
-        "toggle",
-        description=(
-            "'init_once' → flag meant to flip exactly once\n"
-            "'toggle'    → flag can turn on/off repeatedly"
-        ),
-    )
     note: Optional[str] = Field(
-        None, description="Semantic hint (e.g. ‘blocks reward accrual when 0’).")
+        None, description="Semantic hint (e.g. ‘blocks reward accrual when 0’)")
+    
+    # convenience ---------------------------------------------------
+    def missing(self) -> List[str]:
+        "return all expected setters that were NOT observed in code"
+        return sorted(set(self.expected_setters) - set(self.observed_setters))
 
 class ConfigParam(BaseModel):
     """
@@ -153,61 +133,29 @@ class ConfigParam(BaseModel):
             "- 'misc'        : none of the above"
         )
     )
-        
-class AggregateTracker(BaseModel):
+class ArithHint(BaseModel):
     """
-    Follows a critical project-wide total or cap so Phase-1 can spot
-    missing updates or mismatching sums.
-      • examples: totalLocked, totalShares, openInterest
+    Numeric hints Phase-1 needs for precision / div-by-zero checks.
     """
-    id: str = Field(default_factory=_uid)
-    name: str                     # storage var
-    must_increase_on: List[str] = Field(default_factory=list)   # fn names
-    must_decrease_on: List[str] = Field(default_factory=list)
+    var: str                  # "taxRate"  OR "PRICE_PER_PLOT"
+    role: Literal["divisor", "multiplier", "scale"] = "scale"
+    scale_or_default: Optional[int] = None   # 1e18 etc.
+    comment: Optional[str] = None
 
-class DelayGuard(BaseModel):
-    """
-    Captures time / block delay requirements so Phase-1 can detect
-    bypasses (e.g. updateTpSl vs limitClose in Tigris).
-    """
-    id: str = Field(default_factory=_uid)
-    guard_fn: str                 # e.g. '_checkDelay'
-    delay_type: Literal["block","timestamp"]
-    period: int                   # blocks or seconds
+class SyncGuard(BaseModel):
+    name: str                 # storage var *or* checker fn
+    guard_type: Literal["total", "delay"]
+    detail: str               # "must ++ on deposit", "≥ 1 day between calls"
 
-class ExternalFlow(BaseModel):
-    """
-    Describes a critical external call that moves value or relies on
-    off-chain state (price, oracle, fee collection, etc.).
-    """
-    file: str
-    function: str                 # e.g. "claim", "launch"
-    call_sig: str                 # "pool.collect(uint128.max, uint128.max)"
-    expected_effect: str          # human one-liner: "distribute fees per-user"
-    risk: Optional[str] = None    # "fee draining", "DOS", …
-
-class BusinessRule(BaseModel):
-    """
-    High-level rule that spans contracts or storage structures.
-    """
-    description: str              # "maxCapPerUser applies even after NFT transfer"
-    related_contracts: List[str]  # ["ILOPool.sol", "Whitelist.sol"]
-    severity_if_broken: SeverityEst = SeverityEst.HIGH
-class NumericGuard(BaseModel):
-    """
-    Range or slippage guard that must be enforced around a variable.
-    """
-    var_name: str                 # "priceX96" / "amount0"
-    guard_expr: str               # "tickLower <= price <= tickUpper"
-    failure_mode: str             # "sell blocked" / "excess fee"
 
 # ════════════════════════════════════════════════════════════════
 #  CONTRACT-LEVEL SUMMARY
 # ════════════════════════════════════════════════════════════════
 class ContractSummary(BaseModel):
     id: str = Field(default_factory=_uid)
-    file_name: str                                     # from // File:
+    file_name: str                                     # from “// File: …”
 
+    # ────── intent ───────────────────────────────────────────────
     core_purpose_raw: str                              # copy longest relevant paragraph
     core_purpose_digest: str = Field(..., description="≤120-char human summary")
 
@@ -216,33 +164,28 @@ class ContractSummary(BaseModel):
     consumed_interfaces: List[str] = Field(default_factory=list)
     compiler_version: Optional[str] = None
 
-    identified_roles:   List[str] = Field(default_factory=list)
-    key_state_vars:     List[str] = Field(default_factory=list)
-    key_functions:      List[str] = Field(default_factory=list)
-    external_dependencies: List[str] = Field(default_factory=list)
-    security_notes:        List[str] = Field(default_factory=list)
+    # ────── quick-index lists ───────────────────────────────────
+    identified_roles:        List[str] = Field(default_factory=list)
+    key_state_vars:          List[str] = Field(default_factory=list)
+    key_functions:           List[str] = Field(default_factory=list)
+    external_dependencies:   List[str] = Field(default_factory=list)
+    security_notes:          List[str] = Field(default_factory=list)
 
-    # static_findings: List[StaticFinding] = Field(default_factory=list)
-    config_params:  List[ConfigParam]  = Field(default_factory=list)
-    flag_trackers:  List[FlagTracker]  = Field(default_factory=list)
-    math_scale_hints: List[MathScaleHint] = Field(default_factory=list)
-    
-    # new entries
-    aggregate_trackers: List[AggregateTracker] = Field(default_factory=list)
-    delay_guards:       List[DelayGuard]       = Field(default_factory=list)
+    # ────── structured pointers / hints for Phase-1 ─────────────
+    config_params:   List[ConfigParam]  = Field(default_factory=list)
+    flag_trackers:   List[FlagTracker]  = Field(default_factory=list)
 
-    external_flows:  List[ExternalFlow]  = Field(default_factory=list)
-    business_rules:  List[BusinessRule]  = Field(default_factory=list)
-    numeric_guards:  List[NumericGuard]  = Field(default_factory=list)
+    # ⬇️  **merged**: replaces math_scale_hints, aggregate_trackers, delay_guards
+    arith_hints:  List[ArithHint]  = Field(default_factory=list)   # precision & div-by-zero
+    sync_guards:  List[SyncGuard]  = Field(default_factory=list)   # totals & min-delay rules
 
-    # ── light normalisation ──────────────────────────────
+    # ────── normalisation ───────────────────────────────────────
     @model_validator(mode="after")
     def _dedupe(cls, v):
         for fld in ("identified_roles", "key_state_vars",
                     "key_functions", "external_dependencies"):
             setattr(v, fld, sorted(set(getattr(v, fld))))
         return v
-
 # ════════════════════════════════════════════════════════════════
 #  PROJECT-LEVEL SUMMARY
 # ════════════════════════════════════════════════════════════════

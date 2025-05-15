@@ -1,0 +1,1283 @@
+{
+  "analyzed_contracts": [
+    {
+      "id": "Vultisig.sol",
+      "file_name": "Vultisig.sol",
+      "core_purpose_raw": "ERC20 token contract for Vultisig, with an initial supply of 100 million tokens, owned by deployer. Includes approveAndCall to allow atomic approval and callback to a receiver contract.",
+      "core_purpose_digest": "ERC20 Vultisig token with 100M supply and approveAndCall callback support.",
+      "upgradeability_pattern": null,
+      "consumed_interfaces": [
+        "IApproveAndCallReceiver"
+      ],
+      "compiler_version": "0.8.24",
+      "identified_roles": [
+        "Owner"
+      ],
+      "key_state_vars": [
+        "ERC20",
+        "Ownable"
+      ],
+      "key_functions": [
+        "approveAndCall",
+        "constructor"
+      ],
+      "external_dependencies": [
+        "./interfaces/IApproveAndCallReceiver.sol",
+        "@openzeppelin/contracts/access/Ownable.sol",
+        "@openzeppelin/contracts/token/ERC20/ERC20.sol"
+      ],
+      "security_notes": [
+        "approveAndCall pattern can introduce reentrancy if receiver contract is malicious.",
+        "Initial supply minted to deployer; ensure secure key management."
+      ],
+      "config_params": [],
+      "flag_trackers": [],
+      "arith_hints": [],
+      "sync_guards": []
+    },
+    {
+      "id": "Whitelist.sol",
+      "file_name": "Whitelist.sol",
+      "core_purpose_raw": "Manages whitelist and blacklist for Vultisig token sales. Supports self-whitelisting (when enabled), owner-managed whitelisting/blacklisting, max ETH cap per address, Uniswap V3 TWAP oracle integration for price checks, and enforces restrictions during token transfers via checkWhitelist. Tracks contributed ETH per address and enforces per-user and global sale limits.",
+      "core_purpose_digest": "Whitelist/blacklist and cap manager for Vultisig token sales, with Uniswap V3 oracle integration.",
+      "upgradeability_pattern": null,
+      "consumed_interfaces": [
+        "IOracle"
+      ],
+      "compiler_version": "0.8.24",
+      "identified_roles": [
+        "Owner",
+        "Vultisig token contract"
+      ],
+      "key_state_vars": [
+        "_allowedWhitelistIndex",
+        "_contributed",
+        "_isBlacklisted",
+        "_isSelfWhitelistDisabled",
+        "_locked",
+        "_maxAddressCap",
+        "_oracle",
+        "_pool",
+        "_vultisig",
+        "_whitelistCount",
+        "_whitelistIndex"
+      ],
+      "key_functions": [
+        "addBatchWhitelist",
+        "addWhitelistedAddress",
+        "checkWhitelist",
+        "receive",
+        "setAllowedWhitelistIndex",
+        "setBlacklisted",
+        "setIsSelfWhitelistDisabled",
+        "setLocked",
+        "setMaxAddressCap",
+        "setOracle",
+        "setPool",
+        "setVultisig"
+      ],
+      "external_dependencies": [
+        "./interfaces/IOracle.sol",
+        "@openzeppelin/contracts/access/Ownable.sol"
+      ],
+      "security_notes": [
+        "Only Vultisig token contract can call checkWhitelist (enforced by onlyVultisig modifier).",
+        "Self-whitelisting is gated by _isSelfWhitelistDisabled and blacklist.",
+        "ETH cap per address enforced using Uniswap V3 TWAP oracle; manipulation of oracle could affect cap enforcement.",
+        "Owner can change critical parameters (caps, oracle, pool, whitelist/blacklist).",
+        "Reentrancy not present in receive() as ETH is returned after state update.",
+        "No upgradeability pattern."
+      ],
+      "config_params": [
+        {
+          "name": "maxAddressCap",
+          "storage_key": "_maxAddressCap",
+          "load_site": {
+            "id": "Whitelist.maxAddressCap",
+            "file": "Whitelist.sol",
+            "element_name": "maxAddressCap",
+            "unique_snippet": "function maxAddressCap() external view returns (uint256)"
+          },
+          "downstream_uses": [
+            "Whitelist.checkWhitelist"
+          ],
+          "role": "upper_bound"
+        },
+        {
+          "name": "allowedWhitelistIndex",
+          "storage_key": "_allowedWhitelistIndex",
+          "load_site": {
+            "id": "Whitelist.allowedWhitelistIndex",
+            "file": "Whitelist.sol",
+            "element_name": "allowedWhitelistIndex",
+            "unique_snippet": "function allowedWhitelistIndex() external view returns (uint256)"
+          },
+          "downstream_uses": [
+            "Whitelist.checkWhitelist"
+          ],
+          "role": "upper_bound"
+        },
+        {
+          "name": "locked",
+          "storage_key": "_locked",
+          "load_site": {
+            "id": "Whitelist.locked",
+            "file": "Whitelist.sol",
+            "element_name": "locked",
+            "unique_snippet": "function locked() external view returns (bool)"
+          },
+          "downstream_uses": [
+            "Whitelist.checkWhitelist"
+          ],
+          "role": "misc"
+        }
+      ],
+      "flag_trackers": [
+        {
+          "name": "_locked",
+          "expected_setters": [
+            "setLocked"
+          ],
+          "observed_setters": [
+            "setLocked"
+          ],
+          "note": "Controls whether token transfers are allowed during whitelist period."
+        },
+        {
+          "name": "_isSelfWhitelistDisabled",
+          "expected_setters": [
+            "setIsSelfWhitelistDisabled"
+          ],
+          "observed_setters": [
+            "setIsSelfWhitelistDisabled"
+          ],
+          "note": "Controls whether self-whitelisting is enabled."
+        }
+      ],
+      "arith_hints": [
+        {
+          "var": "_maxAddressCap",
+          "role": "divisor",
+          "scale_or_default": null,
+          "comment": "Used as upper bound for contributed ETH per address."
+        }
+      ],
+      "sync_guards": []
+    },
+    {
+      "id": "VultisigWhitelisted.sol",
+      "file_name": "VultisigWhitelisted.sol",
+      "core_purpose_raw": "Extends Vultisig token to enforce whitelist checks during transfers. Calls checkWhitelist on the whitelist contract in _beforeTokenTransfer. Owner can set or remove the whitelist contract address to enable/disable restrictions.",
+      "core_purpose_digest": "Vultisig token with enforced whitelist checks during transfer via external contract.",
+      "upgradeability_pattern": null,
+      "consumed_interfaces": [
+        "IWhitelist"
+      ],
+      "compiler_version": "0.8.24",
+      "identified_roles": [
+        "Owner"
+      ],
+      "key_state_vars": [
+        "_whitelistContract"
+      ],
+      "key_functions": [
+        "_beforeTokenTransfer",
+        "setWhitelistContract"
+      ],
+      "external_dependencies": [
+        "../Vultisig.sol",
+        "../interfaces/IWhitelist.sol"
+      ],
+      "security_notes": [
+        "Whitelist enforcement can be toggled by owner by setting whitelist contract address.",
+        "Relies on external whitelist contract for transfer restrictions.",
+        "No upgradeability pattern."
+      ],
+      "config_params": [],
+      "flag_trackers": [],
+      "arith_hints": [],
+      "sync_guards": []
+    },
+    {
+      "id": "UniswapV3Oracle.sol",
+      "file_name": "UniswapV3Oracle.sol",
+      "core_purpose_raw": "Provides a Uniswap V3 TWAP oracle for VULT/ETH price over a 30-minute window, with a 5% slippage applied. Used by the whitelist contract to estimate ETH value for VULT token purchases.",
+      "core_purpose_digest": "Uniswap V3 TWAP oracle for VULT/ETH with 5% slippage, used for whitelist price checks.",
+      "upgradeability_pattern": null,
+      "consumed_interfaces": [
+        "IOracle",
+        "IUniswapV3Pool"
+      ],
+      "compiler_version": "0.8.24",
+      "identified_roles": [],
+      "key_state_vars": [
+        "BASE_AMOUNT",
+        "PERIOD",
+        "WETH",
+        "baseToken",
+        "pool"
+      ],
+      "key_functions": [
+        "peek"
+      ],
+      "external_dependencies": [
+        "../../interfaces/IOracle.sol",
+        "./uniswapv0.8/OracleLibrary.sol",
+        "@uniswap/v3-core/contracts/interfaces/IUniswapV3Pool.sol"
+      ],
+      "security_notes": [
+        "TWAP oracles can be manipulated if pool liquidity is low or window is too short.",
+        "5% slippage is applied to quoted price.",
+        "No access control or upgradeability."
+      ],
+      "config_params": [],
+      "flag_trackers": [],
+      "arith_hints": [
+        {
+          "var": "period",
+          "role": "scale",
+          "scale_or_default": 1800,
+          "comment": "TWAP period is 30 minutes (1800 seconds)."
+        }
+      ],
+      "sync_guards": []
+    },
+    {
+      "id": "FullMath.sol",
+      "file_name": "FullMath.sol",
+      "core_purpose_raw": "Library for 512-bit precision multiplication and division, used to avoid overflow in price and liquidity calculations. Provides mulDiv and mulDivRoundingUp for full-precision math.",
+      "core_purpose_digest": "512-bit precision math library for safe mul/div operations.",
+      "upgradeability_pattern": null,
+      "consumed_interfaces": [],
+      "compiler_version": null,
+      "identified_roles": [],
+      "key_state_vars": [],
+      "key_functions": [
+        "mulDiv",
+        "mulDivRoundingUp"
+      ],
+      "external_dependencies": [],
+      "security_notes": [
+        "mulDiv and mulDivRoundingUp revert on denominator == 0 and on overflow.",
+        "Critical for price and liquidity math; must be used carefully to avoid division by zero."
+      ],
+      "config_params": [],
+      "flag_trackers": [],
+      "arith_hints": [
+        {
+          "var": "denominator",
+          "role": "divisor",
+          "scale_or_default": null,
+          "comment": "mulDiv and mulDivRoundingUp require denominator > 0."
+        }
+      ],
+      "sync_guards": []
+    },
+    {
+      "id": "OracleLibrary",
+      "file_name": "OracleLibrary.sol",
+      "core_purpose_raw": "Provides utility functions to interact with Uniswap V3 pool oracles, including fetching time-weighted average ticks, quoting token amounts at a tick, and retrieving the age of the oldest observation in a pool.",
+      "core_purpose_digest": "Uniswap V3 oracle utility library for price/tick queries and quoting.",
+      "upgradeability_pattern": null,
+      "consumed_interfaces": [
+        "IUniswapV3Pool"
+      ],
+      "compiler_version": ">=0.5.0",
+      "identified_roles": [
+        "oracle consumer"
+      ],
+      "key_state_vars": [],
+      "key_functions": [
+        "consult",
+        "getOldestObservationSecondsAgo",
+        "getQuoteAtTick"
+      ],
+      "external_dependencies": [
+        "./FullMath.sol",
+        "./TickMath.sol",
+        "@uniswap/v3-core/contracts/interfaces/IUniswapV3Pool.sol"
+      ],
+      "security_notes": [
+        "consult: require(period != 0, 'BP') prevents division by zero.",
+        "getOldestObservationSecondsAgo: require(observationCardinality > 0, 'NI') ensures valid pool state."
+      ],
+      "config_params": [],
+      "flag_trackers": [],
+      "arith_hints": [
+        {
+          "var": "period",
+          "role": "divisor",
+          "scale_or_default": null,
+          "comment": "Used as denominator in consult; checked nonzero."
+        }
+      ],
+      "sync_guards": []
+    },
+    {
+      "id": "TickMath",
+      "file_name": "TickMath.sol",
+      "core_purpose_raw": "Math library for computing sqrt prices from ticks and vice versa for Uniswap V3. Supports price calculations between 2**-128 and 2**128, and provides conversion between tick and sqrtPriceX96.",
+      "core_purpose_digest": "Math for Uniswap V3: tick <-> sqrtPriceX96 conversions.",
+      "upgradeability_pattern": null,
+      "consumed_interfaces": [],
+      "compiler_version": ">=0.5.0",
+      "identified_roles": [
+        "math utility"
+      ],
+      "key_state_vars": [
+        "MAX_SQRT_RATIO",
+        "MAX_TICK",
+        "MIN_SQRT_RATIO",
+        "MIN_TICK"
+      ],
+      "key_functions": [
+        "getSqrtRatioAtTick",
+        "getTickAtSqrtRatio"
+      ],
+      "external_dependencies": [],
+      "security_notes": [
+        "getSqrtRatioAtTick: require(absTick <= uint256(uint24(MAX_TICK)), 'T') bounds check.",
+        "getTickAtSqrtRatio: require(sqrtPriceX96 >= MIN_SQRT_RATIO && sqrtPriceX96 < MAX_SQRT_RATIO, 'R') bounds check."
+      ],
+      "config_params": [],
+      "flag_trackers": [],
+      "arith_hints": [
+        {
+          "var": "tick",
+          "role": "scale",
+          "scale_or_default": null,
+          "comment": "Used to compute sqrt(1.0001^tick) * 2^96"
+        }
+      ],
+      "sync_guards": []
+    },
+    {
+      "id": "ILOManager",
+      "file_name": "ILOManager.sol",
+      "core_purpose_raw": "Manages Initial Liquidity Offering (ILO) projects and pools, including project initialization, pool deployment, fee configuration, and project state tracking. Integrates with Uniswap V3 pools and supports project admin controls, deadlines, and refund logic.",
+      "core_purpose_digest": "Manages ILO projects/pools, fees, deadlines, and Uniswap V3 pool integration.",
+      "upgradeability_pattern": null,
+      "consumed_interfaces": [
+        "IILOManager",
+        "IILOPool",
+        "IUniswapV3Factory",
+        "IUniswapV3Pool",
+        "Ownable"
+      ],
+      "compiler_version": "=0.7.6",
+      "identified_roles": [
+        "owner",
+        "project admin"
+      ],
+      "key_state_vars": [
+        "DEFAULT_DEADLINE_OFFSET",
+        "FEE_TAKER",
+        "ILO_POOL_IMPLEMENTATION",
+        "PERFORMANCE_FEE",
+        "PLATFORM_FEE",
+        "UNIV3_FACTORY",
+        "WETH9",
+        "_cachedProject",
+        "_initializedILOPools"
+      ],
+      "key_functions": [
+        "claimRefund",
+        "initILOPool",
+        "initProject",
+        "initialize",
+        "launch",
+        "setDefaultDeadlineOffset",
+        "setFeeTaker",
+        "setILOPoolImplementation",
+        "setPerformanceFee",
+        "setPlatformFee",
+        "setRefundDeadlineForProject",
+        "transferAdminProject"
+      ],
+      "external_dependencies": [
+        "@openzeppelin/contracts/access/Ownable.sol",
+        "@openzeppelin/contracts/proxy/Clones.sol",
+        "@uniswap/v3-core/contracts/interfaces/IUniswapV3Factory.sol",
+        "@uniswap/v3-core/contracts/interfaces/IUniswapV3Pool.sol"
+      ],
+      "security_notes": [
+        "Project admin and owner roles are enforced via modifiers.",
+        "Refund and launch logic is gated by deadlines and state checks.",
+        "Fee parameters are settable only by owner."
+      ],
+      "config_params": [
+        {
+          "name": "PLATFORM_FEE",
+          "storage_key": "PLATFORM_FEE",
+          "load_site": {
+            "id": "ILOManager.PLATFORM_FEE",
+            "file": "ILOManager.sol",
+            "element_name": "PLATFORM_FEE",
+            "unique_snippet": "uint16 public override PLATFORM_FEE;"
+          },
+          "downstream_uses": [
+            "ILOManager._cacheProject",
+            "ILOManager.setPlatformFee",
+            "ILOManager.initILOPool"
+          ],
+          "role": "misc"
+        },
+        {
+          "name": "PERFORMANCE_FEE",
+          "storage_key": "PERFORMANCE_FEE",
+          "load_site": {
+            "id": "ILOManager.PERFORMANCE_FEE",
+            "file": "ILOManager.sol",
+            "element_name": "PERFORMANCE_FEE",
+            "unique_snippet": "uint16 public override PERFORMANCE_FEE;"
+          },
+          "downstream_uses": [
+            "ILOManager._cacheProject",
+            "ILOManager.setPerformanceFee",
+            "ILOManager.initILOPool"
+          ],
+          "role": "misc"
+        },
+        {
+          "name": "DEFAULT_DEADLINE_OFFSET",
+          "storage_key": "DEFAULT_DEADLINE_OFFSET",
+          "load_site": {
+            "id": "ILOManager.DEFAULT_DEADLINE_OFFSET",
+            "file": "ILOManager.sol",
+            "element_name": "DEFAULT_DEADLINE_OFFSET",
+            "unique_snippet": "uint64 private DEFAULT_DEADLINE_OFFSET = 7 * 24 * 60 * 60;"
+          },
+          "downstream_uses": [
+            "ILOManager.initProject",
+            "ILOManager.setDefaultDeadlineOffset"
+          ],
+          "role": "misc"
+        },
+        {
+          "name": "FEE_TAKER",
+          "storage_key": "FEE_TAKER",
+          "load_site": {
+            "id": "ILOManager.FEE_TAKER",
+            "file": "ILOManager.sol",
+            "element_name": "FEE_TAKER",
+            "unique_snippet": "address public override FEE_TAKER;"
+          },
+          "downstream_uses": [
+            "ILOManager.setFeeTaker"
+          ],
+          "role": "address_key"
+        },
+        {
+          "name": "ILO_POOL_IMPLEMENTATION",
+          "storage_key": "ILO_POOL_IMPLEMENTATION",
+          "load_site": {
+            "id": "ILOManager.ILO_POOL_IMPLEMENTATION",
+            "file": "ILOManager.sol",
+            "element_name": "ILO_POOL_IMPLEMENTATION",
+            "unique_snippet": "address public override ILO_POOL_IMPLEMENTATION;"
+          },
+          "downstream_uses": [
+            "ILOManager.setILOPoolImplementation"
+          ],
+          "role": "address_key"
+        }
+      ],
+      "flag_trackers": [
+        {
+          "name": "initialized",
+          "expected_setters": [
+            "initialize"
+          ],
+          "observed_setters": [
+            "initialize"
+          ],
+          "note": "Prevents re-initialization of contract."
+        }
+      ],
+      "arith_hints": [
+        {
+          "var": "DEFAULT_DEADLINE_OFFSET",
+          "role": "scale",
+          "scale_or_default": 604800,
+          "comment": "Used to compute refund deadlines."
+        }
+      ],
+      "sync_guards": []
+    },
+    {
+      "id": "ILOPool",
+      "file_name": "ILOPool.sol",
+      "core_purpose_raw": "Implements the ILO pool logic, wrapping Uniswap V3 positions as ERC721 NFTs, handling user participation, vesting, liquidity management, refunds, and claims. Integrates with ILOManager and Uniswap V3 pools, and enforces sale/vesting rules.",
+      "core_purpose_digest": "ERC721-wrapped ILO pool: user buy/claim, vesting, refunds, Uniswap V3 integration.",
+      "upgradeability_pattern": null,
+      "consumed_interfaces": [
+        "IILOPool",
+        "IILOManager",
+        "IUniswapV3Pool",
+        "ERC721"
+      ],
+      "compiler_version": "=0.7.6",
+      "identified_roles": [
+        "manager",
+        "project admin",
+        "user"
+      ],
+      "key_state_vars": [
+        "_launchSucceeded",
+        "_nextId",
+        "_positions",
+        "_refundTriggered",
+        "_vestingConfigs",
+        "saleInfo",
+        "totalRaised"
+      ],
+      "key_functions": [
+        "_deductFees",
+        "_saleAmountNeeded",
+        "buy",
+        "claim",
+        "claimProjectRefund",
+        "claimRefund",
+        "initialize",
+        "launch",
+        "totalSold",
+        "vestingStatus"
+      ],
+      "external_dependencies": [
+        "@openzeppelin/contracts/token/ERC721/ERC721.sol",
+        "@uniswap/v3-core/contracts/interfaces/IUniswapV3Pool.sol",
+        "@uniswap/v3-core/contracts/libraries/FixedPoint128.sol",
+        "@uniswap/v3-core/contracts/libraries/FullMath.sol"
+      ],
+      "security_notes": [
+        "buy: checks whitelist, sale period, hard cap, per-user cap, and liquidity.",
+        "claim: only after successful launch, only owner/approved, fee deduction.",
+        "launch: only manager, not after refund, soft cap check.",
+        "claimRefund: only after refund triggered, only owner/approved.",
+        "claimProjectRefund: only manager, only after refund triggered.",
+        "Vesting and liquidity claims are strictly enforced."
+      ],
+      "config_params": [],
+      "flag_trackers": [
+        {
+          "name": "_launchSucceeded",
+          "expected_setters": [
+            "launch"
+          ],
+          "observed_setters": [
+            "launch"
+          ],
+          "note": "Prevents launch/refund after launch."
+        },
+        {
+          "name": "_refundTriggered",
+          "expected_setters": [
+            "claimRefund",
+            "claimProjectRefund"
+          ],
+          "observed_setters": [
+            "claimRefund",
+            "claimProjectRefund"
+          ],
+          "note": "Prevents launch after refund."
+        }
+      ],
+      "arith_hints": [
+        {
+          "var": "saleInfo.hardCap",
+          "role": "multiplier",
+          "scale_or_default": null,
+          "comment": "Used to cap total raise amount."
+        },
+        {
+          "var": "saleInfo.maxCapPerUser",
+          "role": "multiplier",
+          "scale_or_default": null,
+          "comment": "Used to cap per-user raise amount."
+        }
+      ],
+      "sync_guards": [
+        {
+          "name": "launch",
+          "guard_type": "total",
+          "detail": "Requires totalRaised >= saleInfo.softCap before launch."
+        },
+        {
+          "name": "claimRefund",
+          "guard_type": "delay",
+          "detail": "Requires block.timestamp >= refundDeadline and not launched."
+        }
+      ]
+    },
+    {
+      "id": "ILOPoolImmutableState",
+      "file_name": "ILOPoolImmutableState.sol",
+      "core_purpose_raw": "Defines immutable state variables for ILOPool, including token addresses, tick bounds, and cached pool key/address. Used by periphery contracts for consistent state.",
+      "core_purpose_digest": "Defines immutable state for ILOPool: tokens, ticks, pool key/address.",
+      "upgradeability_pattern": null,
+      "consumed_interfaces": [
+        "IILOPoolImmutableState"
+      ],
+      "compiler_version": "=0.7.6",
+      "identified_roles": [],
+      "key_state_vars": [
+        "BPS",
+        "MANAGER",
+        "RAISE_TOKEN",
+        "SALE_TOKEN",
+        "SQRT_RATIO_LOWER_X96",
+        "SQRT_RATIO_UPPER_X96",
+        "SQRT_RATIO_X96",
+        "TICK_LOWER",
+        "TICK_UPPER",
+        "WETH9",
+        "_cachedPoolKey",
+        "_cachedUniV3PoolAddress"
+      ],
+      "key_functions": [],
+      "external_dependencies": [
+        "../interfaces/IILOPoolImmutableState.sol",
+        "../libraries/PoolAddress.sol"
+      ],
+      "security_notes": [],
+      "config_params": [],
+      "flag_trackers": [],
+      "arith_hints": [],
+      "sync_guards": []
+    },
+    {
+      "id": "ILOVest",
+      "file_name": "ILOVest.sol",
+      "core_purpose_raw": "Abstract contract for vesting logic, handling position vesting schedules, share validation, and liquidity unlock calculations for NFT positions. Ensures vesting schedules and share allocations are valid and non-overlapping, and that total shares sum to 10000 BPS.",
+      "core_purpose_digest": "Vesting logic for NFT positions, validates schedules and share allocations.",
+      "upgradeability_pattern": null,
+      "consumed_interfaces": [
+        "IILOVest"
+      ],
+      "compiler_version": "0.7.6",
+      "identified_roles": [],
+      "key_state_vars": [
+        "_positionVests"
+      ],
+      "key_functions": [
+        "_claimableLiquidity",
+        "_unlockedLiquidity",
+        "_validateSharesAndVests",
+        "_validateVestSchedule"
+      ],
+      "external_dependencies": [
+        "IILOVest"
+      ],
+      "security_notes": [
+        "Validates that vesting schedules do not overlap and that total shares equal 10000 BPS.",
+        "Requires that the first recipient is address(0) and others are not, as a validation step."
+      ],
+      "config_params": [],
+      "flag_trackers": [],
+      "arith_hints": [
+        {
+          "var": "BPS",
+          "role": "scale",
+          "scale_or_default": 10000,
+          "comment": "Used as the total basis points for share validation."
+        }
+      ],
+      "sync_guards": []
+    },
+    {
+      "id": "ILOWhitelist",
+      "file_name": "ILOWhitelist.sol",
+      "core_purpose_raw": "Abstract contract for managing a whitelist of addresses for project participation. Allows project admins to open access to all, batch add/remove users, and check whitelist status. Uses OpenZeppelin's EnumerableSet for address management.",
+      "core_purpose_digest": "Manages project whitelist, batch add/remove, open-to-all flag.",
+      "upgradeability_pattern": null,
+      "consumed_interfaces": [
+        "IILOWhitelist"
+      ],
+      "compiler_version": "0.7.6",
+      "identified_roles": [
+        "ProjectAdmin"
+      ],
+      "key_state_vars": [
+        "_openToAll",
+        "_whitelisted"
+      ],
+      "key_functions": [
+        "_isWhitelisted",
+        "_removeWhitelist",
+        "_setOpenToAll",
+        "_setWhitelist",
+        "batchRemoveWhitelist",
+        "batchWhitelist",
+        "isOpenToAll",
+        "isWhitelisted",
+        "setOpenToAll"
+      ],
+      "external_dependencies": [
+        "@openzeppelin/contracts/utils/EnumerableSet.sol",
+        "IILOWhitelist"
+      ],
+      "security_notes": [
+        "Only project admins can modify whitelist or open-to-all status.",
+        "Uses EnumerableSet for safe address management."
+      ],
+      "config_params": [],
+      "flag_trackers": [
+        {
+          "name": "_openToAll",
+          "expected_setters": [
+            "setOpenToAll"
+          ],
+          "observed_setters": [
+            "_setOpenToAll"
+          ],
+          "note": "Controls whether whitelist is bypassed for all users."
+        }
+      ],
+      "arith_hints": [],
+      "sync_guards": []
+    },
+    {
+      "id": "LiquidityManagement",
+      "file_name": "LiquidityManagement.sol",
+      "core_purpose_raw": "Abstract contract for internal liquidity management in Uniswap V3 pools. Handles mint callback, adding liquidity with slippage checks, and interacts with Uniswap V3 pool contracts. Ensures correct payment and slippage protection.",
+      "core_purpose_digest": "Manages Uniswap V3 liquidity, mint callback, slippage checks.",
+      "upgradeability_pattern": null,
+      "consumed_interfaces": [
+        "IUniswapV3MintCallback",
+        "ILOPoolImmutableState"
+      ],
+      "compiler_version": "0.7.6",
+      "identified_roles": [],
+      "key_state_vars": [],
+      "key_functions": [
+        "addLiquidity",
+        "uniswapV3MintCallback"
+      ],
+      "external_dependencies": [
+        "ILOPoolImmutableState",
+        "IUniswapV3Factory",
+        "IUniswapV3MintCallback",
+        "IUniswapV3Pool",
+        "LiquidityAmounts",
+        "PeripheryPayments",
+        "PoolAddress"
+      ],
+      "security_notes": [
+        "Requires msg.sender to be the cached Uniswap V3 pool address in mint callback.",
+        "Checks for minimum amounts to protect against price slippage."
+      ],
+      "config_params": [],
+      "flag_trackers": [],
+      "arith_hints": [],
+      "sync_guards": []
+    },
+    {
+      "id": "Initializable",
+      "file_name": "Initializable.sol",
+      "core_purpose_raw": "Abstract contract providing initialization guard logic. Prevents re-initialization and allows functions to be gated by initialization state.",
+      "core_purpose_digest": "Initialization guard, prevents re-initialization.",
+      "upgradeability_pattern": null,
+      "consumed_interfaces": [],
+      "compiler_version": "0.7.6",
+      "identified_roles": [],
+      "key_state_vars": [
+        "_initialized"
+      ],
+      "key_functions": [
+        "_disableInitialize"
+      ],
+      "external_dependencies": [],
+      "security_notes": [
+        "Modifiers ensure functions are only callable before or after initialization as appropriate."
+      ],
+      "config_params": [],
+      "flag_trackers": [
+        {
+          "name": "_initialized",
+          "expected_setters": [
+            "_disableInitialize"
+          ],
+          "observed_setters": [
+            "_disableInitialize",
+            "whenNotInitialized"
+          ],
+          "note": "Tracks contract initialization state."
+        }
+      ],
+      "arith_hints": [],
+      "sync_guards": []
+    },
+    {
+      "id": "Multicall",
+      "file_name": "Multicall.sol",
+      "core_purpose_raw": "Abstract contract enabling batching of multiple method calls in a single transaction using delegatecall. Returns results for each call and reverts with error message if any call fails.",
+      "core_purpose_digest": "Batch multiple calls in one transaction, revert on failure.",
+      "upgradeability_pattern": null,
+      "consumed_interfaces": [
+        "IMulticall"
+      ],
+      "compiler_version": "0.7.6",
+      "identified_roles": [],
+      "key_state_vars": [],
+      "key_functions": [
+        "multicall"
+      ],
+      "external_dependencies": [
+        "IMulticall"
+      ],
+      "security_notes": [
+        "Reverts with error message if any call in the batch fails.",
+        "Uses delegatecall, so state changes are in the context of the calling contract."
+      ],
+      "config_params": [],
+      "flag_trackers": [],
+      "arith_hints": [],
+      "sync_guards": []
+    },
+    {
+      "id": "PeripheryPayments",
+      "file_name": "PeripheryPayments.sol",
+      "core_purpose_raw": "Abstract contract for handling payments in a periphery contract, supporting ETH and ERC20 tokens, with logic to wrap ETH to WETH9 as needed and to transfer tokens from the contract or from a payer. Ensures only WETH9 can send ETH to the contract.",
+      "core_purpose_digest": "Handles ETH/ERC20 payments, wraps ETH to WETH9, restricts ETH receive to WETH9.",
+      "upgradeability_pattern": null,
+      "consumed_interfaces": [
+        "IERC20",
+        "IWETH9",
+        "ILOPoolImmutableState"
+      ],
+      "compiler_version": ">=0.7.5",
+      "identified_roles": [
+        "payer",
+        "recipient"
+      ],
+      "key_state_vars": [],
+      "key_functions": [
+        "pay"
+      ],
+      "external_dependencies": [
+        "../interfaces/external/IWETH9.sol",
+        "../libraries/TransferHelper.sol",
+        "./ILOPoolImmutableState.sol",
+        "@openzeppelin/contracts/token/ERC20/IERC20.sol"
+      ],
+      "security_notes": [
+        "Only WETH9 contract can send ETH to this contract (receive fallback).",
+        "pay() wraps ETH to WETH9 only as needed."
+      ],
+      "config_params": [],
+      "flag_trackers": [],
+      "arith_hints": [],
+      "sync_guards": []
+    },
+    {
+      "id": "ChainId",
+      "file_name": "ChainId.sol",
+      "core_purpose_raw": "Library providing a function to get the current chain ID using inline assembly.",
+      "core_purpose_digest": "Library to fetch current chain ID via assembly.",
+      "upgradeability_pattern": null,
+      "consumed_interfaces": [],
+      "compiler_version": ">=0.7.0",
+      "identified_roles": [],
+      "key_state_vars": [],
+      "key_functions": [
+        "get"
+      ],
+      "external_dependencies": [],
+      "security_notes": [],
+      "config_params": [],
+      "flag_trackers": [],
+      "arith_hints": [],
+      "sync_guards": []
+    },
+    {
+      "id": "LiquidityAmounts",
+      "file_name": "LiquidityAmounts.sol",
+      "core_purpose_raw": "Library for computing liquidity amounts from token amounts and price ranges, including conversions between token amounts and liquidity, and vice versa, using Uniswap V3 math libraries.",
+      "core_purpose_digest": "Computes liquidity/token amounts for price ranges (Uniswap V3 math).",
+      "upgradeability_pattern": null,
+      "consumed_interfaces": [],
+      "compiler_version": ">=0.5.0",
+      "identified_roles": [],
+      "key_state_vars": [],
+      "key_functions": [
+        "getAmount0ForLiquidity",
+        "getAmount1ForLiquidity",
+        "getLiquidityForAmount0",
+        "getLiquidityForAmount1",
+        "toUint128"
+      ],
+      "external_dependencies": [
+        "@uniswap/v3-core/contracts/libraries/FixedPoint96.sol",
+        "@uniswap/v3-core/contracts/libraries/FullMath.sol",
+        "@uniswap/v3-core/contracts/libraries/SqrtPriceMath.sol"
+      ],
+      "security_notes": [
+        "All conversions and calculations use require checks for safe downcasting.",
+        "Division by zero is prevented by requiring sqrtRatioBX96 != sqrtRatioAX96."
+      ],
+      "config_params": [],
+      "flag_trackers": [],
+      "arith_hints": [
+        {
+          "var": "sqrtRatioBX96 - sqrtRatioAX96",
+          "role": "divisor",
+          "scale_or_default": null,
+          "comment": "Used as denominator in liquidity calculations; must not be zero."
+        },
+        {
+          "var": "FixedPoint96.Q96",
+          "role": "scale",
+          "scale_or_default": null,
+          "comment": "Scaling factor for fixed-point math."
+        }
+      ],
+      "sync_guards": []
+    },
+    {
+      "id": "PoolAddress",
+      "file_name": "PoolAddress.sol",
+      "core_purpose_raw": "Library for deriving a Uniswap V3 pool address from the factory, tokens, and fee, including deterministic computation using CREATE2 and a struct for pool keys.",
+      "core_purpose_digest": "Derives Uniswap V3 pool addresses deterministically from factory/tokens/fee.",
+      "upgradeability_pattern": null,
+      "consumed_interfaces": [],
+      "compiler_version": ">=0.5.0",
+      "identified_roles": [],
+      "key_state_vars": [
+        "POOL_INIT_CODE_HASH"
+      ],
+      "key_functions": [
+        "computeAddress",
+        "getPoolKey"
+      ],
+      "external_dependencies": [],
+      "security_notes": [
+        "computeAddress() requires token0 < token1 to ensure canonical ordering."
+      ],
+      "config_params": [],
+      "flag_trackers": [],
+      "arith_hints": [],
+      "sync_guards": []
+    },
+    {
+      "id": "PositionKey",
+      "file_name": "PositionKey.sol",
+      "core_purpose_raw": "Library for computing a unique position key for Uniswap V3 positions using owner address and tick range.",
+      "core_purpose_digest": "Computes unique position key from owner and tick range.",
+      "upgradeability_pattern": null,
+      "consumed_interfaces": [],
+      "compiler_version": ">=0.5.0",
+      "identified_roles": [],
+      "key_state_vars": [],
+      "key_functions": [
+        "compute"
+      ],
+      "external_dependencies": [],
+      "security_notes": [],
+      "config_params": [],
+      "flag_trackers": [],
+      "arith_hints": [],
+      "sync_guards": []
+    },
+    {
+      "id": "SqrtPriceMathPartial",
+      "file_name": "SqrtPriceMathPartial.sol",
+      "core_purpose_raw": "Exposes two functions from @uniswap/v3-core SqrtPriceMath that use square root of price as a Q64.96 and liquidity to compute deltas. Provides getAmount0Delta and getAmount1Delta to calculate the amount of token0 or token1 required to cover a position of given liquidity between two sqrt prices.",
+      "core_purpose_digest": "Computes token deltas for liquidity positions using sqrt price math (Q64.96) from Uniswap V3.",
+      "upgradeability_pattern": null,
+      "consumed_interfaces": [],
+      "compiler_version": ">=0.5.0",
+      "identified_roles": [
+        "math library"
+      ],
+      "key_state_vars": [],
+      "key_functions": [
+        "getAmount0Delta",
+        "getAmount1Delta"
+      ],
+      "external_dependencies": [
+        "@uniswap/v3-core/contracts/libraries/FixedPoint96.sol",
+        "@uniswap/v3-core/contracts/libraries/FullMath.sol",
+        "@uniswap/v3-core/contracts/libraries/UnsafeMath.sol"
+      ],
+      "security_notes": [
+        "Requires sqrtRatioAX96 > 0 in getAmount0Delta to prevent division by zero.",
+        "Uses external math libraries for precision and rounding."
+      ],
+      "config_params": [],
+      "flag_trackers": [],
+      "arith_hints": [
+        {
+          "var": "sqrtRatioAX96",
+          "role": "divisor",
+          "scale_or_default": null,
+          "comment": "Checked > 0 before division in getAmount0Delta"
+        },
+        {
+          "var": "sqrtRatioBX96",
+          "role": "multiplier",
+          "scale_or_default": null,
+          "comment": "Used in numerator and denominator"
+        },
+        {
+          "var": "liquidity",
+          "role": "multiplier",
+          "scale_or_default": null,
+          "comment": "Used as a factor in both delta calculations"
+        },
+        {
+          "var": "FixedPoint96.Q96",
+          "role": "divisor",
+          "scale_or_default": null,
+          "comment": "Used as divisor in getAmount1Delta"
+        }
+      ],
+      "sync_guards": []
+    },
+    {
+      "id": "TransferHelper",
+      "file_name": "TransferHelper.sol",
+      "core_purpose_raw": "Provides safe wrappers for ERC20 and ETH transfers and approvals. Ensures that token transfers, approvals, and ETH transfers either succeed or revert with a clear error string. Used to safely interact with tokens that do not consistently return true/false.",
+      "core_purpose_digest": "Safely handles ERC20 and ETH transfers/approvals, reverting on failure with clear errors.",
+      "upgradeability_pattern": null,
+      "consumed_interfaces": [
+        "IERC20"
+      ],
+      "compiler_version": ">=0.6.0",
+      "identified_roles": [
+        "transfer helper"
+      ],
+      "key_state_vars": [],
+      "key_functions": [
+        "safeApprove",
+        "safeTransfer",
+        "safeTransferETH",
+        "safeTransferFrom"
+      ],
+      "external_dependencies": [
+        "@openzeppelin/contracts/token/ERC20/IERC20.sol"
+      ],
+      "security_notes": [
+        "Reverts with specific error strings if token/ETH transfer or approval fails.",
+        "Handles tokens that do not return a boolean value on transfer/approve.",
+        "ETH transfer uses .call and checks for success."
+      ],
+      "config_params": [],
+      "flag_trackers": [],
+      "arith_hints": [],
+      "sync_guards": []
+    }
+  ],
+  "project_context": {
+    "overall_goal_raw": "The Vultisig protocol is a token-based system with whitelist functionality and initial liquidity offering (ILO) capabilities. The protocol consists of several interconnected contracts that work together to provide a controlled token distribution mechanism. At the core of the protocol is the Vultisig token, an ERC20 token with an initial supply of 100 million tokens. The token is extended by the VultisigWhitelisted contract, which adds whitelist functionality to control token transfers during a restricted period. This whitelist mechanism is managed by the Whitelist contract, which maintains a list of approved addresses and enforces various restrictions on token transfers. The whitelist system includes several key features: self-whitelist functionality, blacklist capability, max contribution caps, whitelist index tracking, and Uniswap V3 TWAP oracle integration. The protocol also includes an Initial Liquidity Offering (ILO) system through the ILOManager and ILOPool contracts, allowing for project creation, pool initialization, token sales, vesting, and Uniswap V3 launches, with safety mechanisms such as refunds, whitelist controls, and vesting schedules.",
+    "overall_goal_digest": "Controlled token distribution with whitelist, ILO, and Uniswap V3 launch for Vultisig token.",
+    "actors_capabilities": [
+      "Fee Taker: Receives platform and performance fees.",
+      "Project Admins: Manage ILO projects, whitelist settings, and claim refunds.",
+      "Protocol Owner: Set global parameters (fees, caps, oracles, etc).",
+      "Users: Can self-whitelist (if enabled), participate in token sales, claim tokens, and claim refunds."
+    ],
+    "core_assets": [
+      "ILOManager and ILOPool contracts",
+      "Uniswap V3 pool",
+      "Vultisig token (ERC20)",
+      "Whitelist contract"
+    ],
+    "critical_interactions": [
+      "VultisigWhitelisted calls Whitelist.checkWhitelist during transfers.",
+      "Whitelist uses UniswapV3Oracle to estimate ETH value for VULT.",
+      "ILOManager and ILOPool manage project and sale lifecycle, including vesting and refunds."
+    ],
+    "key_assumptions": [
+      {
+        "id": "ctx1",
+        "source": "docs",
+        "context_type": "security_assumption",
+        "details": "Only the configured Vultisig contract can invoke whitelist checks."
+      },
+      {
+        "id": "ctx2",
+        "source": "docs",
+        "context_type": "security_assumption",
+        "details": "Uniswap V3 TWAP oracle provides a reliable price for ETH/VULT conversions."
+      },
+      {
+        "id": "ctx3",
+        "source": "docs",
+        "context_type": "security_assumption",
+        "details": "Owner/admin roles are securely managed and not compromised."
+      }
+    ],
+    "invariants": [
+      {
+        "id": "inv1",
+        "description": "Total supply after deployment equals 100 million tokens",
+        "related_code": [],
+        "origin": "check"
+      },
+      {
+        "id": "inv2",
+        "description": "Only the configured Vultisig contract can invoke whitelist checks",
+        "related_code": [],
+        "origin": "check"
+      },
+      {
+        "id": "inv3",
+        "description": "When adding a new whitelisted address index and count increment correctly",
+        "related_code": [],
+        "origin": "check"
+      },
+      {
+        "id": "inv4",
+        "description": "Receive only whitelists when self-whitelist enabled and not blacklisted",
+        "related_code": [],
+        "origin": "check"
+      },
+      {
+        "id": "inv5",
+        "description": "After self-whitelist, sender index must be non-zero",
+        "related_code": [],
+        "origin": "check"
+      },
+      {
+        "id": "inv6",
+        "description": "Contributed ETH never exceeds maxAddressCap",
+        "related_code": [],
+        "origin": "check"
+      },
+      {
+        "id": "inv7",
+        "description": "Lock flag enforced during pool-to-user transfers in whitelist period",
+        "related_code": [],
+        "origin": "check"
+      },
+      {
+        "id": "inv8",
+        "description": "Buyer must be whitelisted within allowed index on buy actions",
+        "related_code": [],
+        "origin": "check"
+      },
+      {
+        "id": "inv9",
+        "description": "UniswapV3Oracle.peek output includes 5% slippage max",
+        "related_code": [],
+        "origin": "check"
+      },
+      {
+        "id": "inv10",
+        "description": "FullMath.mulDiv denominator non-zero and result <2^256",
+        "related_code": [],
+        "origin": "check"
+      },
+      {
+        "id": "inv-ilo-hardcap",
+        "description": "Total raised in ILOPool must not exceed saleInfo.hardCap.",
+        "related_code": [],
+        "origin": "check"
+      },
+      {
+        "id": "inv-ilo-perusercap",
+        "description": "User's raiseAmount in ILOPool must not exceed saleInfo.maxCapPerUser.",
+        "related_code": [],
+        "origin": "check"
+      },
+      {
+        "id": "inv-ilo-launch-softcap",
+        "description": "ILO pool can only launch if totalRaised >= saleInfo.softCap.",
+        "related_code": [],
+        "origin": "check"
+      },
+      {
+        "id": "inv-ilo-refund-after-deadline",
+        "description": "Refunds can only be claimed after refundDeadline and if not launched.",
+        "related_code": [],
+        "origin": "check"
+      },
+      {
+        "id": "INV1",
+        "description": "Total shares in vesting configs and schedules must always equal 10000 BPS.",
+        "related_code": [
+          "ILOVest._validateSharesAndVests",
+          "ILOVest._validateVestSchedule"
+        ],
+        "origin": "check"
+      },
+      {
+        "id": "inv1",
+        "description": "sqrtRatioBX96 != sqrtRatioAX96 in liquidity math functions to prevent division by zero.",
+        "related_code": [],
+        "origin": "check"
+      },
+      {
+        "id": "inv2",
+        "description": "Only WETH9 contract can send ETH to the periphery contract.",
+        "related_code": [],
+        "origin": "check"
+      },
+      {
+        "id": "inv-1",
+        "description": "sqrtRatioAX96 must be greater than 0 in getAmount0Delta to prevent division by zero.",
+        "related_code": [
+          "SqrtPriceMathPartial:getAmount0Delta"
+        ],
+        "origin": "check"
+      }
+    ],
+    "general_security_ctx": [
+      {
+        "id": "sec1",
+        "source": "docs",
+        "context_type": "best_practice",
+        "details": "Always use OpenZeppelin SafeERC20 for token transfers to handle non-standard ERC20s."
+      },
+      {
+        "id": "sec2",
+        "source": "docs",
+        "context_type": "best_practice",
+        "details": "TWAP oracles can be manipulated if pool liquidity is low or window is too short; use long windows and cross-check prices."
+      },
+      {
+        "id": "sec3",
+        "source": "docs",
+        "context_type": "best_practice",
+        "details": "Critical owner/admin functions should be protected and monitored."
+      },
+      {
+        "id": "sec4",
+        "source": "docs",
+        "context_type": "best_practice",
+        "details": "Avoid using SELFDESTRUCT in new contracts due to EIP-6780 changes."
+      },
+      {
+        "id": "secctx-ilo-whitelist",
+        "source": "code_comment",
+        "context_type": "best_practice",
+        "details": "User must be whitelisted to participate in ILOPool buy."
+      },
+      {
+        "id": "secctx-ilo-nft-ownership",
+        "source": "code_comment",
+        "context_type": "best_practice",
+        "details": "Only owner or approved can claim or refund NFT position."
+      },
+      {
+        "id": "GS1",
+        "source": "code_comment",
+        "context_type": "best_practice",
+        "details": "Slippage checks are enforced when adding liquidity to Uniswap V3 pools."
+      },
+      {
+        "id": "GS2",
+        "source": "code_comment",
+        "context_type": "best_practice",
+        "details": "Initialization guard prevents re-initialization vulnerabilities."
+      },
+      {
+        "id": "sec-1",
+        "source": "code_comment",
+        "context_type": "best_practice",
+        "details": "Reverts with specific error strings if token/ETH transfer or approval fails."
+      }
+    ],
+    "static_summary": null
+  }
+}

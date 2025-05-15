@@ -1,0 +1,44 @@
+{
+  "results": [
+    {
+      "Issue": "Unchecked arithmetic can under-/overflow when calculating fees",
+      "Severity": "Medium",
+      "Contracts": [
+        "ILOPool.sol"
+      ],
+      "Description": "ILOPool is compiled with Solidity 0.7.6, which does NOT have built-in overflow/underflow protection.  Several places subtract a value that can become larger than the minuend, causing the result to wrap around to a huge uint256 and eventually revert or send an excessive amount of tokens.\n\nKey locations:\n```solidity\n/// _deductFees -----------------------------------------------------------\nfunction _deductFees(uint256 amount0, uint256 amount1, uint16 feeBPS)\n        internal pure returns (uint256 amount0Left,uint256 amount1Left)\n{\n    amount0Left = amount0 - FullMath.mulDiv(amount0, feeBPS, BPS);  // <== underflow if feeBPS>10000\n    amount1Left = amount1 - FullMath.mulDiv(amount1, feeBPS, BPS);\n}\n\n/// fee transfer in claim() ----------------------------------------------\nTransferHelper.safeTransfer(_cachedPoolKey.token0, feeTaker, amountCollected0 - amount0); // may underflow\nTransferHelper.safeTransfer(_cachedPoolKey.token1, feeTaker, amountCollected1 - amount1);\n```\n\nIf the **platformFee** or **performanceFee** variables are mistakenly (or maliciously) set above 10 000 BPS, `FullMath.mulDiv(...)` can return a value larger than `amount0/amount1`. Subtracting that larger value wraps around, producing a gigantic number. A wrapped value is later given to `TransferHelper.safeTransfer`, which will revert (DoS) or, if the contract unexpectedly holds enough balance, transfer an excessive amount to the user/fee-taker.\n\nBecause the fee parameters are mutable (`setPlatformFee`, `setPerformanceFee`) and no upper bound is enforced, a single mis-configuration will brick `claim()` for every investor or allow draining of the vault.",
+      "Recommendation": ""
+    },
+    {
+      "Issue": "PlatformFee / PerformanceFee not bounded to 0-10000 BPS",
+      "Severity": "Low",
+      "Contracts": [
+        "ILOManager.sol"
+      ],
+      "Description": "The owner functions used to configure fees do not validate that the supplied value is within a sane range.\n```solidity\nfunction setPlatformFee(uint16 _platformFee) external onlyOwner {\n    PLATFORM_FEE = _platformFee;   // no check\n}\nfunction setPerformanceFee(uint16 _performanceFee) external onlyOwner {\n    PERFORMANCE_FEE = _performanceFee; // no check\n}\n```\nSupplying a number larger than 10 000 or even the maximum `uint16` will trigger the underflow described in the previous finding and permanently break `claim()` or leak funds.",
+      "Recommendation": ""
+    },
+    {
+      "Issue": "UniswapV3Oracle.peek can revert when the pool has <30 min of observations",
+      "Severity": "Medium",
+      "Contracts": [
+        "UniswapV3Oracle.sol",
+        "Whitelist.sol"
+      ],
+      "Description": "`peek()` selects the TWAP period as the **minimum** between 30 minutes and the oldest observation age:\n```solidity\nuint32 longestPeriod = OracleLibrary.getOldestObservationSecondsAgo(pool);\nuint32 period = PERIOD < longestPeriod ? PERIOD : longestPeriod; // PERIOD = 30 min\n```\nIf the pool was **just created** or recently had its first observation, `longestPeriod` can be **zero**, making `period` also zero.\n\n`OracleLibrary.consult(pool, period)` then executes:\n```solidity\nrequire(period != 0, \"BP\"); // will revert\n```\nThe revert bubbles up to `Whitelist.checkWhitelist`, which is called from `VultisigWhitelisted._beforeTokenTransfer`. As a result **all token transfers originating from the Uniswap V3 pool are frozen until the pool accumulates more observations**, creating a denial-of-service window after every deployment or liquidity reset.",
+      "Recommendation": ""
+    },
+    {
+      "Issue": "General absence of SafeMath in 0.7 contracts",
+      "Severity": "Info",
+      "Contracts": [
+        "ILOManager.sol",
+        "ILOPool.sol",
+        "LiquidityAmounts.sol",
+        "SqrtPriceMathPartial.sol"
+      ],
+      "Description": "Most contracts compiled with Solidity 0.7.6 perform arithmetic directly on `uint256` without using SafeMath.  Although not every path is exploitable, future refactors or parameter changes (e.g. larger caps, longer vest arrays) increase the likelihood of accidental over/underflow.  Migrating to Solidity ≥0.8 or introducing `SafeMath` would provide systematic protection.",
+      "Recommendation": ""
+    }
+  ]
+}

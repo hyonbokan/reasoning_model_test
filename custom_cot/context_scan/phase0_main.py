@@ -5,16 +5,18 @@ from typing import List
 from dotenv import load_dotenv
 from openai import OpenAI
 from pydantic import ValidationError
-from schema.phase_0_schemas.phase_0_schema_v8 import ContextSummaryOutput
+from schema.phase_0_schemas.phase_0_schema_v9 import ContextSummaryOutput
 
 # ───────────────────────── configuration ─────────────────────────
 MODEL               = "gpt-4.1-2025-04-14"
 PROMPT_FILE_SYSTEM  = "utils/prompts/phase0_v6_tight_sys_prompt.py"
 # INPUT_MD            = "utils/inputs/backd_full_context.md"
-INPUT_MD            = "utils/inputs/tigris_full_context.md"
-OUTPUT_DIR_PHASE0   = "logs/phase0_results/tigris/schema_v8"
+# INPUT_MD            = "utils/inputs/tigris_full_context.md"
+INPUT_MD            = "utils/inputs/vultisig_full_context.md"
+OUTPUT_DIR_PHASE0   = "logs/phase0_results/vultisig/schema_v9"
 CHUNK_SIZE          = 5                              # contracts per call
 TEMPERATURE         = 0
+PHASE = "phase0_v9_chunked5"
 # ──────────────────────────────────────────────────────────────────
 
 SYSTEM_PROMPT_PHASE0 = pathlib.Path(PROMPT_FILE_SYSTEM).read_text()
@@ -103,7 +105,7 @@ final = ContextSummaryOutput(analyzed_contracts=merged_contracts,
 # ─────────────── save ───────────────
 outdir = pathlib.Path(OUTPUT_DIR_PHASE0); outdir.mkdir(parents=True, exist_ok=True)
 ts = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-outfile = outdir / f"phase0_v8_chunked_{MODEL}_{ts}.json"
+outfile = outdir / f"{PHASE}_{MODEL}_{ts}.json"
 outfile.write_text(final.model_dump_json(indent=2))
 print(f"✅  Phase-0 done – summarised {len(merged_contracts)} contracts "
       f"into {outfile}")

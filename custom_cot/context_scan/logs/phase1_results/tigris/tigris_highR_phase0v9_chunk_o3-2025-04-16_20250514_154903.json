@@ -1,0 +1,59 @@
+{
+  "results": [
+    {
+      "Issue": "Re-entrancy risk in StableVault.deposit / withdraw",
+      "Severity": "Medium",
+      "Contracts": [
+        "StableVault.sol"
+      ],
+      "Description": "StableVault imports ReentrancyGuard but the state-changing entry points are not protected. Both\n```solidity\nfunction deposit(address _token, uint256 _amount) public {\n    IERC20(_token).transferFrom(_msgSender(), address(this), _amount); // <-- external call\n    IERC20Mintable(stable).mintFor(_msgSender(), ...);\n}\n\nfunction withdraw(address _token, uint256 _amount) external returns (uint256 _output) {\n    IERC20Mintable(stable).burnFrom(_msgSender(), _amount);            // external call\n    IERC20(_token).transfer(_msgSender(), _output);                    // external call – can re-enter\n}\n```\nBecause no `nonReentrant` modifier is applied an ERC20 token with a malicious `transfer` / `transferFrom` implementation (e.g. re-entering `withdraw` before state updates complete) can run multiple nested calls and potentially drain vault reserves or manipulate totalLocked logic in the Lock contract.\n",
+      "Recommendation": ""
+    },
+    {
+      "Issue": "Withdrawal of non-whitelisted tokens from StableVault",
+      "Severity": "Low",
+      "Contracts": [
+        "StableVault.sol"
+      ],
+      "Description": "`withdraw()` lets any user exchange tigAsset for **any** ERC-20 the vault happens to hold – it never checks `allowed[_token]`:\n```solidity\nfunction withdraw(address _token, uint256 _amount) external returns (uint256 _output) {\n    IERC20Mintable(stable).burnFrom(_msgSender(), _amount);\n    _output = _amount/10**(18-IERC20Mintable(_token).decimals());\n    IERC20(_token).transfer(_msgSender(), _output);\n}\n```\nAn attacker can transfer arbitrary tokens into the vault (or rely on mistaken transfers) and later redeem them for tigAsset at an attacker-chosen rate, siphoning out value or creating unexpected accounting holes. Listed-asset checks are enforced in `deposit()` but **not** in `withdraw()`.",
+      "Recommendation": ""
+    },
+    {
+      "Issue": "Open-interest underflow blocks position close / liquidation",
+      "Severity": "High",
+      "Contracts": [
+        "PairsContract.sol",
+        "TradingExtension.sol"
+      ],
+      "Description": "When a position is partially closed the amount subtracted from open interest is calculated off-chain:\n```solidity\n// TradingExtension._closePosition\nmodifyLongOi(..., (_trade.margin*_trade.leverage/1e18)*_percent/DIVISION_CONSTANT);\n```\nDue to integer truncation this value can exceed the remaining OI by a few wei. Inside `PairsContract` the subtraction is **unchecked** and will revert:\n```solidity\n_idToOi[_asset][_tigAsset].longOi -= _amount; // will revert if _amount > longOi\n```\nOnce this happens **no one can close or liquidate the position anymore**, leaving bad debt locked permanently and DoSing the protocol for that trader/asset pair.",
+      "Recommendation": ""
+    },
+    {
+      "Issue": "Potential int256 overflow when casting large open-interest values",
+      "Severity": "Low",
+      "Contracts": [
+        "Position.sol"
+      ],
+      "Description": "`Position.trades()` repeatedly casts very large `uint256` open-interest values to `int256`:\n```solidity\n_pendingFunding = ... / int256(longOi[_trade.asset][_trade.tigAsset]);\n```\nIf `longOi` (or `shortOi`) ever grows beyond `type(int256).max`, the cast will overflow and **revert every read of the trade**, effectively freezing the whole contract state for that asset.",
+      "Recommendation": ""
+    },
+    {
+      "Issue": "`maxBridge` limit ignored – unlimited NFT bridging",
+      "Severity": "Info",
+      "Contracts": [
+        "GovNFT.sol"
+      ],
+      "Description": "`GovNFT.crossChain()` declares a `maxBridge` cap (default 20) but never enforces it. A user can request an arbitrarily large `tokenId[]`, potentially exceeding destination gas limits and causing LayerZero messages to fail:\n```solidity\nrequire(tokenId.length > 0, \"Not bridging\"); // no upper bound check\n```",
+      "Recommendation": ""
+    },
+    {
+      "Issue": "Unlimited ERC-20 allowance granted to StableVault on every deposit",
+      "Severity": "Best Practices",
+      "Contracts": [
+        "Trading.sol"
+      ],
+      "Description": "`_handleDeposit()` calls\n```solidity\nIERC20(_marginAsset).approve(_stableVault, type(uint).max);\n```\nfor each deposit. Granting infinite allowance repeatedly is gas-inefficient and exposes traders’ funds to risk if the vault address is ever compromised or upgraded maliciously.",
+      "Recommendation": ""
+    }
+  ]
+}

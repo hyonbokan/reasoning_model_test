@@ -1,0 +1,33 @@
+{
+  "results": [
+    {
+      "Issue": "Missing Re-entrancy Protection in StableVault and Trading Enables Double-Spend / Fund Drain",
+      "Severity": "High",
+      "Contracts": [
+        "StableVault.sol",
+        "Trading.sol"
+      ],
+      "Description": "Neither StableVault nor the (much more valuable) Trading contract uses a non-re-entrancy guard.  Both contracts perform external token calls **before** all critical state-changes are finished, allowing a malicious ERC-20/777 token to callback into the protocol and repeat (or front-run) sensitive functions.\n\nStableVault – `deposit()`\n```solidity\nIERC20(_token).transferFrom(_msgSender(), address(this), _amount);   // external call\nIERC20Mintable(stable).mintFor(_msgSender(), ...);                   // state-change\n```\nStableVault – `withdraw()`\n```solidity\nIERC20Mintable(stable).burnFrom(_msgSender(), _amount);              // burns user balance first\nIERC20(_token).transfer(_msgSender(), _output);                      // external call can re-enter\n```\nTrading – `_handleWithdraw()` (used by close / margin remove)\n```solidity\nIStableVault(_stableVault).withdraw(_outputToken, _toMint);          // external vault call\nIERC20(_outputToken).transfer(_trade.trader, ...);                   // external call again\n```\nBecause `deposit()` and `withdraw()` are *not* marked `nonReentrant`, an attacker controlling a callback token can:\n1. Enter `withdraw()`\n2. During `transfer()` re-enter `withdraw()` (or a Trading function that finishes burning the same `tigAsset` again)\n3. Receive multiple payouts while the internal accounting only registered one burn, draining vault liquidity or user margins.\n\nImpact: Loss of funds in the vault and arbitrary inflation / double-spend of `tigAsset` or margin assets.\nLikelihood: Medium (any listed token could be an ERC-777 compatible asset or a custom ERC-20 with hooks).",
+      "Recommendation": ""
+    },
+    {
+      "Issue": "Withdrawal Function Ignores Token Whitelist – Allows Extraction of *Any* ERC-20 held by the Vault",
+      "Severity": "Medium",
+      "Contracts": [
+        "StableVault.sol"
+      ],
+      "Description": "`withdraw()` does not verify that the requested `_token` is whitelisted:\n```solidity\nfunction withdraw(address _token, uint256 _amount) external returns (uint256 _output) {\n    IERC20Mintable(stable).burnFrom(_msgSender(), _amount);\n    _output = _amount/10**(18-IERC20Mintable(_token).decimals());    // ← no `allowed[_token]` check\n    IERC20(_token).transfer(_msgSender(), _output);\n}\n```\nAn attacker can burn some `tigAsset` and withdraw *any* ERC-20 that the vault happens to hold – even tokens that were **delisted** or never listed at all (for example, tokens sent to the contract by mistake).  This defeats the owner–controlled whitelist (`listToken/delistToken`) and may be used to sweep valuable airdropped assets from the vault.\n\nImpact: Theft of un-whitelisted or previously-delisted tokens sitting in the vault.\nLikelihood: Medium – the vault inevitably accrues miscellaneous token balances (airdrops, mistaken transfers, etc.).",
+      "Recommendation": ""
+    },
+    {
+      "Issue": "Decimals Conversion Underflow – Tokens With >18 Decimals Permanently Break Deposit / Withdraw Flow",
+      "Severity": "Low",
+      "Contracts": [
+        "StableVault.sol",
+        "Trading.sol"
+      ],
+      "Description": "Both the vault and trading contracts assume the underlying ERC-20 has **≤ 18** decimals and compute\n`10**(18 - token.decimals())`.  When a token reports more than 18 decimals the subtraction underflows and the whole transaction reverts, permanently blocking:\n\nStableVault `deposit()`\n```solidity\n_amount * (10 ** (18 - IERC20Mintable(_token).decimals())); // underflow if decimals > 18\n```\nTrading `_handleDeposit()`\n```solidity\nuint _marginDecMultiplier = 10**(18-ExtendedIERC20(_marginAsset).decimals());\n```\nA malicious (or simply mis-configured) token with 19+ decimals could therefore trigger a DoS for *all* vault deposits or trading actions that use that asset, even if it was previously whitelisted.\n\nImpact: Denial-of-service for affected assets.\nLikelihood: Low – most ERC-20 tokens use ≤18 decimals, but the assumption is unchecked.",
+      "Recommendation": ""
+    }
+  ]
+}

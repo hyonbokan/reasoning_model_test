@@ -6,7 +6,7 @@ import os
 import sys
 from dotenv import load_dotenv
 from openai import OpenAI
-from schema.phase_0_schemas.phase_0_schema_v8 import ContextSummaryOutput
+from schema.phase_0_schemas.phase_0_schema_v8_2 import ContextSummaryOutput
 from schema.phase_1_schemas.phase_1_schema_free import FinalAuditReport
 from pydantic import ValidationError, BaseModel
 
@@ -19,16 +19,19 @@ O3 = "o3-2025-04-16"
 MODEL = O3
 PROMPT_FILE_SYSTEM = "utils/prompts/phase1_free_sys_prompt.py"
 # INPUT_FILE_FULL_CONTEXT = "utils/inputs/phase0_full_context.md"
-PHASE = "tigris_highR_phase0v8_21contr"
+PHASE = "highR_phase0v9_chunk"
 
-OUTPUT_DIR_PHASE1 = "logs/phase1_results/tigris"
+OUTPUT_DIR_PHASE1 = "logs/phase1_results/vultisig"
 
-INPUT_PHASE0_OUTPUT_FILE = "logs/phase0_results/tigris/schema_v8/phase0_v8_chunked_cont21.json"
+INPUT_PHASE0_OUTPUT_FILE = "logs/phase0_results/vultisig/schema_v9/phase0_v9_chunked5_gpt-4.1-2025-04-14_20250514_155828.json"
+# INPUT_PHASE0_OUTPUT_FILE = "logs/phase0_results/tigris/schema_v9/phase0_v9_chunked5_gpt-4.1-2025-04-14_20250514_153101.json"
 # INPUT_PHASE0_OUTPUT_FILE = "logs/phase0_results/backd/schema_v8/phase0_v8_chunked_gpt-4.1-2025-04-14_20250513_230553.json"
 # INPUT_PHASE0_OUTPUT_FILE = "logs/phase0_results/munch/schema_v8/"
+
 # INPUT_RAW_CODE_FILE = "utils/contracts/Backed.sol"
-INPUT_RAW_CODE_FILE = "utils/contracts/Tigris.sol"
+# INPUT_RAW_CODE_FILE = "utils/contracts/Tigris.sol"
 # INPUT_RAW_CODE_FILE = "utils/contracts/LandManager.sol"
+INPUT_RAW_CODE_FILE = "utils/contracts/Vultisig.sol"
 
 # --- Load prompts and input ---
 try:
