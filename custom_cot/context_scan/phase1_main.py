@@ -19,11 +19,11 @@ O3 = "o3-2025-04-16"
 MODEL = O3
 PROMPT_FILE_SYSTEM = "utils/prompts/phase1_free_sys_prompt.py"
 # INPUT_FILE_FULL_CONTEXT = "utils/inputs/phase0_full_context.md"
-PHASE = "highR_phase0v9_chunk"
+PHASE = "o3_phase0v8_chunk_claude_sonnet"
 
 OUTPUT_DIR_PHASE1 = "logs/phase1_results/vultisig"
 
-INPUT_PHASE0_OUTPUT_FILE = "logs/phase0_results/vultisig/schema_v9/phase0_v9_chunked5_gpt-4.1-2025-04-14_20250514_155828.json"
+INPUT_PHASE0_OUTPUT_FILE = "logs/phase0_results/vultisig/schema_v8/anthropic_phase0_v8_chunked_claude-3-7-sonnet-20250219_20250515_112451.json"
 # INPUT_PHASE0_OUTPUT_FILE = "logs/phase0_results/tigris/schema_v9/phase0_v9_chunked5_gpt-4.1-2025-04-14_20250514_153101.json"
 # INPUT_PHASE0_OUTPUT_FILE = "logs/phase0_results/backd/schema_v8/phase0_v8_chunked_gpt-4.1-2025-04-14_20250513_230553.json"
 # INPUT_PHASE0_OUTPUT_FILE = "logs/phase0_results/munch/schema_v8/"

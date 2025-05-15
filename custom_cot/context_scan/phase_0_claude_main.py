@@ -8,8 +8,10 @@ from schema.phase_0_schemas.phase_0_schema_v8 import ContextSummaryOutput
 
 # ────────────────────────────── CONFIG ───────────────────────────
 MODEL_FAMILY        = "anthropic"
+# MODEL_FAMILY        = "openai"
 
 CLAUDE_MODEL        = "claude-3-7-sonnet-20250219"
+# CLAUDE_MODEL        = "claude-3-5-haiku-20241022"
 GPT_MODEL           = "gpt-4.1-2025-04-14"
 
 PROMPT_FILE_SYSTEM  = "utils/prompts/phase0_v6_tight_sys_prompt.py"
@@ -17,7 +19,7 @@ INPUT_MD            = "utils/inputs/vultisig_full_context.md"
 OUTPUT_DIR_PHASE0   = "logs/phase0_results/vultisig/schema_v8"
 CHUNK_SIZE          = 5                 # contracts per call
 TEMPERATURE         = 0
-PHASE               = f"{MODEL_FAMILY}_phase0_v8_2_chunked"
+PHASE               = f"{MODEL_FAMILY}_phase0_v8_chunked"
 
 # ────────────────────────── PREP INPUT ───────────────────────────
 SYSTEM_PROMPT = pathlib.Path(PROMPT_FILE_SYSTEM).read_text()
@@ -61,7 +63,7 @@ elif MODEL_FAMILY == "anthropic":
     def llm_call(
         messages: list[dict[str,str]],
         response_model: type[ContextSummaryOutput]|None = None,
-    ) -> ContextSummaryOutput:
+    ):
         claude_client = get_claude_client()
         max_tokens = 40000 if "3-7" in MODEL else 8192
 
@@ -72,8 +74,9 @@ elif MODEL_FAMILY == "anthropic":
         }
         if response_model:
             api_params["response_model"] = response_model
+        
         # respect your global TEMPERATURE / thinking flags
-        if TEMPERATURE == 0:
+        if "3-7" in MODEL:
             api_params["thinking"] = {"type": "enabled", "budget_tokens": 30000}
         else:
             api_params["temperature"] = TEMPERATURE
@@ -82,10 +85,10 @@ elif MODEL_FAMILY == "anthropic":
             resp =  asyncio.run(claude_client.completions.create(**api_params))
             if response_model:
                 # structured output is available as .parsed
-                return resp.choices[0].message.parsed
+                return resp
             else:
                 # fallback to raw text
-                return resp.choices[0].message["content"]
+                return resp.content[0].text
         except AnthropicError as e:
             print(f"Anthropic API error: {e}", exc_info=True)
             raise print("Anthropic API error", {"error": str(e)}) from e
