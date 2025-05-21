@@ -1,0 +1,42 @@
+{
+  "results": [
+    {
+      "Issue": "Hard-cap and per-user caps can be bypassed due to unchecked arithmetic in ILOPool (Solidity 0.7.6)",
+      "Severity": "High",
+      "Contracts": [
+        "ILOPool.sol"
+      ],
+      "Description": "ILOPool is compiled with pragma solidity =0.7.6; therefore **none of the +/- operations are automatically checked for overflow/underflow**.  The buy() function relies on subtraction to enforce the hard-cap and the per-user cap but performs the math unchecked:\n\n```solidity\nrequire(saleInfo.hardCap - totalRaised >= raiseAmount, \"HC\");\ntotalRaised += raiseAmount;               // <- unchecked addition\n...\nrequire(raiseAmount <= saleInfo.maxCapPerUser - _position.raiseAmount, \"UC\");\n_position.raiseAmount += raiseAmount;     // <- unchecked addition\n```\n\nIf `totalRaised` has already exceeded `saleInfo.hardCap`, the expression `saleInfo.hardCap - totalRaised` underflows, wraps to a very large number, and the require will **never revert**, allowing limitless contributions.  The unchecked additions may later overflow, resetting counters to 0 and enabling further abuse.\n\nImpact:\n• Attacker can raise far more than the configured hard-cap / per-user cap.\n• Soft-cap, vesting math and subsequent launch logic become inconsistent, leading to loss of funds or locked liquidity.\n\nLikelihood: trivial to exploit with a single call once the caps are reached.",
+      "Recommendation": ""
+    },
+    {
+      "Issue": "ILOManager can be taken over because initialize() lacks access-control",
+      "Severity": "High",
+      "Contracts": [
+        "ILOManager.sol"
+      ],
+      "Description": "ILOManager is deployed with `_initialized == false` and exposes an **unguarded** initializer:\n\n```solidity\nfunction initialize(\n        address initialOwner,\n        address _feeTaker,\n        ...\n) external override whenNotInitialized() {\n    PLATFORM_FEE = platformFee;\n    PERFORMANCE_FEE = performanceFee;\n    FEE_TAKER = _feeTaker;\n    transferOwnership(initialOwner);   // <- ownership handed to arbitrary address\n    ...\n}\n```\n\nAny address that calls `initialize()` first becomes the contract owner and sets all economic parameters (fees, fee taker, pool implementation, etc.).  Nothing restricts the caller to the deployer; the only condition is that `_initialized` is still false.\n\nImpact:\n• Complete administrative takeover (set arbitrary fees, steal PLATFORM_FEE/PERFORMANCE_FEE, change pool implementation, brick the system).\n• Cascade risk: malicious parameters propagate to every ILO pool created afterwards.\n\nLikelihood: Moderate–High.  If deployment & initialization are not executed in the same transaction, a frontrunner can permanently hijack the manager.",
+      "Recommendation": ""
+    },
+    {
+      "Issue": "Unchecked subtraction in _deductFees allows underflow when fee > 10000 BPS",
+      "Severity": "Low",
+      "Contracts": [
+        "ILOPool.sol",
+        "ILOManager.sol"
+      ],
+      "Description": "Fee parameters are set through `ILOManager.setPlatformFee()` / `setPerformanceFee()` without bounding the value.  In ILOPool the fee is applied as:\n\n```solidity\nuint16 constant BPS = 10000;\n...\namount0Left = amount0 - FullMath.mulDiv(amount0, feeBPS, BPS);\n```\n\nBecause this runs on Solidity 0.7.6, if `feeBPS` is accidentally or maliciously set **> 10000**, `FullMath.mulDiv` returns a value larger than `amount0`, the subtraction underflows and `amount0Left` becomes a gigantic number.  Subsequent `safeTransfer` calls revert due to insufficient balance, effectively **locking user claims**.\n\nImpact: Funds in pool can be bricked or claims blocked when an over-sized fee is configured.\nLikelihood: Low (requires owner action/mistake).",
+      "Recommendation": ""
+    },
+    {
+      "Issue": "Whitelist enforcement can be bypassed via intermediate transfers",
+      "Severity": "Medium",
+      "Contracts": [
+        "Whitelist.sol",
+        "VultisigWhitelisted.sol"
+      ],
+      "Description": "`Whitelist.checkWhitelist()` is only executed when the **direct** transfer comes *from* the configured Uniswap V3 pool:\n\n```solidity\nif (from == _pool && to != owner()) {\n    // whitelist checks\n}\n```\n\nAn attacker can buy through a helper contract: the pool sends VULT to the helper (whitelist enforced once), then the helper immediately forwards the tokens to the final recipient.  The second hop (`from = helper`, `to = user`) is **not checked**, so the real buyer avoids:\n• `_locked` restriction\n• max address cap (`_contributed` remains 0 for the final user)\n• allowed whitelist index check\n\nImpact: Enables un-whitelisted or over-cap users to accumulate unlimited tokens and defeats sale fairness assumptions.\nLikelihood: High – building a minimal proxy helper is trivial.",
+      "Recommendation": ""
+    }
+  ]
+}

@@ -37,6 +37,20 @@ class SeverityEst(str, Enum):
 def _uid() -> str:               # 8-char primary key
     return uuid.uuid4().hex[:8]
 
+class MathScaleHint(BaseModel):
+    """
+    Records fixed-point arithmetic patterns so Phase-1 can
+    catch silent truncation / rounding errors.
+    """
+    id: str          = Field(default_factory=_uid)
+    file: str        # ContractName.sol
+    element_name: str              # function or modifier
+    op: Literal["mul", "div"]      # operation that may lose precision
+    lhs: str                       # left-hand operand (var name or literal)
+    rhs: str                       # right-hand operand
+    scale: int                     # expected scale (e.g. 1e18, 100, 10_000)
+    comment: Optional[str] = None  # free hint, e.g. "taxRate is 18-dec FP"
+
 class CodeRef(BaseModel):
     """
     Pin-points **one exact location** in the code base.
@@ -133,29 +147,35 @@ class ConfigParam(BaseModel):
             "- 'misc'        : none of the above"
         )
     )
-class ArithHint(BaseModel):
+        
+class AggregateTracker(BaseModel):
     """
-    Numeric hints Phase-1 needs for precision / div-by-zero checks.
+    Follows a critical project-wide total or cap so Phase-1 can spot
+    missing updates or mismatching sums.
+      • examples: totalLocked, totalShares, openInterest
     """
-    var: str                  # "taxRate"  OR "PRICE_PER_PLOT"
-    role: Literal["divisor", "multiplier", "scale"] = "scale"
-    scale_or_default: Optional[int] = None   # 1e18 etc.
-    comment: Optional[str] = None
+    id: str = Field(default_factory=_uid)
+    name: str                     # storage var
+    must_increase_on: List[str] = Field(default_factory=list)   # fn names
+    must_decrease_on: List[str] = Field(default_factory=list)
 
-class SyncGuard(BaseModel):
-    name: str                 # storage var *or* checker fn
-    guard_type: Literal["total", "delay"]
-    detail: str               # "must ++ on deposit", "≥ 1 day between calls"
-
+class DelayGuard(BaseModel):
+    """
+    Captures time / block delay requirements so Phase-1 can detect
+    bypasses (e.g. updateTpSl vs limitClose in Tigris).
+    """
+    id: str = Field(default_factory=_uid)
+    guard_fn: str                 # e.g. '_checkDelay'
+    delay_type: Literal["block","timestamp"]
+    period: int                   # blocks or seconds
 
 # ════════════════════════════════════════════════════════════════
 #  CONTRACT-LEVEL SUMMARY
 # ════════════════════════════════════════════════════════════════
 class ContractSummary(BaseModel):
     id: str = Field(default_factory=_uid)
-    file_name: str                                     # from “// File: …”
+    file_name: str                                     # from // File:
 
-    # ────── intent ───────────────────────────────────────────────
     core_purpose_raw: str                              # copy longest relevant paragraph
     core_purpose_digest: str = Field(..., description="≤120-char human summary")
 
@@ -164,28 +184,29 @@ class ContractSummary(BaseModel):
     consumed_interfaces: List[str] = Field(default_factory=list)
     compiler_version: Optional[str] = None
 
-    # ────── quick-index lists ───────────────────────────────────
-    identified_roles:        List[str] = Field(default_factory=list)
-    key_state_vars:          List[str] = Field(default_factory=list)
-    key_functions:           List[str] = Field(default_factory=list)
-    external_dependencies:   List[str] = Field(default_factory=list)
-    security_notes:          List[str] = Field(default_factory=list)
+    identified_roles:   List[str] = Field(default_factory=list)
+    key_state_vars:     List[str] = Field(default_factory=list)
+    key_functions:      List[str] = Field(default_factory=list)
+    external_dependencies: List[str] = Field(default_factory=list)
+    security_notes:        List[str] = Field(default_factory=list)
 
-    # ────── structured pointers / hints for Phase-1 ─────────────
-    config_params:   List[ConfigParam]  = Field(default_factory=list)
-    flag_trackers:   List[FlagTracker]  = Field(default_factory=list)
+    # static_findings: List[StaticFinding] = Field(default_factory=list)
+    config_params:  List[ConfigParam]  = Field(default_factory=list)
+    flag_trackers:  List[FlagTracker]  = Field(default_factory=list)
+    math_scale_hints: List[MathScaleHint] = Field(default_factory=list)
+    
+    # new entries
+    aggregate_trackers: List[AggregateTracker] = Field(default_factory=list)
+    delay_guards:       List[DelayGuard]       = Field(default_factory=list)
 
-    # ⬇️  **merged**: replaces math_scale_hints, aggregate_trackers, delay_guards
-    arith_hints:  List[ArithHint]  = Field(default_factory=list)   # precision & div-by-zero
-    sync_guards:  List[SyncGuard]  = Field(default_factory=list)   # totals & min-delay rules
-
-    # ────── normalisation ───────────────────────────────────────
+    # ── light normalisation ──────────────────────────────
     @model_validator(mode="after")
     def _dedupe(cls, v):
         for fld in ("identified_roles", "key_state_vars",
                     "key_functions", "external_dependencies"):
             setattr(v, fld, sorted(set(getattr(v, fld))))
         return v
+
 # ════════════════════════════════════════════════════════════════
 #  PROJECT-LEVEL SUMMARY
 # ════════════════════════════════════════════════════════════════
@@ -215,5 +236,8 @@ class ProjectContext(BaseModel):
 #  ROOT OBJECT
 # ════════════════════════════════════════════════════════════════
 class ContextSummaryOutput(BaseModel):
-    analyzed_contracts: List[ContractSummary]
     project_context:    ProjectContext
+    analyzed_contracts: ContractsContext
+
+class ContractsContext(BaseModel):
+    analyzed_contracts: list[ContractSummary]

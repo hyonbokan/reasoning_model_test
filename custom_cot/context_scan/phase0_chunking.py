@@ -10,13 +10,13 @@ from schema.phase_0_schemas.phase_0_schema_v8 import ContextSummaryOutput
 MODEL_FAMILY        = "anthropic"
 # MODEL_FAMILY        = "openai"
 
-CLAUDE_MODEL        = "claude-3-7-sonnet-20250219"
-# CLAUDE_MODEL        = "claude-3-5-haiku-20241022"
+# CLAUDE_MODEL        = "claude-3-7-sonnet-20250219"
+CLAUDE_MODEL        = "claude-3-5-haiku-20241022"
 GPT_MODEL           = "gpt-4.1-2025-04-14"
 
 PROMPT_FILE_SYSTEM  = "utils/prompts/phase0_v6_tight_sys_prompt.py"
-INPUT_MD            = "utils/inputs/vultisig_full_context.md"
-OUTPUT_DIR_PHASE0   = "logs/phase0_results/vultisig/schema_v8"
+INPUT_MD            = "utils/inputs/tigris_full_context.md"
+OUTPUT_DIR_PHASE0   = "logs/phase0_results/tigris/schema_v8"
 CHUNK_SIZE          = 5                 # contracts per call
 TEMPERATURE         = 0
 PHASE               = f"{MODEL_FAMILY}_phase0_v8_chunked"

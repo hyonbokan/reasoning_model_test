@@ -1,0 +1,40 @@
+{
+  "results": [
+    {
+      "Issue": "ILOManager.initialize can be called by anyone once – full contract takeover",
+      "Severity": "High",
+      "Contracts": [
+        "ILOManager.sol"
+      ],
+      "Description": "`initialize()` is guarded only by `whenNotInitialized()` – **not by `onlyOwner` or any other access-control modifier**.\n\n```solidity\nfunction initialize(\n        address initialOwner,\n        address _feeTaker,\n        address iloPoolImplementation,\n        address uniV3Factory,\n        address weth9,\n        uint16 platformFee,\n        uint16 performanceFee\n) external override whenNotInitialized() {\n        …\n        transferOwnership(initialOwner); // <- sets the owner to the value supplied by the *caller*\n        …\n}\n```\n\nThe first external account that calls `initialize()` after deployment can:\n• Choose an arbitrary `initialOwner` and become the owner (or give ownership to any address).\n• Set `PLATFORM_FEE`, `PERFORMANCE_FEE`, `FEE_TAKER`, factory addresses, etc.\n\nAll subsequent privileged operations (creating projects, changing fees, launching pools, claiming refunds, etc.) will be under the attacker’s control.  The constructor’s `transferOwnership(tx.origin)` does **not** protect against this, because a separate transaction is still required to run `initialize()`.\n\nImpact ➜ complete loss of control over the ILO ecosystem contracts, stolen fees, blocked projects, rug-pulls.\nLikelihood ➜ high; a bot can simply monitor the mem-pool for newly-deployed managers and instantly call `initialize`.\n",
+      "Recommendation": ""
+    },
+    {
+      "Issue": "Unchecked arithmetic in ILOPool.buy allows hard-cap and per-user cap bypass",
+      "Severity": "High",
+      "Contracts": [
+        "ILOPool.sol"
+      ],
+      "Description": "The contract is compiled with Solidity 0.7 where arithmetic is **unchecked** by default.  Several capacity checks rely on a subtraction that can underflow and wrap around, turning the comparison into a no-op.\n\n```solidity\n// hard-cap check\nrequire(saleInfo.hardCap - totalRaised >= raiseAmount, \"HC\");\n…\n// per-user cap check\nrequire(raiseAmount <= saleInfo.maxCapPerUser - _position.raiseAmount, \"UC\");\n```\n\nIf `totalRaised > hardCap`, the expression `hardCap - totalRaised` underflows to a huge 256-bit number, so the `require` still **passes** and the pool keeps accepting contributions, breaking the `hardCap` invariant.\n\nSimilarly, once a user has already contributed more than `maxCapPerUser`, the second subtraction underflows and the check is bypassed, letting the user contribute unlimited amounts.\n\nAttack scenario – oversubscription:\n1. Attacker waits until `totalRaised` is just below `hardCap`.\n2. Sends a contribution that pushes `totalRaised` above `hardCap`.\n3. All following calls to `buy()` will succeed indefinitely, letting attacker drain all remaining sale tokens and sabotaging other investors.\n\nViolates invariants `inv_sale_cap` and `inv_user_cap` listed in the context summary.\n",
+      "Recommendation": ""
+    },
+    {
+      "Issue": "Use of tx.origin for ownership in constructor",
+      "Severity": "Medium",
+      "Contracts": [
+        "ILOManager.sol"
+      ],
+      "Description": "The constructor sets the initial owner to `tx.origin`:\n\n```solidity\nconstructor () {\n    transferOwnership(tx.origin);\n}\n```\n\nIf the contract is deployed by another contract (factory/proxy) or via a CREATE2 salt, `tx.origin` may point to an unintended EOA.  This breaks the expected trust model and can combine with the unprotected `initialize()` issue to worsen impact.  Using `msg.sender` or passing the desired owner explicitly is the safe pattern.\n",
+      "Recommendation": ""
+    },
+    {
+      "Issue": "Self-whitelist refund uses `transfer`, may break for contracts",
+      "Severity": "Low",
+      "Contracts": [
+        "Whitelist.sol"
+      ],
+      "Description": "`receive()` refunds ETH with `transfer`, forwarding only 2 300 gas:\n\n```solidity\nreceive() external payable {\n    …\n    payable(_msgSender()).transfer(msg.value);\n}\n```\n\nContracts with complex fallback logic (or that rely on >2 300 gas per EIP-1884) will revert, preventing them from self-whitelisting even when allowed.  Using `call{value: msg.value}(\"\")` is recommended.\n",
+      "Recommendation": ""
+    }
+  ]
+}
